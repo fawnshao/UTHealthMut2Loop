@@ -2,13 +2,11 @@
 # all input files should be 6-column sorted bed files
 ###
 # the 4th column of mutation is named as: SampleName~PrimarySite~PrimaryHistology
-# default parameters
 mutationBED=CosmicNCV.WGSv79.srt.bed
 motifBED=homo_sapiens.GRCh38.motiffeatures.20161111.srt.bed
 tssBED=clean_M2MT_hg38.refGene.tss.uniq.srt.bed
 outpre=ensembl.motif.CosmicNCV.WGSv79
 ###
-
 # usage function
 function usage()
 {
@@ -58,23 +56,7 @@ do
 	shift
 done
 
-echo mutationBED=$mutationBED
-echo motifBED=$motifBED
-echo tssBED=$tssBED
-echo outpre=$outpre
-
 echo "mutationBED="$mutationBED
 echo "motifBED   ="$motifBED
 echo "tssBED     ="$tssBED
 echo "outpre     ="$outpre
-
-
-# find the closet motif and TSS for each mutation.
-bedtools closest -D b -a $mutationBED -b $motifBED | \
-awk '$(NF-1)!="."' | \
-bedtools closest -D b -a - -b $tssBED | \
-awk '$(NF-1)!="."' >$outpre.closest
-
-if [ ! -e "" ]; then
-	bedtools
-fi
