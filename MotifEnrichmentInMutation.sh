@@ -1,5 +1,5 @@
 #!/bin/sh
-bindir=.
+bindir=/home1/04935/shaojf/myTools/UTHealthMut2Loop
 # all input files should be 6-column sorted bed files
 ###
 # the 4th column of mutation is named as: SampleName~PrimarySite~PrimaryHistology
@@ -99,19 +99,20 @@ fi
 
 prom_motifCOUNT=$prom_motif".count"
 if [ ! -e "$prom_motifCOUNT" ]; then
-	awk '$13 > -1000 && $13 < 1000 {print $4}' $prom_motif | \
+	awk -v var=promoterLEN '$13 > -1 * var && $13 < var {print $4}' $prom_motif | \
 	sort | uniq -c | awk -vOFS="\t" '{print $2,$1}' > $prom_motifCOUNT
 fi
 
 mut_motifCOUNT=$mutationBED.$motifBED".motif.count"
 if [ ! -e "$mut_motifCOUNT" ]; then
-	awk '$13 > -10 && $13 < 10 {print $10}' ${outpre}.closest | \
+	awk -v var=motifFLANK '$13 > -1 * var && $13 < var {print $10}' ${outpre}.closest | \
 	sort | uniq -c | awk -vOFS="\t" '{print $2,$1}' > $mut_motifCOUNT
 fi
 
 prom_mut_motifCOUNT=$mutationBED.$motifBED".motif.prom.count"
 if [ ! -e "$prom_mut_motifCOUNT" ]; then
-	awk '$13 > -10 && $13 < 10 && $20 > -1000 && $20 < 1000 {print $10}' ${outpre}.closest | \
+	awk -v var1=promoterLEN -v var2=motifFLANK \
+	'$13 > -1 * var && $13 < var && $20 > -1 * var && $20 < var {print $10}' ${outpre}.closest | \
 	sort | uniq -c | awk -vOFS="\t" '{print $2,$1}' > $prom_mut_motifCOUNT
 fi
 

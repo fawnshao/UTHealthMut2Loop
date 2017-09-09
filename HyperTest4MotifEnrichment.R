@@ -4,8 +4,8 @@ usrlist <- args[1]
 backgroud <- args[2]
 outprefix <- args[3]
 
-a <- read.table(usrlist, sep = "\t". row.names = 1)
-b <- read.table(backgroud, sep = "\t". row.names = 1)
+a <- read.table(usrlist, sep = "\t", row.names = 1)
+b <- read.table(backgroud, sep = "\t", row.names = 1)
 pv <- a
 pv <- data.frame(pv, a[,1], a[,1])
 usrlistsum <- sum(a[,1])
