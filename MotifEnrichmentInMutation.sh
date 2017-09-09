@@ -75,6 +75,11 @@ awk '$(NF-1)!="."' | \
 bedtools closest -D b -a - -b $tssBED | \
 awk '$(NF-1)!="."' >$outpre.closest
 
-if [ ! -e "" ]; then
-	bedtools
+motifCOUNT=$motifBED".count"
+if [ ! -e "$motifCOUNT" ]; then
+	cut -f4 $motifBED | sort | uniq -c | awk -vOFS="\t" '{print $2,$1}' > $motifCOUNT
+fi
+mutmotifCOUNT=$mutationBED".motif.count"
+if [ ! -e "mutmotifCOUNT" ]; then
+	cut -f4 $motifBED | sort | uniq -c | awk -vOFS="\t" '{print $2,$1}' > $motifCOUNT
 fi
