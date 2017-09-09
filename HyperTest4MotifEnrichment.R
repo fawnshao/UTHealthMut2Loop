@@ -17,4 +17,4 @@ for(i in 1:nrow(a)){
 		backgroudsum - b[rownames(b) == rownames(a)[i],1], usrlistsum, lower.tail = FALSE)
 	pv[i, 2:3] <- c(a[i,1], b[rownames(b) == rownames(a)[i],1])
 }
-write.table(pv, file = paste(outprefix, "phyper.txt", sep = "."), quote = F, sep = "\t")
+write.csv(pv, file = paste(outprefix, "phyper.csv", sep = "."), quote = F)
