@@ -1,5 +1,6 @@
 #!/bin/sh
 bindir=/home1/04935/shaojf/myTools/UTHealthMut2Loop
+module load Rstats
 # all input files should be 6-column sorted bed files
 ###
 # the 4th column of mutation is named as: SampleName~PrimarySite~PrimaryHistology
@@ -26,8 +27,8 @@ function usage()
      -motif        motif bed files
      -tss          tss bed files
      -o            output prefix
-     -plen 		   up/down stream of TSS for promoter promoterSIZE
-     -mlen		   flanking size for motif mutation.
+     -plen         up/down stream of TSS for promoter promoterSIZE
+     -mlen         flanking size for motif mutation.
 EOF
 }
 
@@ -80,9 +81,9 @@ echo "motifFLANK ="$motifFLANK
 
 # find the closet motif and TSS for each mutation.
 bedtools closest -D b -a $mutationBED -b $motifBED | \
-awk '$(NF-1)!="."' | \
+awk -F "\t" '$(NF-6)!="."' | \
 bedtools closest -D b -a - -b $tssBED | \
-awk '$(NF-1)!="."' >${outpre}.closest
+awk -F "\t" '$(NF-6)!="."' >${outpre}.closest
 
 # find the closet TSS for each motif.
 prom_motif=$motifBED".tss"
@@ -105,15 +106,15 @@ fi
 
 mut_motifCOUNT=$mutationBED.$motifBED".motif.count"
 if [ ! -e "$mut_motifCOUNT" ]; then
-	awk -v var=motifFLANK '$13 > -1 * var && $13 < var {print $10}' ${outpre}.closest | \
-	sort | uniq -c | awk -vOFS="\t" '{print $2,$1}' > $mut_motifCOUNT
+	awk -v var=motifFLANK -v OFS="\t" '$13 > -1 * var && $13 < var {print $7,$8,$9,$10}' ${outpre}.closest | \
+	sort | uniq | cut -f 4 | sort | uniq -c | awk -vOFS="\t" '{print $2,$1}' > $mut_motifCOUNT
 fi
 
 prom_mut_motifCOUNT=$mutationBED.$motifBED".motif.prom.count"
 if [ ! -e "$prom_mut_motifCOUNT" ]; then
-	awk -v var1=promoterLEN -v var2=motifFLANK \
-	'$13 > -1 * var && $13 < var && $20 > -1 * var && $20 < var {print $10}' ${outpre}.closest | \
-	sort | uniq -c | awk -vOFS="\t" '{print $2,$1}' > $prom_mut_motifCOUNT
+	awk -v var1=promoterLEN -v var2=motifFLANK -v OFS="\t" \
+	'$13 > -1 * var && $13 < var && $20 > -1 * var && $20 < var {print $7,$8,$9,$10}' ${outpre}.closest | \
+	sort | uniq | cut -f 4 | sort | uniq -c | awk -vOFS="\t" '{print $2,$1}' > $prom_mut_motifCOUNT
 fi
 
 Rscript $bindir/HyperTest4MotifEnrichment.R \
