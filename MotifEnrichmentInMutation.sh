@@ -113,7 +113,7 @@ fi
 prom_mut_motifCOUNT=$mutationBED.$motifBED".motif.prom.count"
 if [ ! -e "$prom_mut_motifCOUNT" ]; then
 	awk -v var1=promoterLEN -v var2=motifFLANK -v OFS="\t" \
-	'$13 > -1 * var && $13 < var && $20 > -1 * var && $20 < var {print $7,$8,$9,$10}' ${outpre}.closest | \
+	'$13 > -1 * var2 && $13 < var2 && $20 > -1 * var1 && $20 < var1 {print $7,$8,$9,$10}' ${outpre}.closest | \
 	sort | uniq | cut -f 4 | sort | uniq -c | awk -vOFS="\t" '{print $2,$1}' > $prom_mut_motifCOUNT
 fi
 
