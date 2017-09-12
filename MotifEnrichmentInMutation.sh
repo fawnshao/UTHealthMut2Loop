@@ -85,6 +85,9 @@ awk -F "\t" '$(NF-6)!="."' | \
 bedtools closest -D b -a - -b $tssBED | \
 awk -F "\t" '$(NF-6)!="."' >${outpre}.closest
 
+#########
+# motif enrichment
+#########
 # find the closet TSS for each motif.
 prom_motif=$motifBED".tss"
 if [ ! -e "$prom_motif" ]; then
@@ -117,8 +120,41 @@ if [ ! -e "$prom_mut_motifCOUNT" ]; then
 	sort | uniq | cut -f 4 | sort | uniq -c | awk -vOFS="\t" '{print $2,$1}' > $prom_mut_motifCOUNT
 fi
 
+# hypergeometric test for motif enrichment
 Rscript $bindir/HyperTest4MotifEnrichment.R \
 	$mut_motifCOUNT $motifCOUNT ${outpre}.mut.enriched.motif
 Rscript $bindir/HyperTest4MotifEnrichment.R \
 	$prom_mut_motifCOUNT $prom_motifCOUNT ${outpre}.mut.enriched.motif.onlyprom
+
+#########
+# by disease
+#########
+mut2tss_by_disease=${mutationBED}.${tssBED}.distance.by.disease
+if [ ! -e "$mut2tss_by_disease" ]; then
+	cut -f 1-4,20 ${outpre}.closest | uniq | \
+	cut -f 4-5 | sed 's/~/\t/' | cut -f 2-3 > $mut2tss_by_disease
+fi
+
+mut2motif_by_disease=${mutationBED}.${motifBED}.distance.by.disease
+if [ ! -e "$mut2motif_by_disease" ]; then
+	cut -f 1-4,13 ${outpre}.closest | uniq | \
+	cut -f 4-5 | sed 's/~/\t/' | cut -f 2-3 > $mut2motif_by_disease
+fi
+
+motif2tss_by_motif=${motifBED}.${tssBED}.distance.by.motif
+if [ ! -e "$motif2tss_by_motif" ]; then
+	cut -f 1-4,13 $prom_motif | uniq | cut -f 2-3 > $motif2tss_by_motif
+fi
+
+motifmut2tss_by_disease=${mutationBED}.${motifBED}.${tssBED}.distance.by.disease
+if [ ! -e "$motif2tss_by_motif" ]; then
+	awk -v var=motifFLANK -v OFS="\t" '$13 > -1 * var && $13 < var {print $1,$2,$3,$4,$10}' \
+	${outpre}.closest | uniq | cut -f 4-5 | sed 's/~/\t/' | cut -f 2-3 > $motifmut2tss_by_disease
+fi
+
+Rscript $bindir/PlotDistance.R $mut2tss_by_disease $mut2motif_by_disease \
+$motif2tss_by_motif $motifmut2tss_by_disease $outpre ${bindir}/ggplot2_multiple_plot.R
+
+
+
 
