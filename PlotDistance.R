@@ -8,6 +8,8 @@ outpre <- args[5]
 libpath <- args[6]
 source(libpath)
 
+library(ggplot2)
+
 a <- read.table(mut2tss_by_disease, sep = "\t")
 b <- read.table(mut2motif_by_disease, sep = "\t")
 c <- read.table(motif2tss_by_motif, sep = "\t")
