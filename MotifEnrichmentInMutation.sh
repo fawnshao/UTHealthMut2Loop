@@ -143,7 +143,7 @@ fi
 
 motif2tss_by_motif=${motifBED}.${tssBED}.distance.by.motif
 if [ ! -e "$motif2tss_by_motif" ]; then
-	cut -f 1-4,13 $prom_motif | uniq | cut -f 2-3 > $motif2tss_by_motif
+	cut -f 1-4,13 $prom_motif | uniq | cut -f 4-5 > $motif2tss_by_motif
 fi
 
 motifmut2tss_by_disease=${mutationBED}.${motifBED}.${tssBED}.distance.by.disease
