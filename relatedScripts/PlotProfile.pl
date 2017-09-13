@@ -4,7 +4,7 @@ if(@ARGV < 3) {
 	die "Usage: perl $0 <input bedtools intersect file> <y for directionality> <output>\n";
 }
 
-open(OUT, ">$ARGV[2]") or die "can not open $ARGV[2\n";
+open(OUT, ">$ARGV[2]") or die "can not open $ARGV[2]\n";
 open(IN, $ARGV[0]) or die "can not open $ARGV[0]\n";
 while(<IN>){
 	chomp;
