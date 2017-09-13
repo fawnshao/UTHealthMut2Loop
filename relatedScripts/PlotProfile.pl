@@ -32,8 +32,8 @@ while(<IN>){
 			$pos2 = $mid - $right;
 		}
 		else{
-			$pos1 = $left - $mid;
-			$pos2 = $right - $mid;
+			$pos2 = $left - $mid;
+			$pos1 = $right - $mid;
 		}
 		print OUT "$pos1\t$pos2\t$a[1]\n";
 	}
