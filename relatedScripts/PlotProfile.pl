@@ -1,9 +1,10 @@
 #!/usr/bin/perl
 $rfile = "/home1/04935/shaojf/myTools/UTHealthMut2Loop/PlotProfile.R"
-if(@ARGV < 2) {
-	die "Usage: perl $0 <input bedtools intersect file> <y for directionality> > <output>\n";
+if(@ARGV < 3) {
+	die "Usage: perl $0 <input bedtools intersect file> <y for directionality> <output>\n";
 }
 
+open(OUT, ">$ARGV[2]") or die "can not open $ARGV[2\n";
 open(IN, $ARGV[0]) or die "can not open $ARGV[0]\n";
 while(<IN>){
 	chomp;
@@ -34,7 +35,11 @@ while(<IN>){
 			$pos1 = $left - $mid;
 			$pos2 = $right - $mid;
 		}
-		print "$pos1\t$pos2\t$a[1]\n";
+		print OUT "$pos1\t$pos2\t$a[1]\n";
 	}
 }
 close(IN);
+close(OUT)
+
+$cmd = "module load Rstats; Rscript $rfile $ARGV[2]";
+system($cmd);
