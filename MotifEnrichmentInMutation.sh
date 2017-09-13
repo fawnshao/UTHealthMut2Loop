@@ -148,7 +148,7 @@ fi
 
 motifmut2tss_by_disease=${mutationBED}.${motifBED}.${tssBED}.distance.by.disease
 if [ ! -e "$motifmut2tss_by_disease" ]; then
-	awk -v var=motifFLANK -v OFS="\t" '$13 > -1 * var && $13 < var {print $1,$2,$3,$4,$10}' \
+	awk -v var=motifFLANK -v OFS="\t" '$13 > -1 * var && $13 < var {print $1,$2,$3,$4,$20}' \
 	${outpre}.closest | uniq | cut -f 4-5 | sed 's/~/\t/' | cut -f 2-3 > $motifmut2tss_by_disease
 fi
 

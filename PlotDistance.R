@@ -37,5 +37,5 @@ p2 <- ggplot(a, aes(x = factor(group), y = distance, fill = factor(group))) +
     labs(title = "Mutation To TSS", x = "", y = "distance") +
     annotate("text", label = labels, x = unique(a$group), y = 0)
 png(filename = paste(outpre, "violin.png", sep = "."), width = 2000, height = 2000)
-multiplot(p, p1, p2, p3, cols = 1)
+multiplot(p0, p1, p2, p3, cols = 1)
 dev.off()
