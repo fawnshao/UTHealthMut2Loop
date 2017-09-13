@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-$rfile = "/home1/04935/shaojf/myTools/UTHealthMut2Loop/PlotProfile.R";
+$rfile = "/home1/04935/shaojf/myTools/UTHealthMut2Loop/relatedScripts/PlotProfile.R";
 if(@ARGV < 3) {
 	die "Usage: perl $0 <input bedtools intersect file> <y for directionality> <output>\n";
 }
