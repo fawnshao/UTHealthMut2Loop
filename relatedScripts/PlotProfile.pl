@@ -39,7 +39,7 @@ while(<IN>){
 	}
 }
 close(IN);
-close(OUT)
+close(OUT);
 
 $cmd = "module load Rstats; Rscript $rfile $ARGV[2]";
 system($cmd);
