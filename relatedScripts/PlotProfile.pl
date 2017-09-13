@@ -28,12 +28,12 @@ while(<IN>){
 			$right = $b[5];
 		}
 		if($ARGV[1] eq 'y' && $t[5] eq '-'){
-			$pos1 = $mid - $left;
-			$pos2 = $mid - $right;
+			$pos2 = $mid - $left;
+			$pos1 = $mid - $right;
 		}
 		else{
-			$pos2 = $left - $mid;
-			$pos1 = $right - $mid;
+			$pos1 = $left - $mid;
+			$pos2 = $right - $mid;
 		}
 		print OUT "$pos1\t$pos2\t$a[1]\n";
 	}
