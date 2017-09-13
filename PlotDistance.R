@@ -39,3 +39,6 @@ p3 <- ggplot(d, aes(x = factor(group), y = distance, fill = factor(group))) +
 png(filename = paste(outpre, "violin.png", sep = "."), width = 2000, height = 2000)
 multiplot(p0, p1, p2, p3, cols = 1)
 dev.off()
+pdf(file = paste(outpre, "violin.pdf", sep = "."), width = 30, height = 20)
+multiplot(p0, p1, p2, p3, cols = 1)
+dev.off()
