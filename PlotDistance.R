@@ -32,7 +32,7 @@ p2 <- ggplot(a, aes(x = factor(group), y = distance, fill = factor(group))) +
     geom_violin() + ylim(c(-1e4, 1e4)) +
     labs(title = "Mutation To TSS", x = "", y = "distance") +
     annotate("text", label = labels, x = unique(a$group), y = 0)
-p2 <- ggplot(a, aes(x = factor(group), y = distance, fill = factor(group))) + 
+p3 <- ggplot(a, aes(x = factor(group), y = distance, fill = factor(group))) + 
     geom_violin() + ylim(c(-1e4, 1e4)) +
     labs(title = "Mutation To TSS", x = "", y = "distance") +
     annotate("text", label = labels, x = unique(a$group), y = 0)
