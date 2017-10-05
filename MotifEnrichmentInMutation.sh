@@ -32,6 +32,12 @@ function usage()
 EOF
 }
 
+if [[ $# -eq 0 ]]
+then
+	usage
+	exit
+fi
+
 while [[ $# -gt 0 ]]
 do
 	key="$1"
@@ -103,19 +109,19 @@ fi
 
 prom_motifCOUNT=$prom_motif".count"
 if [ ! -e "$prom_motifCOUNT" ]; then
-	awk -v var=promoterLEN '$13 > -1 * var && $13 < var {print $4}' $prom_motif | \
+	awk -v var=$promoterLEN '$13 > -1 * var && $13 < var {print $4}' $prom_motif | \
 	sort | uniq -c | awk -vOFS="\t" '{print $2,$1}' > $prom_motifCOUNT
 fi
 
 mut_motifCOUNT=$mutationBED.$motifBED".motif.count"
 if [ ! -e "$mut_motifCOUNT" ]; then
-	awk -v var=motifFLANK -v OFS="\t" '$13 > -1 * var && $13 < var {print $7,$8,$9,$10}' ${outpre}.closest | \
+	awk -v var=$motifFLANK -v OFS="\t" '$13 > -1 * var && $13 < var {print $7,$8,$9,$10}' ${outpre}.closest | \
 	sort | uniq | cut -f 4 | sort | uniq -c | awk -vOFS="\t" '{print $2,$1}' > $mut_motifCOUNT
 fi
 
 prom_mut_motifCOUNT=$mutationBED.$motifBED".motif.prom.count"
 if [ ! -e "$prom_mut_motifCOUNT" ]; then
-	awk -v var1=promoterLEN -v var2=motifFLANK -v OFS="\t" \
+	awk -v var1=$promoterLEN -v var2=$motifFLANK -v OFS="\t" \
 	'$13 > -1 * var2 && $13 < var2 && $20 > -1 * var1 && $20 < var1 {print $7,$8,$9,$10}' ${outpre}.closest | \
 	sort | uniq | cut -f 4 | sort | uniq -c | awk -vOFS="\t" '{print $2,$1}' > $prom_mut_motifCOUNT
 fi
@@ -148,7 +154,7 @@ fi
 
 motifmut2tss_by_disease=${mutationBED}.${motifBED}.${tssBED}.distance.by.disease
 if [ ! -e "$motifmut2tss_by_disease" ]; then
-	awk -v var=motifFLANK -v OFS="\t" '$13 > -1 * var && $13 < var {print $1,$2,$3,$4,$20}' \
+	awk -v var=$motifFLANK -v OFS="\t" '$13 > -1 * var && $13 < var {print $1,$2,$3,$4,$20}' \
 	${outpre}.closest | uniq | cut -f 4-5 | sed 's/~/\t/' | cut -f 2-3 > $motifmut2tss_by_disease
 fi
 
