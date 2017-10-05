@@ -8,7 +8,7 @@ fc <- args[5]
 a <- read.table(ctr, row.names=1)
 b <- read.table(mut, row.names=1)
 aa <- apply(a, 1, mean)
-c <- wilcox.test(a[,i], b[,1])$p.value
+c <- wilcox.test(aa, b[,1])$p.value
 d <- b[,1]/aa
 dd <- data.frame(d, b[,1], aa)
 colnames(dd) <- c("Fold-Change", mut, "Average-Tumor-Sample")

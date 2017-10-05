@@ -174,7 +174,7 @@ do
 	rm IamGroot.$i
 done
 
-Rscript Wilcox.test.R ${outpre}.ctlMAT ${outpre}.mutMAT $TADid $TCGAsample $foldchange
+Rscript $bindir/Wilcox.test.R ${outpre}.ctlMAT ${outpre}.mutMAT $TADid $TCGAsample $foldchange
 
 
 
