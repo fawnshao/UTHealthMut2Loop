@@ -12,7 +12,7 @@ bb <- apply(b, 1, mean)
 c <- wilcox.test(aa, bb)$p.value
 d <- bb/aa
 dd <- data.frame(d, bb, aa)
-colnames(dd) <- c("Fold-Change", sam, "Average-Tumor-Sample")
-if(nrow(dd[(dd[,1] > fc | dd[,1] < 1/fc) & (dd[,3] > 10 | dd[,3] > 10),]) > 0 && c < 0.05){
+colnames(dd) <- c("Fold-Change", paste(sam, c, sep = ": "), "Average-Tumor-Sample")
+if(nrow(dd[dd[,1] > fc & dd[,2] > 10, ]) > 0 && nrow(dd[dd[,1] < 1/fc & dd[,3] > 10, ]) > 0){
 	write.csv(dd, file = paste(tad, sam, "csv", sep = "."))
 }
