@@ -145,14 +145,17 @@ cut -f 1 ${expMAT}.id | grep -wf - ${outpre}.multiple.pMUT.TAD > ${outpre}.multi
 
 # TCGAsample="TCGA-AD-A5EJ-01"
 # TADid="TAD_3"
+echo +++++++++ test each mutated promoters in a TAD ++++++++
 cut -f 10 ${outpre}.multiple.pMUT.TAD.withexp | sort | uniq | while read TADid
 do
+	echo "|--TAD: "$TADid
 	awk -v tad=$TADid '$10==tad{print $4}' ${outpre}.p.TAD | \
 	tr ';' '\n' | cut -d "|" -f 1 | sort | uniq > IamGroot.0
 	
 	awk -v tad=$TADid '$10==tad{print $4}' ${outpre}.multiple.pMUT.TAD.withexp | \
 	cut -d"~" -f1 | sort | uniq | while read TCGAsample
 	do
+		echo "|----sample: "$TCGAsample
 		col=`head -1 $expMAT | awk -F"\t" -v sample=$TCGAsample \
 		'{for(i=1;i<=NF;i++){if(substr($i,1,15) == sample){print i}}}'`	
 		get_row_column IamGroot.0 1 $expMAT ${outpre}.mutMAT
@@ -171,7 +174,8 @@ do
 		cut -d"~" -f1 | sort | uniq > IamGroot.00
 		head -1 $expMAT | awk -F"\t" '{{for(i=1;i<=NF;i++){o=substr($i,1,15);print i,o}}}' | \
 		grep -vwf IamGroot.00 | awk '{print $1}' | sed -n '2,$p' > IamGroot.000
-		for i in `cat IamGroot.000`
+		# for i in `cat IamGroot.000`
+		for i in `shuf IamGroot.000 | head -10`
 		do
 			# grep -wf IamGroot.0 $expMAT | cut -f $i > IamGroot.$i
 			get_row_column IamGroot.0 $i $expMAT IamGroot.$i
