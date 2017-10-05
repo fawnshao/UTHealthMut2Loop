@@ -3,7 +3,7 @@ ctr <- args[1]
 mut <- args[2]
 tad <- args[3]
 sam <- args[4]
-fc <- args[5]
+fc <- as.numeric(args[5])
 
 a <- read.table(ctr, row.names=1)
 b <- read.table(mut, row.names=1)
