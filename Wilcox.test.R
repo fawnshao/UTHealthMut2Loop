@@ -11,7 +11,7 @@ aa <- apply(a, 1, mean)
 c <- wilcox.test(aa, b[,1])$p.value
 d <- b[,1]/aa
 dd <- data.frame(d, b[,1], aa)
-colnames(dd) <- c("Fold-Change", mut, "Average-Tumor-Sample")
-if(nrow(dd[(dd[,1] > fc | dd[,1] < 1/fc) & (dd[,3] > 10 | dd[,3] > 10),]) > 0 && c$p.value < 0.05){
+colnames(dd) <- c("Fold-Change", sam, "Average-Tumor-Sample")
+if(nrow(dd[(dd[,1] > fc | dd[,1] < 1/fc) & (dd[,3] > 10 | dd[,3] > 10),]) > 0 && c < 0.05){
 	write.csv(dd, file = paste(tad, sam, "csv", sep = "."))
 }
