@@ -146,7 +146,7 @@ cut -f 1 | grep -wf - ${outpre}.multiple.pMUT.TAD > ${outpre}.multiple.pMUT.TAD.
 # TCGAsample="TCGA-AD-A5EJ-01"
 # TADid="TAD_3"
 echo +++++++++ test each mutated promoters in a TAD ++++++++
-echo "TAD sample mutsample genes mutchr mutstart mutend mutinfo mutgene mutdis" > IamGroot.Rinput
+echo "TAD sample mutsample genes mutgene" > IamGroot.Rinput
 cut -f 10 ${outpre}.multiple.pMUT.TAD.withexp | sort | uniq | while read TADid
 do
 	echo "|--TAD: "$TADid
@@ -164,8 +164,8 @@ do
 		cut -d"~" -f1 | sort | uniq | while read TCGAsample
 		do
 			echo "|----sample: "$TCGAsample
-			mutp=`awk -v tad=$TADid -v sam=$TCGAsample '$10==tad && $4~sam {print $1,$2,$3,$4,$5,$6}' \
-			${outpre}.multiple.pMUT.TAD.withexp`
+			mutp=`awk -v tad=$TADid -v sam=$TCGAsample '$10==tad && $4~sam {print $5}' \
+			${outpre}.multiple.pMUT.TAD.withexp | sort | uniq | tr '\n' ',' | sed 's/,$//'`
 			echo $TADid $TCGAsample $mutsample $genes $mutp >> IamGroot.Rinput
 		done
 	fi

@@ -16,7 +16,7 @@ for(i in 1:nrow(toprocess)){
 	y <- unlist(strsplit(as.vector(toprocess[i,2]), ","))
 	z <- unlist(strsplit(as.vector(toprocess[i,3]), ","))
 	u <- unlist(strsplit(as.vector(toprocess[i,4]), ","))
-	p <- as.vector(toprocess[i,9])
+	p <- as.vector(toprocess[i,5])
 	un <- length(intersect(gene.name, u))
 	if(un > 1){
 		ctr <- expr.value[is.element(gene.name, u), !is.element(sample.name.sim, z)]
