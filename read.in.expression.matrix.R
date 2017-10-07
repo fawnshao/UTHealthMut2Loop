@@ -39,7 +39,7 @@ for(i in 1:nrow(toprocess)){
 				}
 			}
 			if(flag == 1){
-				write.csv(t, file = paste(x, y, "csv", sep = "."))
+				write.csv(out, file = paste(x, y, "csv", sep = "."))
 				ifLoop[i] <- "LoopBroken"
 			}
 		}
