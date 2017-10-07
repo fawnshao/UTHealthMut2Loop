@@ -149,7 +149,7 @@ echo +++++++++ test each mutated promoters in a TAD ++++++++
 echo "TAD sample mutsample genes mutchr mutstart mutend mutinfo mutgene mutdis" > IamGroot.Rinput
 # cut -f 10 ${outpre}.multiple.pMUT.TAD.withexp | sort | uniq | while read TADid
 head -1 $expMAT | awk -F"\t" '{for(i=1;i<=NF;i++){print substr($i,1,15)}}' | \
-grep -wf - ${outpre}.multiple.pMUT.TAD.withexp | cut -f 10 | sort | uniq | while read TADid
+grep -wf - ${outpre}.multiple.pMUT.TAD | cut -f 10 | sort | uniq | while read TADid
 do
 	echo "|--TAD: "$TADid
 
