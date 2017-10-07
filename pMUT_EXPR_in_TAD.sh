@@ -164,7 +164,7 @@ do
 		cut -d"~" -f1 | sort | uniq | while read TCGAsample
 		do
 			echo "|----sample: "$TCGAsample
-			mutp=`awk -v tad=$TADid -v sam=$TCGAsample '$10==tad && $4~/sam/ {print $1,$2,$3,$4,$5,$6}' \
+			mutp=`awk -v tad=$TADid -v sam=$TCGAsample '$10==tad && $4~sam {print $1,$2,$3,$4,$5,$6}' \
 			${outpre}.multiple.pMUT.TAD.withexp`
 			echo $TADid $TCGAsample $mutsample $genes $mutp >> IamGroot.Rinput
 		done
