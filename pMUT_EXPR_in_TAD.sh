@@ -171,6 +171,7 @@ do
 	fi
 done
 
+echo +++++++++ Running Rscript to output loop translocate candidates  ++++++++
 Rscript $bindir/read.in.expression.matrix.R $expMAT IamGroot.Rinput $foldchange
 
 

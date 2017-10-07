@@ -10,8 +10,7 @@ sample.name.sim <- apply(sample.name, 2, function(x){substr(x, start = 1, stop =
 expr.value <- matrix(as.numeric(as.matrix(data[-1, -1])), byrow = F, nrow = length(gene.name))
 
 toprocess <- read.table(list, header = T)
-results <- data.frame()
-colnames(results) <- colnames(toprocess)
+ifLoop <- rep(" ", nrow(toprocess))
 for(i in 1:nrow(toprocess)){
 	x <- unlist(strsplit(as.vector(toprocess[i,1]), ","))
 	y <- unlist(strsplit(as.vector(toprocess[i,2]), ","))
@@ -41,6 +40,7 @@ for(i in 1:nrow(toprocess)){
 			}
 			if(flag == 1){
 				write.csv(t, file = paste(x, y, "csv", sep = "."))
+				ifLoop[i] <- "LoopBroken"
 			}
 		}
 	}
