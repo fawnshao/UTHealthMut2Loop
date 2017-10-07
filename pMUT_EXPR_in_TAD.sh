@@ -140,53 +140,40 @@ grep -wf ${outpre}.multiple.p.TAD ${outpre}.pMUT.TAD > ${outpre}.multiple.pMUT.T
 
 # find the mutated promoter and with neigbors in the same TAD, 
 # and the corresponding sample should have expression
-head -1 $expMAT | awk -F"\t" '{for(i=1;i<=NF;i++){print substr($i,1,15)}}' > ${expMAT}.id
-cut -f 1 ${expMAT}.id | grep -wf - ${outpre}.multiple.pMUT.TAD > ${outpre}.multiple.pMUT.TAD.withexp
+# head -1 $expMAT | awk -F"\t" '{for(i=1;i<=NF;i++){print substr($i,1,15)}}' > ${expMAT}.id
+# cut -f 1 ${expMAT}.id | grep -wf - ${outpre}.multiple.pMUT.TAD > ${outpre}.multiple.pMUT.TAD.withexp
 
 # TCGAsample="TCGA-AD-A5EJ-01"
 # TADid="TAD_3"
 echo +++++++++ test each mutated promoters in a TAD ++++++++
-cut -f 10 ${outpre}.multiple.pMUT.TAD.withexp | sort | uniq | while read TADid
+echo "TAD sample mutsample genes mutchr mutstart mutend mutinfo mutgene mutdis" > IamGroot.Rinput
+# cut -f 10 ${outpre}.multiple.pMUT.TAD.withexp | sort | uniq | while read TADid
+head -1 $expMAT | awk -F"\t" '{for(i=1;i<=NF;i++){print substr($i,1,15)}}' | \
+grep -wf - ${outpre}.multiple.pMUT.TAD.withexp | cut -f 10 | sort | uniq | while read TADid
 do
 	echo "|--TAD: "$TADid
-	awk -v tad=$TADid '$10==tad{print $4}' ${outpre}.p.TAD | \
-	tr ';' '\n' | cut -d "|" -f 1 | sort | uniq > IamGroot.0
-	
-	awk -v tad=$TADid '$10==tad{print $4}' ${outpre}.multiple.pMUT.TAD.withexp | \
-	cut -d"~" -f1 | sort | uniq | while read TCGAsample
-	do
-		echo "|----sample: "$TCGAsample
-		col=`head -1 $expMAT | awk -F"\t" -v sample=$TCGAsample \
-		'{for(i=1;i<=NF;i++){if(substr($i,1,15) == sample){print i}}}'`	
-		get_row_column IamGroot.0 1 $expMAT ${outpre}.mutMAT
-		# grep -wf IamGroot.0 $expMAT | cut -f 1 > ${outpre}.mutMAT
-		cp ${outpre}.mutMAT ${outpre}.ctlMAT
-		for i in $col
-		do
-			# grep -wf IamGroot.0 $expMAT | cut -f $i > IamGroot.$i
-			get_row_column IamGroot.0 $i $expMAT IamGroot.$i
-			paste ${outpre}.mutMAT IamGroot.$i > IamGroot.IamGroot
-			mv IamGroot.IamGroot ${outpre}.mutMAT
-			rm IamGroot.$i
-		done
 
-		awk -v tad=$TADid '$10==tad{print $4}' ${outpre}.pMUT.TAD | \
-		cut -d"~" -f1 | sort | uniq > IamGroot.00
-		head -1 $expMAT | awk -F"\t" '{{for(i=1;i<=NF;i++){o=substr($i,1,15);print i,o}}}' | \
-		grep -vwf IamGroot.00 | awk '{print $1}' | sed -n '2,$p' > IamGroot.000
-		# for i in `cat IamGroot.000`
-		for i in `shuf IamGroot.000 | head -10`
-		do
-			# grep -wf IamGroot.0 $expMAT | cut -f $i > IamGroot.$i
-			get_row_column IamGroot.0 $i $expMAT IamGroot.$i
-			paste ${outpre}.ctlMAT IamGroot.$i > IamGroot.IamGroot
-			mv IamGroot.IamGroot ${outpre}.ctlMAT
-			rm IamGroot.$i
-		done
+	genes=`awk -v tad=$TADid '$10==tad{print $4}' ${outpre}.p.TAD | \
+	tr ';' '\n' | cut -d "|" -f 1 | sort | uniq | tr '\n' ',' | sed 's/,$//'`
 
-		Rscript $bindir/Wilcox.test.R ${outpre}.ctlMAT ${outpre}.mutMAT $TADid $TCGAsample $foldchange
-	done
+	# if [ "$genes" != "" ]
+	if [ `echo $genes | grep ","` ]
+		then
+		mutsample=`awk -v tad=$TADid '$10==tad{print $4}' ${outpre}.pMUT.TAD | \
+		cut -d"~" -f1 | sort | uniq | tr '\n' ',' | sed 's/,$//'`
+
+		awk -v tad=$TADid '$10==tad{print $4}' ${outpre}.multiple.pMUT.TAD.withexp | \
+		cut -d"~" -f1 | sort | uniq | while read TCGAsample
+		do
+			echo "|----sample: "$TCGAsample
+			mutp=`awk -v tad=$TADid -v sam=$TCGAsample '$10==tad && $4~/sam/ {print $1,$2,$3,$4,$5,$6}' \
+			${outpre}.multiple.pMUT.TAD.withexp`
+			echo $TADid $TCGAsample $mutsample $genes $mutp >> IamGroot.Rinput
+		done
+	fi
 done
+
+Rscript $bindir/read.in.expression.matrix.R $expMAT IamGroot.Rinput $foldchange
 
 
 
