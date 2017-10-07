@@ -140,16 +140,14 @@ grep -wf ${outpre}.multiple.p.TAD ${outpre}.pMUT.TAD > ${outpre}.multiple.pMUT.T
 
 # find the mutated promoter and with neigbors in the same TAD, 
 # and the corresponding sample should have expression
-# head -1 $expMAT | awk -F"\t" '{for(i=1;i<=NF;i++){print substr($i,1,15)}}' > ${expMAT}.id
-# cut -f 1 ${expMAT}.id | grep -wf - ${outpre}.multiple.pMUT.TAD > ${outpre}.multiple.pMUT.TAD.withexp
+head -1 $expMAT | awk -F"\t" '{for(i=1;i<=NF;i++){print substr($i,1,15)}}' | \
+cut -f 1 | grep -wf - ${outpre}.multiple.pMUT.TAD > ${outpre}.multiple.pMUT.TAD.withexp
 
 # TCGAsample="TCGA-AD-A5EJ-01"
 # TADid="TAD_3"
 echo +++++++++ test each mutated promoters in a TAD ++++++++
 echo "TAD sample mutsample genes mutchr mutstart mutend mutinfo mutgene mutdis" > IamGroot.Rinput
-# cut -f 10 ${outpre}.multiple.pMUT.TAD.withexp | sort | uniq | while read TADid
-head -1 $expMAT | awk -F"\t" '{for(i=1;i<=NF;i++){print substr($i,1,15)}}' | \
-grep -wf - ${outpre}.multiple.pMUT.TAD | cut -f 10 | sort | uniq | while read TADid
+cut -f 10 ${outpre}.multiple.pMUT.TAD.withexp | sort | uniq | while read TADid
 do
 	echo "|--TAD: "$TADid
 
