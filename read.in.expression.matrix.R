@@ -24,11 +24,15 @@ for(i in 1:nrow(toprocess)){
 			byrow = F, nrow = un)
 		ctr.mean <- apply(ctr, 1, mean)
 		mut.mean <- apply(mut, 1, mean)
+		outlier.flag <- c()
+		for(j in 1:length(un)){
+			outlier.flag[j] <- paste(is.element(ctr, boxplot.stats(c(ctr, mut))$out), collapse=",") 
+		}
 		v <- wilcox.test(ctr.mean, mut.mean)$p.value
 		w <- mut.mean/ctr.mean
-		t <- data.frame(w, mut.mean, ctr.mean)
+		t <- data.frame(w, mut.mean, ctr.mean, outlier.flag)
 		rownames(t) <- gene.name[is.element(gene.name, u)]
-		colnames(t) <- c("Fold-Change", paste(y, v, sep = ": "), "Average-nonmut-Tumor-Sample")
+		colnames(t) <- c("Fold-Change", paste(y, v, sep = ": "), "Average-nonmut-Tumor-Sample", "is.outlier")
 
 		if(nrow(t[t[,1] > fc & t[,2] > 10, ]) > 0 && nrow(t[t[,1] < 1/fc & t[,3] > 10, ]) > 0){
 			out <- rbind.data.frame(t[t[,1] > fc & t[,2] > 10, ], t[t[,1] < 1/fc & t[,3] > 10, ])
