@@ -1,0 +1,64 @@
+args <- commandArgs(TRUE)
+expr <- args[1]
+list <- args[2]
+fc <- as.numeric(args[3])
+wgsID <- args[4]
+
+data <- read.table(expr, sep = "\t")
+gene.name <- as.vector(data[-1, 1])
+sample.name <- data[1, -1]
+sample.name.sim <- apply(sample.name, 2, function(x){substr(x, start = 1, stop = 15)})
+expr.value <- matrix(as.numeric(as.matrix(data[-1, -1])), byrow = F, nrow = length(gene.name))
+
+toprocess <- read.table(list, header = T)
+ifLoop <- rep(" ", nrow(toprocess))
+id.with.WGS <- read.table(wgsID)
+# TADid promoter_mutated_TCGAsample TCGAsample_with_NCV_in_extended_regions genes_in_the_TAD promoter_mutated_gene
+# Z-score (if comparing mt vs. wt) = [(value gene X in mt Y) - (mean gene X in wt)] / (standard deviation of gene X in wt)
+for(i in 1:nrow(toprocess)){
+	x <- unlist(strsplit(as.vector(toprocess[i,1]), ","))
+	y <- unlist(strsplit(as.vector(toprocess[i,2]), ","))
+	z <- unlist(strsplit(as.vector(toprocess[i,3]), ","))
+	u <- unlist(strsplit(as.vector(toprocess[i,4]), ","))
+	p <- as.vector(toprocess[i,5])
+	un <- length(intersect(gene.name, u))
+	if(un > 1){
+		ctr <- expr.value[is.element(gene.name, u), !is.element(sample.name.sim, z)]
+		mut <- matrix(expr.value[is.element(gene.name, u), is.element(sample.name.sim, y) & is.element(sample.name.sim, id.with.WGS)], 
+			byrow = F, nrow = un)
+		ctr.mean <- apply(ctr, 1, mean)
+		mut.mean <- apply(mut, 1, mean)
+		# outlier is too harsh
+		outlier.flag <- c()
+		for(j in 1:nrow(ctr)){
+			outlier.flag[j] <- paste(is.element(ctr[j,], boxplot.stats(c(ctr[j,], mut[j,]))$out), collapse=",") 
+		}
+		# z score
+		zscore <- c()
+		for(j in 1:un){
+			zs <- (ctr[j,] - mut.mean[j,])/sd(mut[j,])
+			zscore[j] <- paste(zs, collapse=",")
+		}
+		v <- wilcox.test(ctr.mean, mut.mean)$p.value
+		w <- mut.mean/ctr.mean
+		t <- data.frame(w, mut.mean, ctr.mean, outlier.flag, zscore)
+		rownames(t) <- gene.name[is.element(gene.name, u)]
+		# colnames(t) <- c("Fold-Change", paste(y, v, sep = ": "), "Average-nonmut-Tumor-Sample", "is.outlier")
+		colnames(t) <- c("Fold-Change", paste(y, v, sep = ": "), "Average-nonmut-Tumor-Sample", "is.outlier", "Z score")
+
+		if(nrow(t[t[,1] > fc & t[,2] > 10, ]) > 0 && nrow(t[t[,1] < 1/fc & t[,3] > 10, ]) > 0){
+			out <- rbind.data.frame(t[t[,1] > fc & t[,2] > 10, ], t[t[,1] < 1/fc & t[,3] > 10, ])
+			flag <- 0
+			for(j in 1:nrow(out)){
+				if(length(grep(rownames(out)[j],p)) > 0){
+					flag <- 1
+				}
+			}
+			if(flag == 1){
+				write.csv(out, file = paste(x, y, "csv", sep = "."))
+				ifLoop[i] <- "LoopBroken"
+			}
+		}
+	}
+}
+write.csv(data.frame(toprocess, ifLoop), file = paste(list, "labeled", "csv", sep = "."))

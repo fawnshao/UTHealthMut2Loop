@@ -138,10 +138,23 @@ grep -wf ${outpre}.multiple.p.TAD ${outpre}.pMUT.TAD > ${outpre}.multiple.pMUT.T
 # 	awk -v a=$line '$10==a' ${outpre}.pMUT.TAD >> ${outpre}.multiple.pMUT.TAD
 # done
 
+# extend to TAD regions, and exclude all the sample with mutation in these extended regions
+# the rest samples will be considered as a control
+# and z scores are calulated as:
+# Z-score (if comparing mt vs. wt) = [(value gene X in mt Y) - (mean gene X in wt)] / (standard deviation of gene X in wt)
+awk -v OFS="\t" '{a = $2 - 10000; b = $3 + 10000;}{if(a < 0){a = 0;}if(b < 0){ b = 0;} \
+{print $1, a, b, $4}}' $tadBED > ${outpre}.extended.TAD
+bedtools intersect -wao -a $mutationBED -b ${outpre}.extended.TAD | awk '$NF > 0' > ${outpre}.extended.TAD.mut
+
 # find the mutated promoter and with neigbors in the same TAD, 
 # and the corresponding sample should have expression
+# list the mutation with expression for the patient
 head -1 $expMAT | awk -F"\t" '{for(i=1;i<=NF;i++){print substr($i,1,15)}}' | \
 cut -f 1 | grep -wf - ${outpre}.multiple.pMUT.TAD > ${outpre}.multiple.pMUT.TAD.withexp
+
+# find the TCGA id with WGS data and expression.
+# extract the patient ID with WGS availble.
+cut -f4 $mutationBED | cut -d"~" -f1 | sort | uniq > ${outpre}.mutated.sampleid
 
 # TCGAsample="TCGA-AD-A5EJ-01"
 # TADid="TAD_3"
@@ -157,7 +170,11 @@ do
 	# if [ "$genes" != "" ]
 	if [ `echo $genes | grep ","` ]
 		then
-		mutsample=`awk -v tad=$TADid '$10==tad{print $4}' ${outpre}.pMUT.TAD | \
+		# mutsample=`awk -v tad=$TADid '$10==tad{print $4}' ${outpre}.pMUT.TAD | \
+		# cut -d"~" -f1 | sort | uniq | tr '\n' ',' | sed 's/,$//'`
+		# find samples with any (non-coding) mutations in the extended regions
+		# and then excluded them
+		mutsample=`awk -v tad=$TADid '$10==tad{print $4}' ${outpre}.extended.TAD.mut | \
 		cut -d"~" -f1 | sort | uniq | tr '\n' ',' | sed 's/,$//'`
 
 		awk -v tad=$TADid '$10==tad{print $4}' ${outpre}.multiple.pMUT.TAD.withexp | \
@@ -172,8 +189,9 @@ do
 done
 
 echo +++++++++ Running Rscript to output loop translocate candidates  ++++++++
-Rscript $bindir/read.in.expression.matrix.R $expMAT IamGroot.Rinput $foldchange
-
+# Rscript $bindir/read.in.expression.matrix.R $expMAT IamGroot.Rinput $foldchange
+# use Z score to find the expression alteration direction in the TAD
+Rscript $bindir/opposite_express_regulation.R $expMAT IamGroot.Rinput $foldchange ${outpre}.mutated.sampleid
 
 
 
