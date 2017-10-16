@@ -25,8 +25,8 @@ for(i in 1:nrow(toprocess)){
 		ctr.mean <- apply(ctr, 1, mean)
 		mut.mean <- apply(mut, 1, mean)
 		outlier.flag <- c()
-		for(j in 1:length(un)){
-			outlier.flag[j] <- paste(is.element(ctr, boxplot.stats(c(ctr, mut))$out), collapse=",") 
+		for(j in 1:length(ctr)){
+			outlier.flag[j] <- paste(is.element(ctr[j], boxplot.stats(c(ctr[j], mut[j]))$out), collapse=",") 
 		}
 		v <- wilcox.test(ctr.mean, mut.mean)$p.value
 		w <- mut.mean/ctr.mean
