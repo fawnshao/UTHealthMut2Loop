@@ -36,7 +36,7 @@ for(i in 1:nrow(toprocess)){
 		# z score
 		zscore <- c()
 		for(j in 1:un){
-			zs <- (ctr[j,] - mut.mean[j,])/sd(mut[j,])
+			zs <- (ctr[j,] - mut.mean[j])/sd(mut[j,])
 			zscore[j] <- paste(zs, collapse=",")
 		}
 		v <- wilcox.test(ctr.mean, mut.mean)$p.value
