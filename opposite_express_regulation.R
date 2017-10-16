@@ -26,6 +26,7 @@ for(i in 1:nrow(toprocess)){
 		ctr <- expr.value[is.element(gene.name, u), !is.element(sample.name.sim, z)]
 		mut <- matrix(expr.value[is.element(gene.name, u), is.element(sample.name.sim, y) & is.element(sample.name.sim, id.with.WGS)], 
 			byrow = F, nrow = un)
+		mut ###
 		ctr.mean <- apply(ctr, 1, mean)
 		mut.mean <- apply(mut, 1, mean)
 		# outlier is too harsh
