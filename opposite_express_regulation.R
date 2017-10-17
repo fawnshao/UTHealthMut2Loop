@@ -1,3 +1,8 @@
+# expr <- "COAD.expr.txt"
+# list <- "IamGroot.Rinput"
+# fc <- 2
+# wgsID <- "TAD.exp.mutated.sampleid"
+
 args <- commandArgs(TRUE)
 expr <- args[1]
 list <- args[2]
@@ -23,21 +28,20 @@ for(i in 1:nrow(toprocess)){
 	p <- as.vector(toprocess[i,5])
 	un <- length(intersect(gene.name, u))
 	if(un > 1){
-		ctr <- expr.value[is.element(gene.name, u), !is.element(sample.name.sim, z)]
-		mut <- matrix(expr.value[is.element(gene.name, u), is.element(sample.name.sim, y) & is.element(sample.name.sim, id.with.WGS)], 
+		ctr <- expr.value[is.element(gene.name, u), !is.element(sample.name.sim, z)  & is.element(sample.name.sim, as.character(id.with.WGS[,1]))]
+		mut <- matrix(expr.value[is.element(gene.name, u), is.element(sample.name.sim, y)], 
 			byrow = F, nrow = un)
-		mut ###
 		ctr.mean <- apply(ctr, 1, mean)
 		mut.mean <- apply(mut, 1, mean)
 		# outlier is too harsh
 		outlier.flag <- c()
 		for(j in 1:nrow(ctr)){
-			outlier.flag[j] <- paste(is.element(ctr[j,], boxplot.stats(c(ctr[j,], mut[j,]))$out), collapse=",") 
+			outlier.flag[j] <- paste(is.element(mut[j,], boxplot.stats(c(ctr[j,], mut[j,]))$out), collapse=",") 
 		}
 		# z score
 		zscore <- c()
 		for(j in 1:un){
-			zs <- (ctr[j,] - mut.mean[j])/sd(mut[j,])
+			zs <- (mut[j,] - ctr.mean[j])/sd(ctr[j,])
 			zscore[j] <- paste(zs, collapse=",")
 		}
 		v <- wilcox.test(ctr.mean, mut.mean)$p.value
