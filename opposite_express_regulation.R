@@ -33,6 +33,8 @@ for(i in 1:nrow(toprocess)){
 		ctr <- expr.value[is.element(gene.name, u), !is.element(sample.name.sim, z)  & is.element(sample.name.sim, as.character(id.with.WGS[,1]))]
 		mut <- matrix(expr.value[is.element(gene.name, u), is.element(sample.name.sim, y)], 
 			byrow = F, nrow = un)
+		ctr <- log(ctr, 2)
+		mut <- log(mut, 2)
 		ctr.mean <- apply(ctr, 1, mean)
 		ctr.sd <- apply(ctr, 1, sd)
 		mut.mean <- apply(mut, 1, mean)
