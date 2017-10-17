@@ -45,9 +45,10 @@ for(i in 1:nrow(toprocess)){
 		}
 		# z score
 		zscore <- c()
+		# zscore.flag <- c()
 		for(j in 1:un){
-			zs <- (mut[j,] - ctr.mean[j]) / ctr.sd[j]# sd(ctr[j,])
-			zscore[j] <- paste(zs, collapse=",")
+			zscore[j] <- (mut.mean - ctr.mean[j]) / ctr.sd[j] # sd(ctr[j,])
+			# zscore[j] <- paste(zs, collapse=",")
 		}
 		# v <- wilcox.test(ctr.mean, mut.mean)$p.value
 		w <- mut.mean/ctr.mean
@@ -59,7 +60,8 @@ for(i in 1:nrow(toprocess)){
 		colnames(t) <- c(y, "Average-nonmut-Tumor-Sample", "SD-nonmut-Tumor-Sample", "Fold-Change", "is.outlier", "Z score")
 		# if(nrow(t[t[,1] > fc & t[,2] > 10, ]) > 0 && nrow(t[t[,1] < 1/fc & t[,3] > 10, ]) > 0){
 		if(nrow(t[t[,6] > 1.645 & t[,1] > 10, ]) > 0 && nrow(t[t[,6] < -1.645 & t[,2] > 10, ]) > 0){
-			out <- rbind.data.frame(t[t[,1] > fc & t[,1] > 10, ], t[t[,1] < 1/fc & t[,2] > 10, ])
+			# out <- rbind.data.frame(t[t[,1] > fc & t[,1] > 10, ], t[t[,1] < 1/fc & t[,2] > 10, ])
+			out <- rbind.data.frame(t[t[,6] > 1.645 & t[,1] > 10, ], t[t[,6] < -1.645 & t[,2] > 10, ])
 			flag <- 0
 			for(j in 1:nrow(out)){
 				if(length(grep(rownames(out)[j],p)) > 0){
