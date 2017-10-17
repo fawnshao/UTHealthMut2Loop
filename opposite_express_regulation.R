@@ -51,17 +51,17 @@ for(i in 1:nrow(toprocess)){
 			# zscore[j] <- paste(zs, collapse=",")
 		}
 		# v <- wilcox.test(ctr.mean, mut.mean)$p.value
-		w <- mut.mean/ctr.mean
+		w <- mut.mean-ctr.mean
 		# t <- data.frame(w, mut.mean, ctr.mean, outlier.flag, zscore)
 		t <- data.frame(mut.mean, ctr.mean, ctr.sd, w, outlier.flag, zscore)
 		rownames(t) <- gene.name[is.element(gene.name, u)]
 		# colnames(t) <- c("Fold-Change", paste(y, v, sep = ": "), "Average-nonmut-Tumor-Sample", "is.outlier")
 		# colnames(t) <- c("Fold-Change", paste(y, v, sep = ": "), "Average-nonmut-Tumor-Sample", "is.outlier", "Z score")
-		colnames(t) <- c(y, "Average-nonmut-Tumor-Sample", "SD-nonmut-Tumor-Sample", "Fold-Change", "is.outlier", "Z score")
+		colnames(t) <- c(y, "Average-nonmut-Tumor-Sample", "SD-nonmut-Tumor-Sample", "log2(Fold-Change)", "is.outlier", "Z score")
 		# if(nrow(t[t[,1] > fc & t[,2] > 10, ]) > 0 && nrow(t[t[,1] < 1/fc & t[,3] > 10, ]) > 0){
-		if(nrow(t[t[,6] > 1.645 & t[,1] > 10, ]) > 0 && nrow(t[t[,6] < -1.645 & t[,2] > 10, ]) > 0){
+		if(nrow(t[t[,6] > 1.645 & t[,1] > 3, ]) > 0 && nrow(t[t[,6] < -1.645 & t[,2] > 3, ]) > 0){
 			# out <- rbind.data.frame(t[t[,1] > fc & t[,1] > 10, ], t[t[,1] < 1/fc & t[,2] > 10, ])
-			out <- rbind.data.frame(t[t[,6] > 1.645 & t[,1] > 10, ], t[t[,6] < -1.645 & t[,2] > 10, ])
+			out <- rbind.data.frame(t[t[,6] > 1.645 & t[,1] > 3, ], t[t[,6] < -1.645 & t[,2] > 3, ])
 			flag <- 0
 			for(j in 1:nrow(out)){
 				if(length(grep(rownames(out)[j],p)) > 0){
