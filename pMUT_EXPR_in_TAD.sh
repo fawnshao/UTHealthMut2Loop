@@ -13,18 +13,18 @@ expMAT=COAD.expr.txt
 tadBED=hg38.GSE63525_GM12878.srt.bed
 outpre=TAD.exp
 promoterLEN=1000
-foldchange=2
+# foldchange=2
 #output
-expr_matrix=
-promoter_mut_matrix=
-gene_in_TAD_matrix=
+# expr_matrix=
+# promoter_mut_matrix=
+# gene_in_TAD_matrix=
 
 # usage function
 function usage(){
    prog=`basename "$0"`
    cat << EOF
 
-   Usage: $prog [-mut mutationBED] [-tss tssBED] [-exp expMAT] [-tad tadBED] [-o outpre] [-plen promoterLEN] [-fc foldchange]
+   Usage: $prog [-mut mutationBED] [-tss tssBED] [-exp expMAT] [-tad tadBED] [-o outpre] [-plen promoterLEN]
 
    optional arguments:
      -h            show this help message and exit
@@ -34,9 +34,9 @@ function usage(){
      -tad          TAD bed files
      -o            output prefix
      -plen         up/down stream of TSS for promoter promoterSIZE
-     -fc           fold change threhold for differentially expressed genes in the same TAD.
 EOF
 }
+     # -fc           fold change threhold for differentially expressed genes in the same TAD.
 
 # get exact row and columns from a file
 function get_row_column(){
@@ -93,10 +93,10 @@ do
 			promoterLEN="$2"
 			shift
 			;;
-		-fc)
-			foldchange="$2"
-			shift
-			;;
+		# -fc)
+		# 	foldchange="$2"
+		# 	shift
+		# 	;;
 		*)
 			usage
 			break
@@ -111,7 +111,7 @@ echo "tadBED     ="$tadBED
 echo "tssBED     ="$tssBED
 echo "outpre     ="$outpre
 echo "promoterLEN="$promoterLEN
-echo "foldchange ="$foldchange
+# echo "foldchange ="$foldchange
 
 ###############
 # mutation to expressed promoter
@@ -191,7 +191,7 @@ done
 echo +++++++++ Running Rscript to output loop translocate candidates  ++++++++
 # Rscript $bindir/read.in.expression.matrix.R $expMAT IamGroot.Rinput $foldchange
 # use Z score to find the expression alteration direction in the TAD
-Rscript $bindir/opposite_express_regulation.R $expMAT IamGroot.Rinput $foldchange ${outpre}.mutated.sampleid
+Rscript $bindir/opposite_express_regulation.R $expMAT IamGroot.Rinput ${outpre}.mutated.sampleid
 
 
 

@@ -6,8 +6,8 @@
 args <- commandArgs(TRUE)
 expr <- args[1]
 list <- args[2]
-fc <- as.numeric(args[3])
-wgsID <- args[4]
+# fc <- as.numeric(args[3])
+wgsID <- args[3]
 
 data <- read.table(expr, sep = "\t")
 gene.name <- as.vector(data[-1, 1])
@@ -51,7 +51,7 @@ for(i in 1:nrow(toprocess)){
 			# zscore[j] <- paste(zs, collapse=",")
 		}
 		# v <- wilcox.test(ctr.mean, mut.mean)$p.value
-		w <- mut.mean-ctr.mean
+		w <- mut.mean - ctr.mean
 		# t <- data.frame(w, mut.mean, ctr.mean, outlier.flag, zscore)
 		t <- data.frame(mut.mean, ctr.mean, ctr.sd, w, outlier.flag, zscore)
 		rownames(t) <- gene.name[is.element(gene.name, u)]
@@ -63,16 +63,18 @@ for(i in 1:nrow(toprocess)){
 			# out <- rbind.data.frame(t[t[,1] > fc & t[,1] > 10, ], t[t[,1] < 1/fc & t[,2] > 10, ])
 			out <- rbind.data.frame(t[t[,6] > 1.645 & t[,1] > 3, ], t[t[,6] < -1.645 & t[,2] > 3, ])
 			flag <- 0
+			mut.flag <- rep("", nrow(out))
 			for(j in 1:nrow(out)){
-				if(length(grep(rownames(out)[j],p)) > 0){
+				if(length(grep(pattern = paste("^", rownames(out)[j], "\\|", sep = ""), x = p) > 0){
 					flag <- 1
+					mut.flag[j] <- "MutatedPromoter"
 				}
 			}
 			if(flag == 1){
-				write.csv(out, file = paste(x, y, "csv", sep = "."))
+				write.csv(data.frame(out, mut.flag), file = paste(x, y, "csv", sep = "."), sep = "\t")
 				ifLoop[i] <- "LoopBroken"
 			}
 		}
 	}
 }
-write.csv(data.frame(toprocess, ifLoop), file = paste(list, "labeled", "csv", sep = "."))
+write.csv(data.frame(toprocess, ifLoop), file = paste(list, "labeled", "csv", sep = "."), sep= "\t")
