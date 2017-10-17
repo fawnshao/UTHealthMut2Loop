@@ -1,8 +1,7 @@
-# expr <- "COAD.expr.txt"
-# list <- "IamGroot.Rinput"
+expr <- "COAD.expr.txt"
+list <- "IamGroot.Rinput"
+wgsID <- "TAD.exp.mutated.sampleid"
 # fc <- 2
-# wgsID <- "TAD.exp.mutated.sampleid"
-
 args <- commandArgs(TRUE)
 expr <- args[1]
 list <- args[2]
@@ -71,7 +70,12 @@ for(i in 1:nrow(toprocess)){
 				}
 			}
 			if(flag == 1){
-				write.csv(data.frame(out, mut.flag), file = paste(x, y, "csv", sep = "."), sep = "\t")
+				write.table(data.frame(out, mut.flag), 
+					file = paste(x, y, "tsv", sep = "."), 
+					sep = "\t")
+				# write.table(data.frame(out, mut.flag), 
+				# 	file = paste(x, y, "csv", sep = "."), 
+				# 	sep = "\t", quote = TRUE, col.names = TRUE, row.names = TRUE)
 				ifLoop[i] <- "LoopBroken"
 			}
 		}
