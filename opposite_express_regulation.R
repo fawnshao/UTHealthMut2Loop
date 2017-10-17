@@ -81,4 +81,4 @@ for(i in 1:nrow(toprocess)){
 		}
 	}
 }
-write.csv(data.frame(toprocess, ifLoop), file = paste(list, "labeled", "csv", sep = "."), sep= "\t")
+write.table(data.frame(toprocess, ifLoop), file = paste(list, "labeled", "csv", sep = "."), sep= "\t")
