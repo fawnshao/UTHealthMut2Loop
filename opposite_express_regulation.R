@@ -20,6 +20,8 @@ ifLoop <- rep(" ", nrow(toprocess))
 id.with.WGS <- read.table(wgsID)
 # TADid promoter_mutated_TCGAsample TCGAsample_with_NCV_in_extended_regions genes_in_the_TAD promoter_mutated_gene
 # Z-score (if comparing mt vs. wt) = [(value gene X in mt Y) - (mean gene X in wt)] / (standard deviation of gene X in wt)
+# https://www.easycalculation.com/statistics/p-value-for-z-score.php
+# p(z=1.645)=0.05 
 for(i in 1:nrow(toprocess)){
 	x <- unlist(strsplit(as.vector(toprocess[i,1]), ","))
 	y <- unlist(strsplit(as.vector(toprocess[i,2]), ","))
@@ -32,6 +34,7 @@ for(i in 1:nrow(toprocess)){
 		mut <- matrix(expr.value[is.element(gene.name, u), is.element(sample.name.sim, y)], 
 			byrow = F, nrow = un)
 		ctr.mean <- apply(ctr, 1, mean)
+		ctr.sd <- apply(ctr, 1, sd)
 		mut.mean <- apply(mut, 1, mean)
 		# outlier is too harsh
 		outlier.flag <- c()
@@ -41,18 +44,20 @@ for(i in 1:nrow(toprocess)){
 		# z score
 		zscore <- c()
 		for(j in 1:un){
-			zs <- (mut[j,] - ctr.mean[j])/sd(ctr[j,])
+			zs <- (mut[j,] - ctr.mean[j]) / ctr.sd[j]# sd(ctr[j,])
 			zscore[j] <- paste(zs, collapse=",")
 		}
-		v <- wilcox.test(ctr.mean, mut.mean)$p.value
+		# v <- wilcox.test(ctr.mean, mut.mean)$p.value
 		w <- mut.mean/ctr.mean
-		t <- data.frame(w, mut.mean, ctr.mean, outlier.flag, zscore)
+		# t <- data.frame(w, mut.mean, ctr.mean, outlier.flag, zscore)
+		t <- data.frame(mut.mean, ctr.mean, ctr.sd, w, outlier.flag, zscore)
 		rownames(t) <- gene.name[is.element(gene.name, u)]
 		# colnames(t) <- c("Fold-Change", paste(y, v, sep = ": "), "Average-nonmut-Tumor-Sample", "is.outlier")
-		colnames(t) <- c("Fold-Change", paste(y, v, sep = ": "), "Average-nonmut-Tumor-Sample", "is.outlier", "Z score")
-
-		if(nrow(t[t[,1] > fc & t[,2] > 10, ]) > 0 && nrow(t[t[,1] < 1/fc & t[,3] > 10, ]) > 0){
-			out <- rbind.data.frame(t[t[,1] > fc & t[,2] > 10, ], t[t[,1] < 1/fc & t[,3] > 10, ])
+		# colnames(t) <- c("Fold-Change", paste(y, v, sep = ": "), "Average-nonmut-Tumor-Sample", "is.outlier", "Z score")
+		colnames(t) <- c(y, "Average-nonmut-Tumor-Sample", "SD-nonmut-Tumor-Sample", "Fold-Change", "is.outlier", "Z score")
+		# if(nrow(t[t[,1] > fc & t[,2] > 10, ]) > 0 && nrow(t[t[,1] < 1/fc & t[,3] > 10, ]) > 0){
+		if(nrow(t[t[,6] > 1.645 & t[,1] > 10, ]) > 0 && nrow(t[t[,6] < -1.645 & t[,2] > 10, ]) > 0){
+			out <- rbind.data.frame(t[t[,1] > fc & t[,1] > 10, ], t[t[,1] < 1/fc & t[,2] > 10, ])
 			flag <- 0
 			for(j in 1:nrow(out)){
 				if(length(grep(rownames(out)[j],p)) > 0){
