@@ -7,6 +7,7 @@ expr <- args[1]
 list <- args[2]
 # fc <- as.numeric(args[3])
 wgsID <- args[3]
+outpre <- args[4]
 
 data <- read.table(expr, sep = "\t")
 gene.name <- as.vector(data[-1, 1])
@@ -77,7 +78,7 @@ for(i in 1:nrow(toprocess)){
 			alt.flag[alt.flag == FALSE] <- "" 
 			if(flag == 1){
 				write.table(data.frame(out, mut.flag, alt.flag), 
-					file = paste(x, y, "tsv", sep = "."), 
+					file = paste(outpre, x, y, "tsv", sep = "."), 
 					sep = "\t")
 				# write.table(data.frame(out, mut.flag), 
 				# 	file = paste(x, y, "csv", sep = "."), 
@@ -87,4 +88,4 @@ for(i in 1:nrow(toprocess)){
 		}
 	}
 }
-write.table(data.frame(toprocess, ifLoop), file = paste(list, "labeled", "tsv", sep = "."), sep= "\t")
+write.table(data.frame(toprocess, ifLoop), file = paste(outpre, "TAD.labeled", "tsv", sep = "."), sep= "\t")

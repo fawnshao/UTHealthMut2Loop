@@ -159,7 +159,7 @@ cut -f4 $mutationBED | cut -d"~" -f1 | sort | uniq > ${outpre}.mutated.sampleid
 # TCGAsample="TCGA-AD-A5EJ-01"
 # TADid="TAD_3"
 echo +++++++++ test each mutated promoters in a TAD ++++++++
-echo "TAD sample mutsample genes mutgene" > IamGroot.Rinput
+echo "TAD sample mutsample genes mutgene" > ${outpre}.IamGroot.Rinput
 cut -f 10 ${outpre}.multiple.pMUT.TAD.withexp | sort | uniq | while read TADid
 do
 	echo "|--TAD: "$TADid
@@ -183,7 +183,7 @@ do
 			echo "|----sample: "$TCGAsample
 			mutp=`awk -v tad=$TADid -v sam=$TCGAsample '$10==tad && $4~sam {print $5}' \
 			${outpre}.multiple.pMUT.TAD.withexp | sort | uniq | tr '\n' ',' | sed 's/,$//'`
-			echo $TADid $TCGAsample $mutsample $genes $mutp >> IamGroot.Rinput
+			echo $TADid $TCGAsample $mutsample $genes $mutp >> ${outpre}.IamGroot.Rinput
 		done
 	fi
 done
@@ -191,7 +191,7 @@ done
 echo +++++++++ Running Rscript to output loop translocate candidates  ++++++++
 # Rscript $bindir/read.in.expression.matrix.R $expMAT IamGroot.Rinput $foldchange
 # use Z score to find the expression alteration direction in the TAD
-Rscript $bindir/opposite_express_regulation.R $expMAT IamGroot.Rinput ${outpre}.mutated.sampleid
+Rscript $bindir/opposite_express_regulation.R $expMAT ${outpre}.IamGroot.Rinput ${outpre}.mutated.sampleid ${outpre}
 
 
 
