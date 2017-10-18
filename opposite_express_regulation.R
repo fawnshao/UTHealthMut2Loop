@@ -65,7 +65,8 @@ for(i in 1:nrow(toprocess)){
 			zs.mut <- 1
 			mut.flag <- rep("", nrow(out))
 			for(j in 1:nrow(out)){
-				if(length(grep(pattern = paste("^", rownames(out)[j], "\\|", sep = ""), x = p) > 0)){
+				if(length(grep(pattern = paste("^", rownames(out)[j], "\\|", sep = ""), x = p) > 0) || 
+					length(grep(pattern = paste(";", rownames(out)[j], "\\|", sep = ""), x = p) > 0)){
 					flag <- 1
 					mut.flag[j] <- "MutatedPromoter"
 					zs.mut <- out[j,6]
