@@ -68,10 +68,10 @@ for(i in 1:nrow(toprocess)){
 				if(length(grep(pattern = paste("^", rownames(out)[j], "\\|", sep = ""), x = p) > 0)){
 					flag <- 1
 					mut.flag[j] <- "MutatedPromoter"
-					zs.mut <- t[j,6]
+					zs.mut <- out[j,6]
 				}
 			}
-			alt.flag <- t[,6]/zs.mut < 0
+			alt.flag <- out[,6]/zs.mut < 0
 			alt.flag[alt.flag == TRUE] <- "Opposite" 
 			alt.flag[alt.flag == FALSE] <- "" 
 			if(flag == 1){
