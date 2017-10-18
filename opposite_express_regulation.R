@@ -62,15 +62,20 @@ for(i in 1:nrow(toprocess)){
 			# out <- rbind.data.frame(t[t[,1] > fc & t[,1] > 10, ], t[t[,1] < 1/fc & t[,2] > 10, ])
 			out <- rbind.data.frame(t[t[,6] > 1.645 & t[,1] > 3, ], t[t[,6] < -1.645 & t[,2] > 3, ])
 			flag <- 0
+			zs.mut <- 1
 			mut.flag <- rep("", nrow(out))
 			for(j in 1:nrow(out)){
 				if(length(grep(pattern = paste("^", rownames(out)[j], "\\|", sep = ""), x = p) > 0)){
 					flag <- 1
 					mut.flag[j] <- "MutatedPromoter"
+					zs.mut <- t[j,6]
 				}
 			}
+			alt.flag <- t[,6]/zs.mut < 0
+			alt.flag[alt.flag == TRUE] <- "Opposite" 
+			alt.flag[alt.flag == FALSE] <- "" 
 			if(flag == 1){
-				write.table(data.frame(out, mut.flag), 
+				write.table(data.frame(out, mut.flag, alt.flag), 
 					file = paste(x, y, "tsv", sep = "."), 
 					sep = "\t")
 				# write.table(data.frame(out, mut.flag), 
