@@ -1,6 +1,6 @@
-expr <- "exp_seq.COAD-US.tsv.WGS.sim"
-list <- "TAD.exp.IamGroot.Rinput"
-outpre <- "TAD.exp.COAD"
+# expr <- "exp_seq.COAD-US.tsv.WGS.sim"
+# list <- "TAD.exp.IamGroot.Rinput"
+# outpre <- "TAD.exp.COAD"
 args <- commandArgs(TRUE)
 expr <- args[1]
 list <- args[2]
@@ -17,6 +17,7 @@ ifLoop <- rep(" ", nrow(toprocess))
 # Z-score (if comparing mt vs. wt) = [(value gene X in mt Y) - (mean gene X in wt)] / (standard deviation of gene X in wt)
 # https://www.easycalculation.com/statistics/p-value-for-z-score.php
 # p(z=1.645)=0.05 
+expr.cutoff <- summary(data[data[,3] > 0,3])[3]
 for(i in 1:nrow(toprocess)){
 	tad.id <- unlist(strsplit(as.vector(toprocess[i,1]), ","))
 	p.mut.s <- unlist(strsplit(as.vector(toprocess[i,2]), ","))
@@ -44,9 +45,10 @@ for(i in 1:nrow(toprocess)){
 		# colnames(t) <- c(p.mut.s, "Average-nonmut-Tumor-Sample", "SD-nonmut-Tumor-Sample", "Fold-Change", "is.outlier", "Z score")
 		# summary(data[data[,3] > 0,3])
 		# some are FPKM, and some are not. so use median value as cut off
-		if(nrow(t[t[,6] > 1.645 & t[,1] > 10, ]) > 0 && nrow(t[t[,6] < -1.645 & t[,2] > 10, ]) > 0){
-			out <- rbind.data.frame(t[t[,6] > 1.645 & t[,1] > summary(data[data[,3] > 0,3])[3], ], 
-				t[t[,6] < -1.645 & t[,2] > summary(data[data[,3] > 0,3])[3], ])
+		if(nrow(t[t[,6] > 1.645 & t[,1] > expr.cutoff, ]) > 0 && 
+			nrow(t[t[,6] < -1.645 & t[,2] > expr.cutoff, ]) > 0){
+			out <- rbind.data.frame(t[t[,6] > 1.645 & t[,1] > expr.cutoff, ], 
+				t[t[,6] < -1.645 & t[,2] > expr.cutoff, ])
 			flag <- 0
 			zs.mut <- 1
 			mut.flag <- rep("", nrow(out))
