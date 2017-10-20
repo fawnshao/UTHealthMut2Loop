@@ -86,7 +86,7 @@ echo "promoterLEN="$promoterLEN
 
 ###############
 # get the WGS mutations from simple_somatic_mutation.open.*.tsv
-awk -F"\t" -vOFS="\t" '$34=="WGS"{print $9,$10-1,$11,substr($7,1,15),".","+"}' $mutationTSV | 
+gunzip -c $mutationTSV | awk -F"\t" -vOFS="\t" '$34=="WGS"{print $9,$10-1,$11,substr($7,1,15),".","+"}' | 
 uniq | bedtools sort -i - > $mutationTSV.WGS.srt.bed
 
 # mutation to expressed promoter
@@ -118,7 +118,7 @@ awk '$NF > 0' > ${outpre}.extended.TAD.mut
 # find the TCGA id with WGS data and expression.
 # extract the patient ID with WGS availble.
 cut -f 4 $mutationTSV.WGS.srt.bed | sort | uniq > ${outpre}.WGS.sampleid
-awk -F"\t" -vOFS="\t" '{print substr($5,1,15), $8, $9 * 1000000}' $expMAT | \
+gunzip -c $expMAT | awk -F"\t" -vOFS="\t" '{print substr($5,1,15), $8, $9}' | \
 grep -f ${outpre}.WGS.sampleid > $expMAT.WGS.sim
 # find the mutated promoter and with neigbors in the same TAD, 
 # and the corresponding sample should have expression
