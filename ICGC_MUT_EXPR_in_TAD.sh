@@ -86,7 +86,9 @@ echo "promoterLEN="$promoterLEN
 
 ###############
 # get the WGS mutations from simple_somatic_mutation.open.*.tsv
-gunzip -c $mutationTSV | awk -F"\t" -vOFS="\t" '$34=="WGS"{print $9,$10-1,$11,substr($7,1,15),".","+"}' | 
+# gunzip -c $mutationTSV | awk -F"\t" -vOFS="\t" '$34=="WGS"{print $9,$10-1,$11,substr($7,1,15),".","+"}' | 
+# uniq | bedtools sort -i - > $mutationTSV.WGS.srt.bed
+gunzip -c $mutationTSV | awk -F"\t" -vOFS="\t" '$34=="WGS"{print $9,$10-1,$11,$2,".","+"}' | 
 uniq | bedtools sort -i - > $mutationTSV.WGS.srt.bed
 
 # mutation to expressed promoter
@@ -118,8 +120,11 @@ awk '$NF > 0' > ${outpre}.extended.TAD.mut
 # find the TCGA id with WGS data and expression.
 # extract the patient ID with WGS availble.
 cut -f 4 $mutationTSV.WGS.srt.bed | sort | uniq > ${outpre}.WGS.sampleid
-gunzip -c $expMAT | awk -F"\t" -vOFS="\t" '{print substr($5,1,15), $8, $9}' | \
-grep -f ${outpre}.WGS.sampleid > $expMAT.WGS.sim
+# gunzip -c $expMAT | awk -F"\t" -vOFS="\t" '{print substr($5,1,15), $8, $9}' | \
+# grep -f ${outpre}.WGS.sampleid > $expMAT.WGS.sim
+gunzip -c $expMAT | awk -F"\t" -vOFS="\t" '{print $1, $8, $9}' | \
+grep -wf ${outpre}.WGS.sampleid > $expMAT.WGS.sim
+
 # find the mutated promoter and with neigbors in the same TAD, 
 # and the corresponding sample should have expression
 # list the mutation with expression for the patient
