@@ -68,7 +68,7 @@ for(i in 1:nrow(toprocess)){
 				write.table(data.frame(out, mut.flag, alt.flag), 
 					file = paste(outpre, tad.id, p.mut.s, "tsv", sep = "."), 
 					sep = "\t")
-				print(paste("Shoot:", outpre, tad.id, p.mut.s, sep = "\t"))
+				print(paste("Shoot:", outpre, tad.id, p.mut.s, sep = "    "))
 				# write.table(data.frame(out, mut.flag), 
 				# 	file = paste(x, y, "csv", sep = "."), 
 				# 	sep = "\t", quote = TRUE, col.names = TRUE, row.names = TRUE)
