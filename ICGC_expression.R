@@ -19,6 +19,7 @@ ifLoop <- rep(" ", nrow(toprocess))
 # p(z=1.645)=0.05 
 expr.cutoff <- summary(data[data[,3] > 0,3])[3]
 for(i in 1:nrow(toprocess)){
+	# print(toprocess[i,1:2])
 	tad.id <- unlist(strsplit(as.vector(toprocess[i,1]), ","))
 	p.mut.s <- unlist(strsplit(as.vector(toprocess[i,2]), ","))
 	tad.mut.s <- unlist(strsplit(as.vector(toprocess[i,3]), ","))
@@ -65,8 +66,9 @@ for(i in 1:nrow(toprocess)){
 			alt.flag[alt.flag == FALSE] <- "" 
 			if(flag == 1){
 				write.table(data.frame(out, mut.flag, alt.flag), 
-					file = paste(outpre, x, y, "tsv", sep = "."), 
+					file = paste(outpre, tad.id, p.mut.s, "tsv", sep = "."), 
 					sep = "\t")
+				print(paste("Shoot:", outpre, tad.id, p.mut.s, sep = "\t"))
 				# write.table(data.frame(out, mut.flag), 
 				# 	file = paste(x, y, "csv", sep = "."), 
 				# 	sep = "\t", quote = TRUE, col.names = TRUE, row.names = TRUE)
