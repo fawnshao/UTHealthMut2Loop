@@ -43,8 +43,10 @@ for(i in 1:nrow(toprocess)){
 		rownames(t) <- tad.gene.withexpr
 		# colnames(t) <- c(p.mut.s, "Average-nonmut-Tumor-Sample", "SD-nonmut-Tumor-Sample", "Fold-Change", "is.outlier", "Z score")
 		# summary(data[data[,3] > 0,3])
+		# some are FPKM, and some are not. so use median value as cut off
 		if(nrow(t[t[,6] > 1.645 & t[,1] > 10, ]) > 0 && nrow(t[t[,6] < -1.645 & t[,2] > 10, ]) > 0){
-			out <- rbind.data.frame(t[t[,6] > 1.645 & t[,1] > 10, ], t[t[,6] < -1.645 & t[,2] > 10, ])
+			out <- rbind.data.frame(t[t[,6] > 1.645 & t[,1] > summary(data[data[,3] > 0,3])[3], ], 
+				t[t[,6] < -1.645 & t[,2] > summary(data[data[,3] > 0,3])[3], ])
 			flag <- 0
 			zs.mut <- 1
 			mut.flag <- rep("", nrow(out))
