@@ -134,7 +134,7 @@ grep -wf ${outpre}.WGS.sampleid > $expMAT.WGS.sim
 
 if [ ! -z "$id2name" ]
 	then
-	perl $bindir/replace_ensembl_with_genesymbol.pl $id2name $expMAT.WGS.sim > $expMAT.WGS.sim.tmp
+	perl $bindir/relatedScripts/replace_ensembl_with_genesymbol.pl  $id2name $expMAT.WGS.sim > $expMAT.WGS.sim.tmp
 	mv $expMAT.WGS.sim.tmp $expMAT.WGS.sim
 fi
 
