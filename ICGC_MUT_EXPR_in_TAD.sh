@@ -11,6 +11,7 @@ promoterLEN=1000
 mutationTSV=simple_somatic_mutation.open.COAD-US.tsv
 expMAT=exp_seq.COAD-US.tsv
 outpre=TAD.exp
+id2name=
 
 
 # usage function
@@ -18,7 +19,7 @@ function usage(){
    prog=`basename "$0"`
    cat << EOF
 
-   Usage: $prog [-mut mutationTSV] [-tss tssBED] [-exp expMAT] [-tad tadBED] [-o outpre] [-plen promoterLEN]
+   Usage: $prog [-mut mutationTSV] [-tss tssBED] [-exp expMAT] [-tad tadBED] [-o outpre] [-plen promoterLEN] [-idconvert id2name]
 
    optional arguments:
      -h            show this help message and exit
@@ -28,6 +29,7 @@ function usage(){
      -tad          TAD bed files
      -o            output prefix
      -plen         up/down stream of TSS for promoter promoterSIZE
+     -idconvert    ensembl ID to gene symbol file. do not set it if not needed
 EOF
 }
 
@@ -69,6 +71,10 @@ do
 			promoterLEN="$2"
 			shift
 			;;
+		-idconvert)
+			id2name="$2"
+			shift
+			;;
 		*)
 			usage
 			break
@@ -83,6 +89,7 @@ echo "tadBED     ="$tadBED
 echo "tssBED     ="$tssBED
 echo "outpre     ="$outpre
 echo "promoterLEN="$promoterLEN
+echo "id2name    ="$id2name
 
 ###############
 # get the WGS mutations from simple_somatic_mutation.open.*.tsv
@@ -124,6 +131,13 @@ cut -f 4 $mutationTSV.WGS.srt.bed | sort | uniq > ${outpre}.WGS.sampleid
 # grep -f ${outpre}.WGS.sampleid > $expMAT.WGS.sim
 gunzip -c $expMAT | awk -F"\t" -vOFS="\t" '{print $1, $8, $9}' | \
 grep -wf ${outpre}.WGS.sampleid > $expMAT.WGS.sim
+
+if [ ! -z "$id2name" ]
+	then
+	perl $bindir/replace_ensembl_with_genesymbol.pl $id2name $expMAT.WGS.sim > $expMAT.WGS.sim.tmp
+	mv $expMAT.WGS.sim.tmp $expMAT.WGS.sim
+fi
+
 
 # find the mutated promoter and with neigbors in the same TAD, 
 # and the corresponding sample should have expression
