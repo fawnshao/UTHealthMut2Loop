@@ -15,9 +15,10 @@ print STDERR "reading $ARGV[1]\n";
 while(<IN>){
 	chomp;
 	@t = split(/\t/);
-	if(not exists $hash{$t[1]}){print "$_\n";}
+	@id = split(/\./, $t[1]);
+	if(not exists $hash{$id[0]}){print "$_\n";}
 	else{
-		print "$t[0]\t$hash{$t[1]}\t$t[2]\n"
+		print "$t[0]\t$hash{$id[0]}\t$t[2]\n"
 		}
 	}
 close(IN);
