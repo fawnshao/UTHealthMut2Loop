@@ -102,22 +102,26 @@ echo "id2name    ="$id2name
 # get the WGS mutations from simple_somatic_mutation.open.*.tsv
 # gunzip -c $mutationTSV | awk -F"\t" -vOFS="\t" '$34=="WGS"{print $9,$10-1,$11,substr($7,1,15),".","+"}' | 
 # uniq | bedtools sort -i - > $mutationTSV.WGS.srt.bed
+echo +++++++++ get WGS mutations ++++++++
 gunzip -c $mutationTSV | awk -F"\t" -vOFS="\t" '$34=="WGS"{print $9,$10-1,$11,$2,".","+"}' | 
 uniq | bedtools sort -i - > $mutationTSV.WGS.srt.bed
 
 # mutation to expressed promoter
 # find the closet TSS for each mutation.
 # ???? seems not WGS....
+echo +++++++++ get promoter WGS mutations ++++++++
 bedtools closest -D b -a $mutationTSV.WGS.srt.bed -b $tssBED | \
 awk -F "\t" -v var=$promoterLEN -v OFS="\t" \
 '$(NF-6)!="." && $NF > -1 * var && $NF < var {print $1,$2,$3,$4,$10,$13}' > ${outpre}.pMUT
 
 # mutated promoter to TAD
 # find the overlapped TAD for each mutated promoter.
+echo +++++++++ get TAD promoter WGS mutations ++++++++
 bedtools intersect -wao -a ${outpre}.pMUT -b $tadBED | awk '$NF > 0' | cut -f 1-10 > ${outpre}.pMUT.TAD
 
 # promoter to TAD
 # find all the promoters in a TAD, and keeps those with more than 2 genes
+echo +++++++++ get TAd lists with many genes ++++++++
 bedtools intersect -wao -a $tssBED -b $tadBED | awk '$NF > 0' | cut -f 1-10 > ${outpre}.p.TAD
 cut -f10 ${outpre}.p.TAD | sort | uniq -c | awk '$1>1{print $2}' > ${outpre}.multiple.p.TAD
 grep -wf ${outpre}.multiple.p.TAD ${outpre}.pMUT.TAD > ${outpre}.multiple.pMUT.TAD
@@ -126,17 +130,20 @@ grep -wf ${outpre}.multiple.p.TAD ${outpre}.pMUT.TAD > ${outpre}.multiple.pMUT.T
 # the rest samples will be considered as a control
 # and z scores are calulated as:
 # Z-score (if comparing mt vs. wt) = [(value gene X in mt Y) - (mean gene X in wt)] / (standard deviation of gene X in wt)
+echo +++++++++ get TAD mutations ++++++++
 awk -v OFS="\t" '{a = $2 - 10000; b = $3 + 10000;}{if(a < 0){a = 0;}if(b < 0){ b = 0;} \
 {print $1, a, b, $4}}' $tadBED > ${outpre}.extended.TAD
 bedtools intersect -wao -a $mutationTSV.WGS.srt.bed -b ${outpre}.extended.TAD | \
 awk '$NF > 0' > ${outpre}.extended.TAD.mut
 
 # mutation to motif
+echo +++++++++ find if the mutation is in any motifs ++++++++
 bedtools intersect -wao -a $mutationTSV.WGS.srt.bed -b $motifBED | \
 awk '$NF > 0' > ${outpre}.WGSmut2motif
 
 # find the TCGA id with WGS data and expression.
 # extract the patient ID with WGS availble.
+echo +++++++++ get WGS expressions ++++++++
 cut -f 4 $mutationTSV.WGS.srt.bed | sort | uniq > ${outpre}.WGS.sampleid
 # gunzip -c $expMAT | awk -F"\t" -vOFS="\t" '{print substr($5,1,15), $8, $9}' | \
 # grep -f ${outpre}.WGS.sampleid > $expMAT.WGS.sim
@@ -190,13 +197,13 @@ done
 count=`wc -l ${outpre}.IamGroot.Rinput | awk '{print $1}'`
 echo +++++++++ Running Rscript to output loop translocate candidates  ++++++++
 # use Z score to find the expression alteration direction in the TAD
-if [ $count -lt 100 ]
+if [ $count -lt 300 ]
 	then
 	echo Running in one piece
 	Rscript $bindir/ICGC_expression.R $expMAT.WGS.sim ${outpre}.IamGroot.Rinput ${outpre}
 else
 	echo Running in many pieces
-	sed -n '2,$p' ${outpre}.IamGroot.Rinput | split -l 100 /dev/stdin ${outpre}.IamGroot.Rinput.
+	sed -n '2,$p' ${outpre}.IamGroot.Rinput | split -l 300 /dev/stdin ${outpre}.IamGroot.Rinput.
 	# rm ${outpre}.IamGroot.Rinput.*.TAD.labeled.tsv
 	np=`ls ${outpre}.IamGroot.Rinput.* | wc -l`
 	for f in ${outpre}.IamGroot.Rinput.*
