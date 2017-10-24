@@ -205,11 +205,12 @@ else
 		rm $f
 		Rscript $bindir/ICGC_expression.R $expMAT.WGS.sim $f.title $f &
 	done
-	sleep 1m
+	sleep 5m
 	npfinished=`ls ${outpre}.IamGroot.Rinput.*.TAD.labeled.tsv | wc -l`
 	while [ $npfinished -lt $np ]
 	do
 		sleep 1m
+		npfinished=`ls ${outpre}.IamGroot.Rinput.*.TAD.labeled.tsv | wc -l`
 	done
 	echo Finishing all pieces
 	cat ${outpre}.IamGroot.Rinput.*.TAD.labeled.tsv > ${outpre}.TAD.labeled.tsv
