@@ -155,7 +155,7 @@ cut -f1 $expMAT.WGS.sim | uniq | grep -wf - ${outpre}.multiple.pMUT.TAD > ${outp
 # TADid="TAD_3"
 echo +++++++++ test each mutated promoters in a TAD ++++++++
 echo "TAD sample mutsample genes mutgene" > ${outpre}.IamGroot.Rinput
-count=0
+# count=0
 cut -f 10 ${outpre}.multiple.pMUT.TAD.withexp | sort | uniq | while read TADid
 do
 	echo "|--TAD: "$TADid
@@ -178,18 +178,20 @@ do
 			mutp=`awk -v tad=$TADid -v sam=$TCGAsample '$10==tad && $4==sam {print $5}' \
 			${outpre}.multiple.pMUT.TAD.withexp | sort | uniq | tr '\n' ',' | sed 's/,$//'`
 			echo $TADid $TCGAsample $mutsample $genes $mutp >> ${outpre}.IamGroot.Rinput
-			count=$((count+1))
+			# count=$((count+1))
 		done
 	fi
 done
 
+count=`wc -l ${outpre}.IamGroot.Rinput | awk '{print $1}'`
 echo +++++++++ Running Rscript to output loop translocate candidates  ++++++++
 # use Z score to find the expression alteration direction in the TAD
-if [ "$count" -lt 500 ]
+if [ $count -lt 500 ]
 	then
-	echo $count
+	echo Running in one piece
 	Rscript $bindir/ICGC_expression.R $expMAT.WGS.sim ${outpre}.IamGroot.Rinput ${outpre}
 else
+	echo Running in many pieces
 	sed -n '2,$p' ${outpre}.IamGroot.Rinput | split -l 500 /dev/stdin ${outpre}.IamGroot.Rinput.
 	# rm ${outpre}.IamGroot.Rinput.*.TAD.labeled.tsv
 	np=`ls ${outpre}.IamGroot.Rinput.* | wc -l`
