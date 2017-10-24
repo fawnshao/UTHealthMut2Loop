@@ -137,9 +137,9 @@ bedtools intersect -wao -a $mutationTSV.WGS.srt.bed -b ${outpre}.extended.TAD | 
 awk '$NF > 0' > ${outpre}.extended.TAD.mut
 
 # mutation to motif
-echo +++++++++ find if the mutation is in any motifs ++++++++
-bedtools intersect -wao -a $mutationTSV.WGS.srt.bed -b $motifBED | \
-awk '$NF > 0' > ${outpre}.WGSmut2motif
+# echo +++++++++ find if the mutation is in any motifs ++++++++
+# bedtools intersect -wao -a $mutationTSV.WGS.srt.bed -b $motifBED | \
+# awk '$NF > 0' > ${outpre}.WGSmut2motif
 
 # find the TCGA id with WGS data and expression.
 # extract the patient ID with WGS availble.
