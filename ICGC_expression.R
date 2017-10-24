@@ -18,7 +18,7 @@ ifLoop <- rep(" ", nrow(toprocess))
 # https://www.easycalculation.com/statistics/p-value-for-z-score.php
 # p(z=1.645)=0.05 
 expr.cutoff <- summary(data[data[,3] > 0,3])[2]
-print(paste("expression levels:", summary(data[data[,3] > 0,3]), sep = "    "))
+print(paste("expression levels:", expr.cutoff, sep = "    "))
 for(i in 1:nrow(toprocess)){
 	# print(toprocess[i,1:2])
 	tad.id <- unlist(strsplit(as.vector(toprocess[i,1]), ","))
