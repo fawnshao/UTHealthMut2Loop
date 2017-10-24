@@ -32,6 +32,7 @@ for(i in 1:nrow(toprocess)){
 		ctr.mean <- c()
 		mut.mean <- c()
 		ctr.sd <- c()
+		mut.exp <- c()
 		ctr.exp <- c()
 		for(j in 1:length(tad.gene.withexpr)){
 			ctr <- data[gene.name == tad.gene.withexpr[j] & !is.element(sample.name, tad.mut.s), 3]
@@ -40,11 +41,12 @@ for(i in 1:nrow(toprocess)){
 			ctr.mean[j] <- mean(ctr)
 			ctr.sd[j] <- sd(ctr)
 			outlier.flag[j] <- paste(is.element(mut, boxplot.stats(c(ctr, mut))$out), collapse=",")
-			ctr.exp[j] <- paste(ctr, collapse=",")
+			mut.exp[j] <- paste(format(mut, format = "e", digits = 2), collapse=",")
+			ctr.exp[j] <- paste(format(ctr, format = "e", digits = 2), collapse=",")
 		}
 		zscore <- (mut.mean - ctr.mean) / ctr.sd
 		fc <- mut.mean / ctr.mean
-		t <- data.frame(mut.mean, ctr.mean, ctr.sd, fc, outlier.flag, zscore, ctr.exp)
+		t <- data.frame(mut.mean, ctr.mean, ctr.sd, fc, outlier.flag, zscore, mut.exp, ctr.exp)
 		rownames(t) <- tad.gene.withexpr
 		# colnames(t) <- c(p.mut.s, "Average-nonmut-Tumor-Sample", "SD-nonmut-Tumor-Sample", "Fold-Change", "is.outlier", "Z score")
 		# summary(data[data[,3] > 0,3])

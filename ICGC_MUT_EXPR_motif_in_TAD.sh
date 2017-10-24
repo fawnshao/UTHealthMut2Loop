@@ -131,6 +131,10 @@ awk -v OFS="\t" '{a = $2 - 10000; b = $3 + 10000;}{if(a < 0){a = 0;}if(b < 0){ b
 bedtools intersect -wao -a $mutationTSV.WGS.srt.bed -b ${outpre}.extended.TAD | \
 awk '$NF > 0' > ${outpre}.extended.TAD.mut
 
+# mutation to motif
+bedtools intersect -wao -a $mutationTSV.WGS.srt.bed -b $motifBED | \
+awk '$NF > 0' > ${outpre}.WGSmut2motif
+
 # find the TCGA id with WGS data and expression.
 # extract the patient ID with WGS availble.
 cut -f 4 $mutationTSV.WGS.srt.bed | sort | uniq > ${outpre}.WGS.sampleid
@@ -141,7 +145,7 @@ grep -wf ${outpre}.WGS.sampleid > $expMAT.WGS.sim
 
 if [ ! -z "$id2name" ]
 	then
-	perl $bindir/relatedScripts/replace_ensembl_with_genesymbol.pl  $id2name $expMAT.WGS.sim > $expMAT.WGS.sim.tmp
+	perl $bindir/relatedScripts/replace_ensembl_with_genesymbol.pl $id2name $expMAT.WGS.sim > $expMAT.WGS.sim.tmp
 	mv $expMAT.WGS.sim.tmp $expMAT.WGS.sim
 fi
 
@@ -186,13 +190,13 @@ done
 count=`wc -l ${outpre}.IamGroot.Rinput | awk '{print $1}'`
 echo +++++++++ Running Rscript to output loop translocate candidates  ++++++++
 # use Z score to find the expression alteration direction in the TAD
-if [ $count -lt 500 ]
+if [ $count -lt 100 ]
 	then
 	echo Running in one piece
 	Rscript $bindir/ICGC_expression.R $expMAT.WGS.sim ${outpre}.IamGroot.Rinput ${outpre}
 else
 	echo Running in many pieces
-	sed -n '2,$p' ${outpre}.IamGroot.Rinput | split -l 500 /dev/stdin ${outpre}.IamGroot.Rinput.
+	sed -n '2,$p' ${outpre}.IamGroot.Rinput | split -l 100 /dev/stdin ${outpre}.IamGroot.Rinput.
 	# rm ${outpre}.IamGroot.Rinput.*.TAD.labeled.tsv
 	np=`ls ${outpre}.IamGroot.Rinput.* | wc -l`
 	for f in ${outpre}.IamGroot.Rinput.*
@@ -201,11 +205,11 @@ else
 		rm $f
 		Rscript $bindir/ICGC_expression.R $expMAT.WGS.sim $f.title $f &
 	done
-	sleep 10m
+	sleep 1m
 	npfinished=`ls ${outpre}.IamGroot.Rinput.*.TAD.labeled.tsv | wc -l`
 	while [ $npfinished -lt $np ]
 	do
-		sleep 10m
+		sleep 1m
 	done
 	echo Finishing all pieces
 	cat ${outpre}.IamGroot.Rinput.*.TAD.labeled.tsv > ${outpre}.TAD.labeled.tsv
@@ -221,14 +225,15 @@ fi
 ## find if the mutation is associated with some motifs
 echo +++++++++ checking if the mutation is in any motif  ++++++++
 echo "mutation-motif" > ${outpre}.LoopBroken.motif
+echo -n "" > ${outpre}.LoopBroken.bed
 grep LoopBroken ${outpre}.TAD.labeled.tsv | sed 's/"//g' | while read line
 do
 	tadid=`echo $line | awk '{print $2}'`
 	sampleid=`echo $line | awk '{print $3}'`
 	awk -v tad=$TADid -v sam=$sampleid -v OFS="\t" \
 	'$10==tad && $4==sam {print $1,$2,$3,$10"~"$4"~"$5"~"$6}' \
-	${outpre}.multiple.pMUT.TAD.withexp | \
-	bedtools intersect -wao -a - -b $motifBED | awk '$NF > 0' >> ${outpre}.LoopBroken.motif
+	${outpre}.multiple.pMUT.TAD.withexp >> ${outpre}.LoopBroken.bed
+	bedtools intersect -wao -a ${outpre}.LoopBroken.bed -b $motifBED | awk '$NF > 0' >> ${outpre}.LoopBroken.motif
 done
 
 rm ${outpre}.pMUT ${outpre}.p.TAD ${outpre}.pMUT.TAD
