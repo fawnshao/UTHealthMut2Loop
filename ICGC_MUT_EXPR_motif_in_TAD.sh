@@ -187,6 +187,7 @@ echo +++++++++ Running Rscript to output loop translocate candidates  ++++++++
 # use Z score to find the expression alteration direction in the TAD
 if [ "$count" -lt 500 ]
 	then
+	echo $count
 	Rscript $bindir/ICGC_expression.R $expMAT.WGS.sim ${outpre}.IamGroot.Rinput ${outpre}
 else
 	sed -n '2,$p' ${outpre}.IamGroot.Rinput | split -l 500 /dev/stdin ${outpre}.IamGroot.Rinput.
