@@ -17,7 +17,8 @@ ifLoop <- rep(" ", nrow(toprocess))
 # Z-score (if comparing mt vs. wt) = [(value gene X in mt Y) - (mean gene X in wt)] / (standard deviation of gene X in wt)
 # https://www.easycalculation.com/statistics/p-value-for-z-score.php
 # p(z=1.645)=0.05 
-expr.cutoff <- summary(data[data[,3] > 0,3])[3]
+expr.cutoff <- summary(data[data[,3] > 0,3])[2]
+print(paste("expression levels:", summary(data[data[,3] > 0,3]), sep = "    "))
 for(i in 1:nrow(toprocess)){
 	# print(toprocess[i,1:2])
 	tad.id <- unlist(strsplit(as.vector(toprocess[i,1]), ","))
@@ -31,17 +32,19 @@ for(i in 1:nrow(toprocess)){
 		ctr.mean <- c()
 		mut.mean <- c()
 		ctr.sd <- c()
+		ctr.exp <- c()
 		for(j in 1:length(tad.gene.withexpr)){
 			ctr <- data[gene.name == tad.gene.withexpr[j] & !is.element(sample.name, tad.mut.s), 3]
 			mut <- data[gene.name == tad.gene.withexpr[j] & is.element(sample.name, p.mut.s), 3]
 			mut.mean[j] <- mean(mut)
 			ctr.mean[j] <- mean(ctr)
 			ctr.sd[j] <- sd(ctr)
-			outlier.flag[j] <- paste(is.element(mut, boxplot.stats(c(ctr, mut))$out), collapse=",") 
+			outlier.flag[j] <- paste(is.element(mut, boxplot.stats(c(ctr, mut))$out), collapse=",")
+			ctr.exp[j] <- paste(ctr, collapse=",")
 		}
 		zscore <- (mut.mean - ctr.mean) / ctr.sd
 		fc <- mut.mean / ctr.mean
-		t <- data.frame(mut.mean, ctr.mean, ctr.sd, fc, outlier.flag, zscore)
+		t <- data.frame(mut.mean, ctr.mean, ctr.sd, fc, outlier.flag, zscore, ctr.exp)
 		rownames(t) <- tad.gene.withexpr
 		# colnames(t) <- c(p.mut.s, "Average-nonmut-Tumor-Sample", "SD-nonmut-Tumor-Sample", "Fold-Change", "is.outlier", "Z score")
 		# summary(data[data[,3] > 0,3])
