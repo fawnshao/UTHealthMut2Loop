@@ -10,7 +10,7 @@ tadBED=hg19.GSE63525_GM12878.srt.bed
 promoterLEN=1000
 mutationTSV=simple_somatic_mutation.open.COAD-US.tsv
 expMAT=exp_seq.COAD-US.tsv
-motifBED=10bp.flank.hg19.fimo.JASPAR.srt.bed 
+motifDIR=motifdir
 outpre=TAD.exp
 id2name=
 
@@ -28,7 +28,7 @@ function usage(){
      -tss          tss bed files
      -exp          expression matrix files with gene as row and sample as column
      -tad          TAD bed files
-     -m            motif bed file
+     -m            motif dir for motif files
      -o            output prefix
      -plen         up/down stream of TSS for promoter promoterSIZE
      -idconvert    ensembl ID to gene symbol file. do not set it if not needed
@@ -66,7 +66,7 @@ do
 			shift
 			;;
 		-m)
-			motifBED="$2"
+			motifDIR="$2"
 			shift
 			;;
 		-o)
@@ -93,7 +93,7 @@ echo "mutationTSV="$mutationTSV
 echo "expMAT     ="$expMAT
 echo "tadBED     ="$tadBED
 echo "tssBED     ="$tssBED
-echo "motifBED   ="$motifBED
+echo "motifDIR   ="$motifDIR
 echo "outpre     ="$outpre
 echo "promoterLEN="$promoterLEN
 echo "id2name    ="$id2name
@@ -197,13 +197,13 @@ done
 count=`wc -l ${outpre}.IamGroot.Rinput | awk '{print $1}'`
 echo +++++++++ Running Rscript to output loop translocate candidates  ++++++++
 # use Z score to find the expression alteration direction in the TAD
-if [ $count -lt 300 ]
+if [ $count -lt 1000 ]
 	then
 	echo Running in one piece
 	Rscript $bindir/ICGC_expression.R $expMAT.WGS.sim ${outpre}.IamGroot.Rinput ${outpre}
 else
 	echo Running in many pieces
-	sed -n '2,$p' ${outpre}.IamGroot.Rinput | split -l 300 /dev/stdin ${outpre}.IamGroot.Rinput.
+	sed -n '2,$p' ${outpre}.IamGroot.Rinput | split -l 500 /dev/stdin ${outpre}.IamGroot.Rinput.
 	# rm ${outpre}.IamGroot.Rinput.*.TAD.labeled.tsv
 	np=`ls ${outpre}.IamGroot.Rinput.* | wc -l`
 	for f in ${outpre}.IamGroot.Rinput.*
@@ -212,11 +212,11 @@ else
 		rm $f
 		Rscript $bindir/ICGC_expression.R $expMAT.WGS.sim $f.title $f &
 	done
-	sleep 5m
+	sleep 3m
 	npfinished=`ls ${outpre}.IamGroot.Rinput.*.TAD.labeled.tsv | wc -l`
 	while [ $npfinished -lt $np ]
 	do
-		sleep 1m
+		sleep 30s
 		npfinished=`ls ${outpre}.IamGroot.Rinput.*.TAD.labeled.tsv | wc -l`
 	done
 	echo Finishing all pieces
@@ -241,7 +241,11 @@ do
 	awk -v tad=$tadid -v sam=$sampleid -v OFS="\t" \
 	'$10==tad && $4==sam {print $1,$2,$3,$10"~"$4"~"$5"~"$6}' \
 	${outpre}.multiple.pMUT.TAD.withexp >> ${outpre}.LoopBroken.bed
-	bedtools intersect -wao -a ${outpre}.LoopBroken.bed -b $motifBED | awk '$NF > 0' >> ${outpre}.LoopBroken.motif
+	for m in `ls $motifDIR/`
+	do
+		bedtools intersect -wao -a ${outpre}.LoopBroken.bed -b $motifDIR/$m | \
+		awk '$NF > 0' >> ${outpre}.LoopBroken.motif
+	done
 done
 
 rm ${outpre}.pMUT ${outpre}.p.TAD ${outpre}.pMUT.TAD
