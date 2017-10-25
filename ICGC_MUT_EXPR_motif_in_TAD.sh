@@ -238,13 +238,13 @@ grep LoopBroken ${outpre}.TAD.labeled.tsv | sed 's/"//g' | while read line
 do
 	tadid=`echo $line | awk '{print $2}'`
 	sampleid=`echo $line | awk '{print $3}'`
-	awk -v tad=$TADid -v sam=$sampleid -v OFS="\t" \
+	awk -v tad=$tadid -v sam=$sampleid -v OFS="\t" \
 	'$10==tad && $4==sam {print $1,$2,$3,$10"~"$4"~"$5"~"$6}' \
 	${outpre}.multiple.pMUT.TAD.withexp >> ${outpre}.LoopBroken.bed
 	bedtools intersect -wao -a ${outpre}.LoopBroken.bed -b $motifBED | awk '$NF > 0' >> ${outpre}.LoopBroken.motif
 done
 
 rm ${outpre}.pMUT ${outpre}.p.TAD ${outpre}.pMUT.TAD
-rm ${outpre}.multiple.p.TAD ${outpre}.multiple.pMUT.TAD ${outpre}.multiple.pMUT.TAD.withexp
+rm ${outpre}.multiple.p.TAD ${outpre}.multiple.pMUT.TAD # ${outpre}.multiple.pMUT.TAD.withexp
 rm ${outpre}.extended.TAD ${outpre}.extended.TAD.mut
 rm ${outpre}.IamGroot.Rinput ${outpre}.WGS.sampleid
