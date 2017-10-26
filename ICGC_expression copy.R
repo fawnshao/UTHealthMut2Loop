@@ -34,8 +34,6 @@ for(i in 1:nrow(toprocess)){
 		ctr.sd <- c()
 		mut.exp <- c()
 		ctr.exp <- c()
-		all.mean <- c()
-		all.sd <- c()
 		for(j in 1:length(tad.gene.withexpr)){
 			ctr <- data[gene.name == tad.gene.withexpr[j] & !is.element(sample.name, tad.mut.s), 3]
 			mut <- data[gene.name == tad.gene.withexpr[j] & is.element(sample.name, p.mut.s), 3]
@@ -50,22 +48,18 @@ for(i in 1:nrow(toprocess)){
 			outlier.flag[j] <- paste(is.element(mut, boxplot.stats(c(ctr, mut))$out), collapse=",")
 			mut.exp[j] <- paste(format(mut, format = "e", digits = 2), collapse=",")
 			ctr.exp[j] <- paste(format(ctr, format = "e", digits = 2), collapse=",")
-			all <- data[gene.name == tad.gene.withexpr[j], 3]
-			all.mean[j] <- mean(all)
-			all.sd[j] <- sd(all)
 		}
-		zscore.1 <- (mut.mean - ctr.mean) / ctr.sd
-		zscore.2 <- (mut.mean - all.mean) / all.sd
+		zscore <- (mut.mean - ctr.mean) / ctr.sd
 		fc <- mut.mean / ctr.mean
-		t <- data.frame(mut.mean, ctr.mean, ctr.sd, fc, outlier.flag, zscore.1, zscore.2, mut.exp, ctr.exp)
+		t <- data.frame(mut.mean, ctr.mean, ctr.sd, fc, outlier.flag, zscore, mut.exp, ctr.exp)
 		rownames(t) <- tad.gene.withexpr
 		# colnames(t) <- c(p.mut.s, "Average-nonmut-Tumor-Sample", "SD-nonmut-Tumor-Sample", "Fold-Change", "is.outlier", "Z score")
 		# summary(data[data[,3] > 0,3])
 		# some are FPKM, and some are not. so use median value as cut off
-		out.1 <- t[(t[,6] > 1.645 | t[,7] > 1.645) & t[,1] > expr.cutoff, ]
-		out.2 <- t[(t[,6] < -1.645 | t[,7] < -1.645) & t[,2] > expr.cutoff, ]
-		if(nrow(out.1) > 0 && nrow(out.2) > 0){
-			out <- rbind.data.frame(out.1, out.2)
+		if(nrow(t[t[,6] > 1.645 & t[,1] > expr.cutoff, ]) > 0 && 
+			nrow(t[t[,6] < -1.645 & t[,2] > expr.cutoff, ]) > 0){
+			out <- rbind.data.frame(t[t[,6] > 1.645 & t[,1] > expr.cutoff, ], 
+				t[t[,6] < -1.645 & t[,2] > expr.cutoff, ])
 			flag <- 0
 			zs.mut <- 1
 			mut.flag <- rep("", nrow(out))
@@ -74,12 +68,10 @@ for(i in 1:nrow(toprocess)){
 					length(grep(pattern = paste(";", rownames(out)[j], "\\|", sep = ""), x = p.mut)) > 0){
 					flag <- 1
 					mut.flag[j] <- "MutatedPromoter"
-					# zs.mut <- out[j,6]
-					o <- out[j,6:7]
-					zs.mut <- o[abs(o)==max(abs(o))]
+					zs.mut <- out[j,6]
 				}
 			}
-			alt.flag <- (out[,6] / zs.mut < 0 | out[,7] / zs.mut < 0)
+			alt.flag <- out[,6]/zs.mut < 0
 			alt.flag[alt.flag == TRUE] <- "Opposite" 
 			alt.flag[alt.flag == FALSE] <- "" 
 			if(flag == 1){
