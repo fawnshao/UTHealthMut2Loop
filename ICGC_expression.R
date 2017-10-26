@@ -37,6 +37,11 @@ for(i in 1:nrow(toprocess)){
 		for(j in 1:length(tad.gene.withexpr)){
 			ctr <- data[gene.name == tad.gene.withexpr[j] & !is.element(sample.name, tad.mut.s), 3]
 			mut <- data[gene.name == tad.gene.withexpr[j] & is.element(sample.name, p.mut.s), 3]
+			### some genes in some projects will be missed. make it to be 0
+			if(length(mut) == 0){
+				mut <- 0
+			}
+			###
 			mut.mean[j] <- mean(mut)
 			ctr.mean[j] <- mean(ctr)
 			ctr.sd[j] <- sd(ctr)

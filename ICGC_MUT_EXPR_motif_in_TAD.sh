@@ -241,11 +241,11 @@ do
 	awk -v tad=$tadid -v sam=$sampleid -v OFS="\t" \
 	'$10==tad && $4==sam {print $1,$2,$3,$10"~"$4"~"$5"~"$6}' \
 	${outpre}.multiple.pMUT.TAD.withexp >> ${outpre}.LoopBroken.bed
-	for m in `ls $motifDIR/`
-	do
-		bedtools intersect -wao -a ${outpre}.LoopBroken.bed -b $motifDIR/$m | \
-		awk '$NF > 0' >> ${outpre}.LoopBroken.motif
-	done
+done
+for m in `ls $motifDIR/`
+do
+	bedtools intersect -wao -a ${outpre}.LoopBroken.bed -b $motifDIR/$m | \
+	awk '$NF > 0' >> ${outpre}.LoopBroken.motif
 done
 
 rm ${outpre}.pMUT ${outpre}.p.TAD ${outpre}.pMUT.TAD
