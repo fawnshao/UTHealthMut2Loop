@@ -251,4 +251,4 @@ done
 rm ${outpre}.pMUT ${outpre}.p.TAD ${outpre}.pMUT.TAD
 rm ${outpre}.multiple.p.TAD ${outpre}.multiple.pMUT.TAD # ${outpre}.multiple.pMUT.TAD.withexp
 rm ${outpre}.extended.TAD ${outpre}.extended.TAD.mut
-rm ${outpre}.IamGroot.Rinput ${outpre}.WGS.sampleid
+# rm ${outpre}.IamGroot.Rinput ${outpre}.WGS.sampleid
