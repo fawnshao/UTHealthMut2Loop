@@ -232,7 +232,8 @@ fi
 #####
 ## find if the mutation is associated with some motifs
 echo +++++++++ checking if the mutation is in any motif  ++++++++
-echo "mutation-motif" > ${outpre}.LoopBroken.motif
+# echo "mutation-motif" > ${outpre}.LoopBroken.motif
+echo -n "" > ${outpre}.LoopBroken.motif
 echo -n "" > ${outpre}.LoopBroken.bed
 grep LoopBroken ${outpre}.TAD.labeled.tsv | sed 's/"//g' | while read line
 do
