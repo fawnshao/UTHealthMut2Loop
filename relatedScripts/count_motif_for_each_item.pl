@@ -20,6 +20,6 @@ foreach my $id (keys %motif){
 	my @tfs = sort keys { map { $_ => 1 } @{$motif{$id}} };
 	my $tflist = join(";", @tfs);
 	my $size = scalar @tfs;
-	print "$id\t$size\ttflist\n";
+	print "$id\t$size\t$tflist\n";
 }
 

@@ -1,6 +1,6 @@
 #!/bin/sh
 bindir=/home1/04935/shaojf/myTools/UTHealthMut2Loop
-module load Rstats
+# module load Rstats
 # TSS should be 6-column sorted bed files
 # the TAD file is 4-column bed files
 # default parameters
@@ -108,5 +108,10 @@ do
 	bedtools intersect -wao -a ${outpre}.pMUT -b $motifDIR/$m | \
 	awk -v lab=$m '$NF > 0 {print $0"\t"lab}' >> ${outpre}.WGS.p.motif
 done
+
+perl $bindir/relatedScripts/count_motif_for_each_item.pl \
+${outpre}.WGS.motif > ${outpre}.WGS.motif.count
+perl $bindir/relatedScripts/count_motif_for_each_item.pl \
+${outpre}.p.WGS.motif > ${outpre}.WGS.p.motif.count
 
 
