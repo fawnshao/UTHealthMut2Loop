@@ -18,7 +18,7 @@ close(IN);
 foreach my $id (keys %motif){
 	# my @names = @{$motif{$id}};
 	my @tfs = sort keys { map { $_ => 1 } @{$motif{$id}} };
-	my $tflist = join(";", @tfs);
+	my $tflist = join(", ", @tfs);
 	my $size = scalar @tfs;
 	print "$id\t$size\t$tflist\n";
 }
