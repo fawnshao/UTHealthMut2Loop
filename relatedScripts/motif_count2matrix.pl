@@ -23,13 +23,13 @@ while(<IN>){
 close(IN);
 
 print "chr\tstart\tend\tname";
-foreach $m (keys sort %motifs){
+foreach $m (sort keys %motifs){
 	print "\t$m";
 }
 print "\n";
-foreach $g (keys sort %genes){
+foreach $g (sort keys %genes){
 	print "$g";
-	foreach $m (keys sort %motifs){
+	foreach $m (sort keys %motifs){
 		$mkey = $g."&&".$m;
 		if(not exists $hash{$mkey}){$hash{$mkey} = 0;}
 		print "\t$hash{$mkey}";
