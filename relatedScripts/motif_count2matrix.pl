@@ -13,7 +13,7 @@ while(<IN>){
 	@t = split(/\t/);
 	$id = join("\t", $t[0], $t[1], $t[2], $t[3]);
 	$mykey = $id."&&".$t[$motif];
-	unless (exists %hash{$mykey}) {
+	unless (exists $hash{$mykey}) {
 		%hash{$mykey} = 0;
 	}
 	%hash{$mykey}++;
