@@ -14,9 +14,9 @@ while(<IN>){
 	$id = join("\t", $t[0], $t[1], $t[2], $t[3]);
 	$mykey = $id."&&".$t[$motif];
 	unless (exists $hash{$mykey}) {
-		%hash{$mykey} = 0;
+		$hash{$mykey} = 0;
 	}
-	%hash{$mykey}++;
+	$hash{$mykey}++;
 	$genes{$id} = 1;
 	$motifs{$t[$motif]} = 1;
 }
@@ -28,9 +28,11 @@ foreach $m (keys sort %motifs){
 }
 print "\n";
 foreach $g (keys sort %genes){
+	print "$g";
 	foreach $m (keys sort %motifs){
 		$mkey = $g."&&".$m;
 		if(not exists $hash{$mkey}){$hash{$mkey} = 0;}
-		print "$g\t$m\t$hash{$mkey}\n";
+		print "\t$hash{$mkey}";
 	}
+	print "\n";
 }
