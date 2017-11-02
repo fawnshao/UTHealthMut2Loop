@@ -11,7 +11,7 @@ open(IN, $ARGV[0]) or die "can not open $ARGV[0]\n";
 while(<IN>){
 	chomp;
 	@t = split(/\t/);
-	$id = join("\t", $t[0], $t[1], $t[2], $t[3]);
+	$id = join(":", $t[0], $t[1], $t[2], $t[3]);
 	$mykey = $id."&&".$t[$motif];
 	unless (exists $hash{$mykey}) {
 		$hash{$mykey} = 0;
@@ -22,7 +22,7 @@ while(<IN>){
 }
 close(IN);
 
-print "chr\tstart\tend\tname";
+print "chr:start:end:name";
 foreach $m (sort keys %motifs){
 	print "\t$m";
 }
