@@ -32,6 +32,7 @@ function usage(){
      -o            output prefix
      -plen         up/down stream of TSS for promoter promoterSIZE
      -idconvert    ensembl ID to gene symbol file. do not set it if not needed
+     -pmotif       promoter motif with counts
 EOF
 }
 
