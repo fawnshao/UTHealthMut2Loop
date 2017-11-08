@@ -13,14 +13,14 @@ expMAT=exp_seq.COAD-US.tsv
 motifDIR=motifdir
 outpre=TAD.exp
 id2name=
-
+promoterMOTIF=/home1/04935/shaojf/stampede2/mutations/ICGC/p_motif/hg19.tss1k.motif.simcount
 
 # usage function
 function usage(){
    prog=`basename "$0"`
    cat << EOF
 
-   Usage: $prog [-mut mutationTSV] [-tss tssBED] [-exp expMAT] [-tad tadBED] [-m motifBED] [-o outpre] [-plen promoterLEN] [-idconvert id2name]
+   Usage: $prog [-mut mutationTSV] [-tss tssBED] [-exp expMAT] [-tad tadBED] [-m motifBED] [-o outpre] [-plen promoterLEN] [-idconvert id2name] [-pmotif promoterMOTIF]
 
    optional arguments:
      -h            show this help message and exit
@@ -81,6 +81,10 @@ do
 			id2name="$2"
 			shift
 			;;
+		-pmotif)
+			promoterMOTIF="$2"
+			shift
+			;;
 		*)
 			usage
 			break
@@ -89,14 +93,15 @@ do
 	shift
 done
 
-echo "mutationTSV="$mutationTSV
-echo "expMAT     ="$expMAT
-echo "tadBED     ="$tadBED
-echo "tssBED     ="$tssBED
-echo "motifDIR   ="$motifDIR
-echo "outpre     ="$outpre
-echo "promoterLEN="$promoterLEN
-echo "id2name    ="$id2name
+echo "mutationTSV  ="$mutationTSV
+echo "expMAT       ="$expMAT
+echo "tadBED       ="$tadBED
+echo "tssBED       ="$tssBED
+echo "motifDIR     ="$motifDIR
+echo "outpre       ="$outpre
+echo "promoterLEN  ="$promoterLEN
+echo "id2name      ="$id2name
+echo "promoterMOTIF="$promoterMOTIF
 
 ###############
 # get the WGS mutations from simple_somatic_mutation.open.*.tsv
@@ -253,3 +258,33 @@ rm ${outpre}.pMUT ${outpre}.p.TAD ${outpre}.pMUT.TAD
 rm ${outpre}.multiple.p.TAD ${outpre}.multiple.pMUT.TAD # ${outpre}.multiple.pMUT.TAD.withexp
 rm ${outpre}.extended.TAD ${outpre}.extended.TAD.mut
 # rm ${outpre}.IamGroot.Rinput ${outpre}.WGS.sampleid
+
+# put all the results together
+# ${outpre}.LoopBroken.motif
+echo -n "disease	TAD	patient	Gene	" > ${outpre}.combined.tsv
+echo -n "mut.mean	ctr.mean	ctr.sd	fc	outlier.flag	zscore.1	zscore.2	" >> ${outpre}.combined.tsv
+echo -n "mut.exp	ctr.exp	mut.flag	alt.flag	" >> ${outpre}.combined.tsv
+echo "promoter.motif.count	promoter.motifs	mutated.sites	mutated.motifs" >> ${outpre}.combined.tsv
+for f in ${outpre}.TAD_*.tsv
+do
+	disease=`echo $f | awk -F"." '{print $1}'`
+	tad=`echo $f | awk -F"." '{print $2}'`
+	patient=`echo $f | awk -F"." '{print $3}'`
+	sed -n '2,$p' $f | while read line
+	do
+		gene=`echo $line | awk '{print $1}' | sed 's/"//g'`
+		motifcount=`echo "" | awk -v a=$gene '{print "\t"a"|"}' | grep -f - $promoterMOTIF | awk -F"\t" '{print $8}' |  tr ', ' '\n' | grep -v "^$" | sort | uniq | wc -l`
+		motifs=`echo "" | awk -v a=$gene '{print "\t"a"|"}' | grep -f - $promoterMOTIF | awk -F"\t" '{print $8}' |  tr ', ' '\n' | grep -v "^$" | sort | uniq | tr '\n' ',' | sed 's/,$//'`
+		#echo $disease"	"$tad"	"$patient"	"$line"	"$motifcount"	"$motifs
+		echo -n $disease"	"$tad"	"$patient"	" >> ${outpre}.combined.tsv
+		echo -n $line | awk '{for(i=1;i<=NF;i++){printf "%s\t",$i}}' >> ${outpre}.combined.tsv
+		echo -n $motifcount"	"$motifs >> ${outpre}.combined.tsv
+		if [[ `echo $line | grep MutatedPromoter` ]]; then
+			postion=`echo "" | awk -v a=$gene '{print "~"a"|\n;"a"|"}' | grep -f - ${outpre}.LoopBroken.motif | awk '{print $4}' | grep -w $tad | grep -w $patient | sort | uniq | tr '\n' '#' | sed 's/#$//'`
+			mutmotif=`echo "" | awk -v a=$gene '{print "~"a"|\n;"a"|"}' | grep -f - ${outpre}.LoopBroken.motif | grep -w $tad | grep -w $patient | awk '{print $8}' | sort | uniq | tr '\n' ',' | sed 's/,$//'`
+			echo $postion"	"$mutmotif >> ${outpre}.combined.tsv
+		else
+			echo "" >> ${outpre}.combined.tsv
+		fi
+	done
+done
