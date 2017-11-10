@@ -281,9 +281,9 @@ do
 		echo -n $line | awk '{for(i=1;i<=NF;i++){printf "%s\t",$i}}' >> ${outpre}.combined.tsv
 		echo -n $motifcount"	"$motifs >> ${outpre}.combined.tsv
 		if [[ `echo $line | grep MutatedPromoter` ]]; then
-			postion=`echo "" | awk -v a=$gene '{print "~"a"|\n;"a"|"}' | grep -f - ${outpre}.LoopBroken.motif | awk '{print $4}' | grep -w $tad | grep -w $patient | sort | uniq | tr '\n' '#' | sed 's/#$//'`
+			position=`echo "" | awk -v a=$gene '{print "~"a"|\n;"a"|"}' | grep -f - ${outpre}.LoopBroken.bed | awk '{print $4}' | grep -w $tad | grep -w $patient | sort | uniq | tr '\n' '#' | sed 's/#$//'`
 			mutmotif=`echo "" | awk -v a=$gene '{print "~"a"|\n;"a"|"}' | grep -f - ${outpre}.LoopBroken.motif | grep -w $tad | grep -w $patient | awk '{print $8}' | sort | uniq | tr '\n' ',' | sed 's/,$//'`
-			echo $postion"	"$mutmotif >> ${outpre}.combined.tsv
+			echo $position"	"$mutmotif >> ${outpre}.combined.tsv
 		else
 			echo "" >> ${outpre}.combined.tsv
 		fi
