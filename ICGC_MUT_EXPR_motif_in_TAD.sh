@@ -260,12 +260,16 @@ rm ${outpre}.multiple.p.TAD ${outpre}.multiple.pMUT.TAD # ${outpre}.multiple.pMU
 rm ${outpre}.extended.TAD ${outpre}.extended.TAD.mut
 # rm ${outpre}.IamGroot.Rinput ${outpre}.WGS.sampleid
 
+
+sh $bindir/ICGC_fimo_denovo_motif_in_LoopShiftMut.sh ${outpre}
+
 # put all the results together
 # ${outpre}.LoopBroken.motif
 echo -n "disease	TAD	patient	Gene	" > ${outpre}.combined.tsv
 echo -n "mut.mean	ctr.mean	ctr.sd	fc	outlier.flag	zscore.1	zscore.2	" >> ${outpre}.combined.tsv
 echo -n "mut.exp	ctr.exp	mut.flag	alt.flag	" >> ${outpre}.combined.tsv
-echo "promoter.motif.count	promoter.motifs	mutated.sites	mutated.motifs" >> ${outpre}.combined.tsv
+echo -n "promoter.motif.count	promoter.motifs	mutated.sites	mutated.motifs" >> ${outpre}.combined.tsv
+echo "mut.motif.gain	mut.motif.lost" >> ${outpre}.combined.tsv
 for f in ${outpre}.TAD_*.tsv
 do
 	disease=`echo $f | awk -F"." '{print $1}'`
@@ -274,12 +278,12 @@ do
 	sed -n '2,$p' $f | while read line
 	do
 		gene=`echo $line | awk '{print $1}' | sed 's/"//g'`
-		motifcount=`echo "" | awk -v a=$gene '{print "\t"a"|"}' | grep -f - $promoterMOTIF | awk -F"\t" '{print $8}' |  tr ', ' '\n' | grep -v "^$" | sort | uniq | wc -l`
-		motifs=`echo "" | awk -v a=$gene '{print "\t"a"|"}' | grep -f - $promoterMOTIF | awk -F"\t" '{print $8}' |  tr ', ' '\n' | grep -v "^$" | sort | uniq | tr '\n' ',' | sed 's/,$//'`
+		motifcount=`echo "" | awk -v a=$gene '{print "\t"a"|\n;"a"|"}' | grep -f - $promoterMOTIF | awk -F"\t" '{print $8}' |  tr ', ' '\n' | grep -v "^$" | sort | uniq | wc -l`
+		motifs=`echo "" | awk -v a=$gene '{print "\t"a"|\n;"a"|"}' | grep -f - $promoterMOTIF | awk -F"\t" '{print $8}' |  tr ', ' '\n' | grep -v "^$" | sort | uniq | tr '\n' ',' | sed 's/,$//'`
 		#echo $disease"	"$tad"	"$patient"	"$line"	"$motifcount"	"$motifs
 		echo -n $disease"	"$tad"	"$patient"	" >> ${outpre}.combined.tsv
 		echo -n $line | awk '{for(i=1;i<=NF;i++){printf "%s\t",$i}}' >> ${outpre}.combined.tsv
-		echo -n $motifcount"	"$motifs >> ${outpre}.combined.tsv
+		echo -n $motifcount"	"$motifs"	" >> ${outpre}.combined.tsv
 		if [[ `echo $line | grep MutatedPromoter` ]]; then
 			position=`echo "" | awk -v a=$gene '{print "~"a"|\n;"a"|"}' | grep -f - ${outpre}.LoopBroken.bed | awk '{print $4}' | grep -w $tad | grep -w $patient | sort | uniq | tr '\n' '#' | sed 's/#$//'`
 			mutmotif=`echo "" | awk -v a=$gene '{print "~"a"|\n;"a"|"}' | grep -f - ${outpre}.LoopBroken.motif | grep -w $tad | grep -w $patient | awk '{print $8}' | sort | uniq | tr '\n' ',' | sed 's/,$//'`
