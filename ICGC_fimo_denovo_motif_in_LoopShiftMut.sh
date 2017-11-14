@@ -45,4 +45,4 @@ cut -f 1-2 $pre.mut.fimo.txt | grep -vf - $pre.ref.fimo.txt > $pre.LoopBroken.mo
 
 rm $pre.mut.fa $pre.ref.fa $pre.LoopBroken.left.fa $pre.LoopBroken.right.fa
 rm $pre.rawmut.txt
-
+rm -rf JASPAR.$pre.ref/ JASPAR.$pre.mut/ HOCOMOCO.$pre.ref/ HOCOMOCO.$pre.mut/
