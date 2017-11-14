@@ -260,7 +260,6 @@ rm ${outpre}.multiple.p.TAD ${outpre}.multiple.pMUT.TAD # ${outpre}.multiple.pMU
 rm ${outpre}.extended.TAD ${outpre}.extended.TAD.mut
 # rm ${outpre}.IamGroot.Rinput ${outpre}.WGS.sampleid
 
-
 sh $bindir/ICGC_fimo_denovo_motif_in_LoopShiftMut.sh ${outpre}
 
 # put all the results together
@@ -287,7 +286,10 @@ do
 		if [[ `echo $line | grep MutatedPromoter` ]]; then
 			position=`echo "" | awk -v a=$gene '{print "~"a"|\n;"a"|"}' | grep -f - ${outpre}.LoopBroken.bed | awk '{print $4}' | grep -w $tad | grep -w $patient | sort | uniq | tr '\n' '#' | sed 's/#$//'`
 			mutmotif=`echo "" | awk -v a=$gene '{print "~"a"|\n;"a"|"}' | grep -f - ${outpre}.LoopBroken.motif | grep -w $tad | grep -w $patient | awk '{print $8}' | sort | uniq | tr '\n' ',' | sed 's/,$//'`
-			echo $position"	"$mutmotif >> ${outpre}.combined.tsv
+			tss=`echo "" | awk -v a=$gene '{print "~"a"|\n;"a"|"}' | grep -f - ${outpre}.LoopBroken.bed | awk '{print $4}' | grep -w $tad | grep -w $patient | sort | uniq | cut -d"~" -f3-4`
+			gains=`echo $tss | grep -f - ${outpre}.LoopBroken.motif.gain | awk '{print $1"|"$2}' | sort | uniq | tr '\n' ';' | sed 's/;$//'`
+			losts=`echo $tss | grep -f - ${outpre}.LoopBroken.motif.lose | awk '{print $1"|"$2}' | sort | uniq | tr '\n' ';' | sed 's/;$//'`
+			echo -n $position"	"$mutmotif"	"$gains"	"$losts >> ${outpre}.combined.tsv
 		else
 			echo "" >> ${outpre}.combined.tsv
 		fi
