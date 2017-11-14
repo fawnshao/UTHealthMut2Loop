@@ -287,8 +287,8 @@ do
 			position=`echo "" | awk -v a=$gene '{print "~"a"|\n;"a"|"}' | grep -f - ${outpre}.LoopBroken.bed | awk '{print $4}' | grep -w $tad | grep -w $patient | sort | uniq | tr '\n' '#' | sed 's/#$//'`
 			mutmotif=`echo "" | awk -v a=$gene '{print "~"a"|\n;"a"|"}' | grep -f - ${outpre}.LoopBroken.motif | grep -w $tad | grep -w $patient | awk '{print $8}' | sort | uniq | tr '\n' ',' | sed 's/,$//'`
 			tss=`echo "" | awk -v a=$gene '{print "~"a"|\n;"a"|"}' | grep -f - ${outpre}.LoopBroken.bed | awk '{print $4}' | grep -w $tad | grep -w $patient | sort | uniq | cut -d"~" -f3-4`
-			gains=`echo $tss | grep -f - ${outpre}.LoopBroken.motif.gain | awk '{print $1"|"$2}' | sort | uniq | tr '\n' ';' | sed 's/;$//'`
-			losts=`echo $tss | grep -f - ${outpre}.LoopBroken.motif.lose | awk '{print $1"|"$2}' | sort | uniq | tr '\n' ';' | sed 's/;$//'`
+			gains=`echo $tss | grep -f - ${outpre}.LoopBroken.motif.gain | awk '{print $1}' | sort | uniq | tr '\n' ';' | sed 's/;$//'`
+			losts=`echo $tss | grep -f - ${outpre}.LoopBroken.motif.lose | awk '{print $1}' | sort | uniq | tr '\n' ';' | sed 's/;$//'`
 			echo -n $position"	"$mutmotif"	"$gains"	"$losts >> ${outpre}.combined.tsv
 		else
 			echo "" >> ${outpre}.combined.tsv
