@@ -4,7 +4,8 @@
 # find if a mutation will gain to lose motifs
 pre=$1
 refseq=/home1/04935/shaojf/scratch/bwa-index/hg19.fa
-jaspar=/home1/04935/shaojf/stampede2/meme/fimo_JASPAR/JASPAR_CORE_2016_vertebrates.meme
+JASPAR=/home1/04935/shaojf/stampede2/myTools/MEME/motif_databases/JASPAR/JASPAR_CORE_2016_vertebrates.meme
+HOCOMOCO=/home1/04935/shaojf/stampede2/myTools/MEME/motif_databases/HUMAN/HOCOMOCOv10_HUMAN_mono_meme_format.meme
 coordinates=$pre.LoopBroken.bed
 rawmutation=simple_somatic_mutation.open.$pre.tsv.gz
 gunzip -c $rawmutation | cut -f 2,9-10,14,16-17 | uniq > $pre.rawmut.txt
@@ -30,11 +31,17 @@ mv $pre.c $pre.mut.fa
 rm $pre.a $pre.b
 
 # fimo
-fimo -oc $pre.ref $jaspar $pre.ref.fa
-fimo -oc $pre.mut $jaspar $pre.mut.fa
+fimo -oc JASPAR.$pre.ref $JASPAR $pre.ref.fa
+fimo -oc JASPAR.$pre.mut $JASPAR $pre.mut.fa
+fimo -oc HOCOMOCO.$pre.ref $HOCOMOCO $pre.ref.fa
+fimo -oc HOCOMOCO.$pre.mut $HOCOMOCO $pre.mut.fa
 
-cut -f 1-3 $pre.ref/fimo.txt | grep -vf - $pre.mut/fimo.txt > $pre.LoopBroken.motif.gain
-cut -f 1-3 $pre.mut/fimo.txt | grep -vf - $pre.ref/fimo.txt > $pre.LoopBroken.motif.lost
+sed -i 's/\t/|/' JASPAR.$pre.ref/fimo.txt
+sed -i 's/\t/|/' JASPAR.$pre.mut/fimo.txt
+cat JASPAR.$pre.ref/fimo.txt HOCOMOCO.$pre.ref/fimo.txt > $pre.ref.fimo.txt
+cat JASPAR.$pre.mut/fimo.txt HOCOMOCO.$pre.mut/fimo.txt > $pre.mut.fimo.txt
+cut -f 1-2 $pre.ref.fimo.txt | grep -vf - $pre.mut.fimo.txt > $pre.LoopBroken.motif.gain
+cut -f 1-2 $pre.mut.fimo.txt | grep -vf - $pre.ref.fimo.txt > $pre.LoopBroken.motif.lost
 
 rm $pre.mut.fa $pre.ref.fa $pre.LoopBroken.left.fa $pre.LoopBroken.right.fa
 rm $pre.rawmut.txt
