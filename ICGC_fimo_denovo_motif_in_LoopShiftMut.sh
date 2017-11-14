@@ -36,5 +36,6 @@ fimo -oc $pre.mut $jaspar $pre.mut.fa
 cut -f 1-3 $pre.ref/fimo.txt | grep -vf - $pre.mut/fimo.txt > $pre.LoopBroken.motif.gain
 cut -f 1-3 $pre.mut/fimo.txt | grep -vf - $pre.ref/fimo.txt > $pre.LoopBroken.motif.lost
 
-
+rm $pre.mut.fa $pre.ref.fa $pre.LoopBroken.left.fa $pre.LoopBroken.right.fa
+rm $pre.rawmut.txt
 
