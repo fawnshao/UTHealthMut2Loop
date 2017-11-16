@@ -123,9 +123,10 @@ awk -F "\t" -v var=$promoterLEN -v OFS="\t" \
 '$(NF-6)!="." && $NF > -1 * var && $NF < var {print $1,$2,$3,$4,$10,$13}' \
 ${outpre}.tmp > ${outpre}.pMUT
 # create extending window for each promoter with at least one mutation
-awk -F "\t" -v var=$promoterLEN -win=$windowSIZE -v OFS="\t" \
+awk -F "\t" -v var=$promoterLEN -v win=$windowSIZE -v OFS="\t" \
 '$(NF-6)!="." && $NF > -1 * var && $NF < var {print $7,$8-win,$9+win}' \
-${outpre}.tmp | uniq | awk '{print $0"\t"$1":"$2"-"$3}' > ${outpre}.pseudoTAD
+${outpre}.tmp | uniq | \
+awk '{if($2 < 0){$2 = 0;}{print $1"\t"$2"\t"$3"\t"$1":"$2"-"$3}' > ${outpre}.pseudoTAD
 rm ${outpre}.tmp
 tadBED=${outpre}.pseudoTAD
 
