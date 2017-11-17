@@ -126,7 +126,7 @@ ${outpre}.tmp > ${outpre}.pMUT
 awk -F "\t" -v var=$promoterLEN -v win=$windowSIZE -v OFS="\t" \
 '$(NF-6)!="." && $NF > -1 * var && $NF < var {print $7,$8-win,$9+win}' \
 ${outpre}.tmp | uniq | \
-awk '{if($2 < 0){$2 = 0;}{print $1"\t"$2"\t"$3"\t"$1":"$2"-"$3}' > ${outpre}.pseudoTAD
+awk '{if($2 < 0){$2 = 0;}print $1"\t"$2"\t"$3"\tTAD_"$1"-"$2"-"$3}' > ${outpre}.pseudoTAD
 rm ${outpre}.tmp
 tadBED=${outpre}.pseudoTAD
 
@@ -164,11 +164,15 @@ echo +++++++++ get WGS expressions ++++++++
 cut -f 4 $mutationTSV.WGS.srt.bed | sort | uniq > ${outpre}.WGS.sampleid
 # gunzip -c $expMAT | awk -F"\t" -vOFS="\t" '{print substr($5,1,15), $8, $9}' | \
 # grep -f ${outpre}.WGS.sampleid > $expMAT.WGS.sim
-gunzip -c $expMAT | awk -F"\t" -vOFS="\t" '{print $1, $8, $9}' | \
-grep -wf ${outpre}.WGS.sampleid > $expMAT.WGS.sim
+# gunzip -c $expMAT | awk -F"\t" -vOFS="\t" '{print $1, $8, $9}' | \
+# grep -wf ${outpre}.WGS.sampleid > $expMAT.WGS.sim
+gunzip -c $expMAT | awk -F"\t" -vOFS="\t" '{print $1, $8, $9}' > $expMAT.all.sim
+grep -wf ${outpre}.WGS.sampleid $expMAT.all.sim > $expMAT.WGS.sim
 
 if [ ! -z "$id2name" ]
 	then
+	perl $bindir/relatedScripts/replace_ensembl_with_genesymbol.pl $id2name $expMAT.all.sim > $expMAT.all.sim.tmp
+	mv $expMAT.all.sim.tmp $expMAT.all.sim
 	perl $bindir/relatedScripts/replace_ensembl_with_genesymbol.pl $id2name $expMAT.WGS.sim > $expMAT.WGS.sim.tmp
 	mv $expMAT.WGS.sim.tmp $expMAT.WGS.sim
 fi
@@ -215,20 +219,21 @@ done
 count=`wc -l ${outpre}.IamGroot.Rinput | awk '{print $1}'`
 echo +++++++++ Running Rscript to output loop translocate candidates  ++++++++
 # use Z score to find the expression alteration direction in the TAD
-if [ $count -lt 1000 ]
+if [ $count -lt 100 ]
 	then
 	echo Running in one piece
 	Rscript $bindir/ICGC_expression.R $expMAT.WGS.sim ${outpre}.IamGroot.Rinput ${outpre}
 else
 	echo Running in many pieces
-	sed -n '2,$p' ${outpre}.IamGroot.Rinput | split -l 500 /dev/stdin ${outpre}.IamGroot.Rinput.
+	each=`echo $count/40 | bc`
+	sed -n '2,$p' ${outpre}.IamGroot.Rinput | split -l $count /dev/stdin ${outpre}.IamGroot.Rinput.
 	# rm ${outpre}.IamGroot.Rinput.*.TAD.labeled.tsv
 	np=`ls ${outpre}.IamGroot.Rinput.* | wc -l`
 	for f in ${outpre}.IamGroot.Rinput.*
 	do
 		echo "TAD sample mutsample genes mutgene" | cat - $f > $f.title
 		rm $f
-		Rscript $bindir/ICGC_expression.R $expMAT.WGS.sim $f.title $f &
+		Rscript $bindir/ICGC_expression.R $expMAT.WGS.sim $f.title $f $expMAT.all.sim &
 	done
 	sleep 1m
 	npfinished=`ls ${outpre}.IamGroot.Rinput.*.TAD.labeled.tsv | wc -l`
