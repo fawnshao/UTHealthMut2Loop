@@ -19,7 +19,7 @@ while(<IN>){
 }
 close(IN);
 
-foreach $g(keys %gens){
+foreach $g(keys %genes){
 	print "$g";
 	foreach $s(keys %samples){
 		$id = join("#", $s, $g);
