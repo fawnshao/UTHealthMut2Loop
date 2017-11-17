@@ -14,13 +14,14 @@ motifDIR=motifdir
 outpre=TAD.exp
 id2name=
 promoterMOTIF=/home1/04935/shaojf/stampede2/mutations/ICGC/p_motif/hg19.tss1k.motif.simcount
+np=30
 
 # usage function
 function usage(){
    prog=`basename "$0"`
    cat << EOF
 
-   Usage: $prog [-mut mutationTSV] [-tss tssBED] [-exp expMAT] [-m motifBED] [-o outpre] [-plen promoterLEN] [-wlen windowSIZE] [-idconvert id2name] [-pmotif promoterMOTIF]
+   Usage: $prog [-mut mutationTSV] [-tss tssBED] [-exp expMAT] [-m motifBED] [-o outpre] [-plen promoterLEN] [-wlen windowSIZE] [-idconvert id2name] [-pmotif promoterMOTIF] [-n np]
 
    optional arguments:
      -h            show this help message and exit
@@ -33,6 +34,7 @@ function usage(){
      -wlen         flanking (TSS) windowSIZE for a promoter mutation
      -idconvert    ensembl ID to gene symbol file. do not set it if not needed
      -pmotif       promoter motif with counts
+     -n            cpus
 EOF
 }
 
@@ -86,6 +88,10 @@ do
 			promoterMOTIF="$2"
 			shift
 			;;
+		-n)
+			np="$2"
+			shift
+			;;
 		*)
 			usage
 			break
@@ -103,6 +109,7 @@ echo "promoterLEN  ="$promoterLEN
 echo "windowSIZE   ="$windowSIZE
 echo "id2name      ="$id2name
 echo "promoterMOTIF="$promoterMOTIF
+echo "np           ="$np
 
 ###############
 # get the WGS mutations from simple_somatic_mutation.open.*.tsv
@@ -225,7 +232,7 @@ if [ $count -lt 100 ]
 	Rscript $bindir/ICGC_expression.R $expMAT.WGS.sim ${outpre}.IamGroot.Rinput ${outpre} $expMAT.all.sim 
 else
 	echo Running in many pieces
-	each=`echo $count/40 | bc`
+	each=`echo $count/$np | bc`
 	sed -n '2,$p' ${outpre}.IamGroot.Rinput | split -l $count /dev/stdin ${outpre}.IamGroot.Rinput.
 	# rm ${outpre}.IamGroot.Rinput.*.TAD.labeled.tsv
 	np=`ls ${outpre}.IamGroot.Rinput.* | wc -l`
