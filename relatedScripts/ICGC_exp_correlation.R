@@ -12,7 +12,7 @@ for(i in 1:(nrow(data) - 1)){
 		gene2 <- rownames(data)[j]
 		cor.x <- cor.test(data[i,],data[j,],method = "pearson")
 		cor.y <- cor.test(data[i,],data[j,],method = "spearman")
-		res <- rbind.data.frame(y, c(gene1, gene2, 
+		res <- rbind.data.frame(res, c(gene1, gene2, 
 			cor.x$estimate[[1]], cor.x$p.value, cor.y$estimate[[1]], cor.y$p.value))
 	}
 }
