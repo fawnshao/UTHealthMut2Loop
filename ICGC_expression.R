@@ -52,7 +52,7 @@ for(i in 1:nrow(toprocess)){
 			outlier.flag[j] <- paste(is.element(mut, boxplot.stats(c(ctr, mut))$out), collapse=";")
 			mut.exp[j] <- paste(format(mut, format = "e", digits = 2), collapse=";")
 			ctr.exp[j] <- paste(format(ctr, format = "e", digits = 2), collapse=";")
-			all <- allx[gene.name == tad.gene.withexpr[j], 3]
+			all <- allx[allx[,2] == tad.gene.withexpr[j], 3]
 			all.mean[j] <- mean(all)
 			all.sd[j] <- sd(all)
 		}

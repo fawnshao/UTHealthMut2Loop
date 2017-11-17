@@ -222,7 +222,7 @@ echo +++++++++ Running Rscript to output loop translocate candidates  ++++++++
 if [ $count -lt 100 ]
 	then
 	echo Running in one piece
-	Rscript $bindir/ICGC_expression.R $expMAT.WGS.sim ${outpre}.IamGroot.Rinput ${outpre}
+	Rscript $bindir/ICGC_expression.R $expMAT.WGS.sim ${outpre}.IamGroot.Rinput ${outpre} $expMAT.all.sim 
 else
 	echo Running in many pieces
 	each=`echo $count/40 | bc`
