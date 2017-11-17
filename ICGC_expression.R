@@ -7,6 +7,7 @@ list <- args[2]
 outpre <- args[3]
 allexpr <- args[4]
 
+# can not as.matrix, otherwise the expression will be strings, not numeric
 data <- read.table(expr, sep = "\t")
 sample.name <- as.vector(data[, 1])
 gene.name <- as.vector(data[, 2])
@@ -53,7 +54,7 @@ for(i in 1:nrow(toprocess)){
 			outlier.flag[j] <- paste(is.element(mut, boxplot.stats(c(ctr, mut))$out), collapse=";")
 			mut.exp[j] <- paste(format(mut, format = "e", digits = 2), collapse=";")
 			ctr.exp[j] <- paste(format(ctr, format = "e", digits = 2), collapse=";")
-			all <- allx[allx.gene == tad.gene.withexpr[j], 3]
+			all <- as.numeric(as.matrix(allx[allx.gene == tad.gene.withexpr[j], 3]))
 			all.mean[j] <- mean(all)
 			all.sd[j] <- sd(all)
 		}
