@@ -8,6 +8,7 @@ data <- as.matrix(read.table(expr, sep = "\t", row.names = 1))
 res <- data.frame()
 for(i in 1:(nrow(data) - 1)){
 	for(j in (i + 1):nrow(data)){
+		print(paste(i,j,sep=" vs "))
 		gene1 <- rownames(data)[i]
 		gene2 <- rownames(data)[j]
 		cor.x <- cor.test(data[i,],data[j,],method = "pearson")
@@ -18,4 +19,4 @@ for(i in 1:(nrow(data) - 1)){
 }
 colnames(res) <- c("gene1", "gene2", 
 	"pearson.cor", "pearson.pvalues", "spearman.cor", "spearman.pvalues")
-write.table(y, file = out, sep = "\t")
+write.table(res, file = out, sep = "\t")
