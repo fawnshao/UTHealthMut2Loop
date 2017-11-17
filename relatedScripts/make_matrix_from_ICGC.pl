@@ -33,7 +33,8 @@ foreach $g(keys %genes){
 }
 
 sub average{
-  my $total;
-  $total += $_ for @_;
-  return sprintf '%.2f', $total / @_;
+	my $total;
+	$total += $_ for @_;
+	# return sprintf '%.2f', $total / @_;
+	return $total / @_;
 }
