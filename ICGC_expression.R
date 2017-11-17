@@ -12,7 +12,7 @@ data <- read.table(expr, sep = "\t")
 sample.name <- as.vector(data[, 1])
 gene.name <- as.vector(data[, 2])
 # expr.value <- data[,3]
-allx <- read.table(allexpr, sep = "\t")
+allx <- read.table(allexpr, sep = "\t", header = T)
 allx.gene <- as.vector(allx[, 2])
 
 toprocess <- read.table(list, header = T)
@@ -54,7 +54,8 @@ for(i in 1:nrow(toprocess)){
 			outlier.flag[j] <- paste(is.element(mut, boxplot.stats(c(ctr, mut))$out), collapse=";")
 			mut.exp[j] <- paste(format(mut, format = "e", digits = 2), collapse=";")
 			ctr.exp[j] <- paste(format(ctr, format = "e", digits = 2), collapse=";")
-			all <- as.numeric(as.matrix(allx[allx.gene == tad.gene.withexpr[j], 3]))
+			# all <- as.numeric(as.matrix(allx[allx.gene == tad.gene.withexpr[j], 3]))
+			all <- allx[allx.gene == tad.gene.withexpr[j], 3]
 			all.mean[j] <- mean(all)
 			all.sd[j] <- sd(all)
 		}
