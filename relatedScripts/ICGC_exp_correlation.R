@@ -20,3 +20,4 @@ for(i in 1:(nrow(data) - 1)){
 colnames(res) <- c("gene1", "gene2", 
 	"pearson.cor", "pearson.pvalues", "spearman.cor", "spearman.pvalues")
 write.table(res, file = out, sep = "\t")
+save.image(file = paste(out,"RData", sep = "."))
