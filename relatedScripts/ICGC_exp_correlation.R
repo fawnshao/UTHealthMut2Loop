@@ -13,6 +13,7 @@ cl <- makeCluster(no_cores)
 # mat_expr_$f.tsv
 data <- as.matrix(read.table(expr, sep = "\t", row.names = 1))
 mycor <- function(i, m){
+	print(i)
 	gene1 <- rownames(m)[i]
 	res <- matrix(ncol = 6, nrow = (nrow(m) - i))
 	c <- 1
