@@ -31,8 +31,18 @@ mycor <- function(i, m){
 
 clusterExport(cl, "data")
 clusterExport(cl, "mycor")
-a <- parLapply(cl, 1:nrow(data), function(x) {mycor(x,data)})
-stopCluster(cl)
+# a <- parLapply(cl, 1:nrow(data), function(x) {mycor(x,data)})
+# out.data <- do.call("rbind", a)
+# write.table(out.data, file = out, sep = "\t")
+for(s in 1:2000){
+	start <- (s - 1) * 10 + 1
+	end <- s * 10
+	a <- parLapply(cl, start:end, function(x) {mycor(x,data)})
+	out.data <- do.call("rbind", a)
+	write.table(out.data, file = out, sep = "\t", append = TRUE)
+}
+a <- parLapply(cl, 20001:nrow(data), function(x) {mycor(x,data)})
 out.data <- do.call("rbind", a)
-write.table(out.data, file = out, sep = "\t")
+write.table(out.data, file = out, sep = "\t", append = TRUE)
+stopCluster(cl)
 save.image(file = paste(out,"RData", sep = "."))
