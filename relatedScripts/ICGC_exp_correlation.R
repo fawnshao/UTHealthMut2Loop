@@ -16,18 +16,23 @@ mycor <- function(i, m){
 	print(i)
 	gene1 <- rownames(m)[i]
 	res <- matrix(ncol = 6, nrow = (nrow(m) - i))
-	c <- 1
+	c <- 0
 	for(j in (i + 1):nrow(m)){
 		gene2 <- rownames(m)[j]
 		cor.x <- cor.test(m[i,],m[j,], method = "pearson")
 		cor.y <- cor.test(m[i,],m[j,], method = "spearman")
 		if(abs(cor.x$estimate[[1]]) > 0.6 || abs(cor.y$estimate[[1]]) > 0.6){
-			res[c,] <- c(gene1, gene2, cor.x$estimate[[1]], cor.x$p.value, cor.y$estimate[[1]], cor.y$p.value)
 			c <- c + 1
+			res[c,] <- c(gene1, gene2, cor.x$estimate[[1]], cor.x$p.value, cor.y$estimate[[1]], cor.y$p.value)
 		}
 	}
-	colnames(res) <- c("gene1", "gene2", "pearson.cor", "pearson.pvalues", "spearman.cor", "spearman.pvalues")
-	return(res)
+	if(c > 0){
+		colnames(res) <- c("gene1", "gene2", "pearson.cor", "pearson.pvalues", "spearman.cor", "spearman.pvalues")
+		return(res[1:c,])
+	}
+	else{
+		return()
+	}
 }
 
 clusterExport(cl, "data")
@@ -38,12 +43,18 @@ clusterExport(cl, "mycor")
 for(s in 1:(floor(nrow(data)/10) - 1)){
 	start <- (s - 1) * 10 + 1
 	end <- s * 10
+	print(paste(start, end, sep=" : "))
 	a <- parLapply(cl, start:end, function(x) {mycor(x,data)})
-	out.data <- do.call("rbind", a)
-	write.table(out.data, file = out, sep = "\t", append = TRUE, quote = FALSE)
+	if(!is.null(a)){
+		out.data <- do.call("rbind", a)
+		write.table(out.data, file = out, sep = "\t", row.names = FALSE, append = TRUE, quote = FALSE)
+	}
 }
+print(paste((end + 1), (nrow(data)-1), sep=" : "))
 a <- parLapply(cl, (end + 1):(nrow(data)-1), function(x) {mycor(x,data)})
-out.data <- do.call("rbind", a)
-write.table(out.data, file = out, sep = "\t", append = TRUE, quote = FALSE)
+if(!is.null(a)){
+	out.data <- do.call("rbind", a)
+	write.table(out.data, file = out, sep = "\t", row.names = FALSE, append = TRUE, quote = FALSE)
+}
 stopCluster(cl)
 save.image(file = paste(out,"RData", sep = "."))
