@@ -1,7 +1,7 @@
 args <- commandArgs(TRUE)
 expr <- args[1]
 out <- args[2]
-# from <- args[3]
+from <- args[3]
 # to <- args[4]
 
 library(parallel)
@@ -12,6 +12,8 @@ cl <- makeCluster(no_cores)
 
 # mat_expr_$f.tsv
 data <- as.matrix(read.table(expr, sep = "\t", row.names = 1))
+data <- data[rowSums(data) > 0, ]
+# if rowsums==0, spearman correlation will be stopped, and errors caused.
 mycor <- function(i, m){
 	print(i)
 	gene1 <- rownames(m)[i]
@@ -40,7 +42,7 @@ clusterExport(cl, "mycor")
 # a <- parLapply(cl, 1:nrow(data), function(x) {mycor(x,data)})
 # out.data <- do.call("rbind", a)
 # write.table(out.data, file = out, sep = "\t")
-for(s in 1:(floor(nrow(data)/10) - 1)){
+for(s in from:(floor(nrow(data)/10) - 1)){
 	start <- (s - 1) * 10 + 1
 	end <- s * 10
 	print(paste(start, end, sep=" : "))
