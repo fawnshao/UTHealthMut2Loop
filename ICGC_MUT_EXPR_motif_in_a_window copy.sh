@@ -125,18 +125,7 @@ echo +++++++++ get promoter WGS mutations ++++++++
 # bedtools closest -D b -a $mutationTSV.WGS.srt.bed -b $tssBED | \
 # awk -F "\t" -v var=$promoterLEN -v OFS="\t" \
 # '$(NF-6)!="." && $NF > -1 * var && $NF < var {print $1,$2,$3,$4,$10,$13}' > ${outpre}.pMUT
-count=`wc -l $mutationTSV.WGS.srt.bed | awk '{print $1}'`
-each=`echo $count/$np | bc`
-split -l $each $mutationTSV.WGS.srt.bed ${outpre}.IamGroot.mut.
-for f in ${outpre}.IamGroot.mut.*
-do
-	bedtools closest -D b -a $f -b $tssBED > ${f}.tmp &
-done
-wait
-# bedtools closest -D b -a $mutationTSV.WGS.srt.bed -b $tssBED > ${outpre}.tmp
-cat ${outpre}.IamGroot.mut.*.tmp > ${outpre}.tmp
-rm ${outpre}.IamGroot.mut.*
-
+bedtools closest -D b -a $mutationTSV.WGS.srt.bed -b $tssBED > ${outpre}.tmp
 awk -F "\t" -v var=$promoterLEN -v OFS="\t" \
 '$(NF-6)!="." && $NF > -1 * var && $NF < var {print $1,$2,$3,$4,$10,$13}' \
 ${outpre}.tmp > ${outpre}.pMUT
@@ -158,17 +147,7 @@ bedtools intersect -wao -a ${outpre}.pMUT -b $tadBED | awk '$NF > 0' | cut -f 1-
 echo +++++++++ get TAD lists with many genes ++++++++
 bedtools intersect -wao -a $tssBED -b $tadBED | awk '$NF > 0' | cut -f 1-10 > ${outpre}.p.TAD
 cut -f10 ${outpre}.p.TAD | sort | uniq -c | awk '$1>1{print $2}' > ${outpre}.multiple.p.TAD
-# grep -wf ${outpre}.multiple.p.TAD ${outpre}.pMUT.TAD > ${outpre}.multiple.pMUT.TAD
-count=`wc -l ${outpre}.multiple.p.TAD | awk '{print $1}'`
-each=`echo $count/$np | bc`
-split -l $each ${outpre}.multiple.p.TAD ${outpre}.IamGroot.pTAD.
-for f in ${outpre}.IamGroot.pTAD.*
-do
-	grep -wf $f ${outpre}.pMUT.TAD > ${f}.tmp &
-done
-wait
-cat ${outpre}.IamGroot.pTAD.*.tmp > ${outpre}.multiple.pMUT.TAD
-rm ${outpre}.IamGroot.pTAD.*
+grep -wf ${outpre}.multiple.p.TAD ${outpre}.pMUT.TAD > ${outpre}.multiple.pMUT.TAD
 
 # extend to TAD regions, and exclude all the sample with mutation in these extended regions
 # the rest samples will be considered as a control
@@ -195,17 +174,7 @@ cut -f 4 $mutationTSV.WGS.srt.bed | sort | uniq > ${outpre}.WGS.sampleid
 # gunzip -c $expMAT | awk -F"\t" -vOFS="\t" '{print $1, $8, $9}' | \
 # grep -wf ${outpre}.WGS.sampleid > $expMAT.WGS.sim
 gunzip -c $expMAT | awk -F"\t" -vOFS="\t" '{print $1, $8, $9}' > $expMAT.all.sim
-# grep -wf ${outpre}.WGS.sampleid $expMAT.all.sim > $expMAT.WGS.sim
-count=`wc -l ${outpre}.WGS.sampleid | awk '{print $1}'`
-each=`echo $count/$np | bc`
-split -l $each ${outpre}.WGS.sampleid ${outpre}.IamGroot.WGSe.
-for f in ${outpre}.IamGroot.WGSe.*
-do
-	grep -wf $f $expMAT.all.sim > ${f}.tmp &
-done
-wait
-cat ${outpre}.IamGroot.WGSe.*.tmp > $expMAT.WGS.sim
-rm ${outpre}.IamGroot.WGSe.*
+grep -wf ${outpre}.WGS.sampleid $expMAT.all.sim > $expMAT.WGS.sim
 
 if [ ! -z "$id2name" ]
 	then
@@ -219,18 +188,7 @@ fi
 # find the mutated promoter and with neigbors in the same TAD, 
 # and the corresponding sample should have expression
 # list the mutation with expression for the patient
-cut -f1 $expMAT.WGS.sim | sort | uniq > ${outpre}.WGS.tmp
-# grep -wf - ${outpre}.multiple.pMUT.TAD > ${outpre}.multiple.pMUT.TAD.withexp
-count=`wc -l ${outpre}.multiple.pMUT.TAD | awk '{print $1}'`
-each=`echo $count/$np | bc`
-split -l $each ${outpre}.multiple.pMUT.TAD ${outpre}.IamGroot.WGS.
-for f in ${outpre}.IamGroot.WGS.*
-do
-	grep -wf ${outpre}.WGS.tmp $f > ${f}.tmp &
-done
-wait
-cat ${outpre}.IamGroot.WGS.*.tmp > ${outpre}.multiple.pMUT.TAD.withexp
-rm ${outpre}.IamGroot.WGS.*
+cut -f1 $expMAT.WGS.sim | uniq | grep -wf - ${outpre}.multiple.pMUT.TAD > ${outpre}.multiple.pMUT.TAD.withexp
 
 # TCGAsample="TCGA-AD-A5EJ-01"
 # TADid="TAD_3"
@@ -274,27 +232,24 @@ if [ $count -lt 100 ]
 	Rscript $bindir/ICGC_expression.R $expMAT.WGS.sim ${outpre}.IamGroot.Rinput ${outpre} $expMAT.all.sim 
 else
 	echo Running in many pieces
-	date
 	each=`echo $count/$np | bc`
-	sed -n '2,$p' ${outpre}.IamGroot.Rinput | split -l $each /dev/stdin ${outpre}.IamGroot.Rinput.
+	sed -n '2,$p' ${outpre}.IamGroot.Rinput | split -l $count /dev/stdin ${outpre}.IamGroot.Rinput.
 	# rm ${outpre}.IamGroot.Rinput.*.TAD.labeled.tsv
-	# nps=`ls ${outpre}.IamGroot.Rinput.* | wc -l`
+	np=`ls ${outpre}.IamGroot.Rinput.* | wc -l`
 	for f in ${outpre}.IamGroot.Rinput.*
 	do
 		echo "TAD sample mutsample genes mutgene" | cat - $f > $f.title
 		rm $f
 		Rscript $bindir/ICGC_expression.R $expMAT.WGS.sim $f.title $f $expMAT.all.sim &
 	done
-	# sleep 1m
-	# npfinished=`ls ${outpre}.IamGroot.Rinput.*.TAD.labeled.tsv | wc -l`
-	# while [ $npfinished -lt $nps ]
-	# do
-	# 	sleep 30s
-	# 	npfinished=`ls ${outpre}.IamGroot.Rinput.*.TAD.labeled.tsv | wc -l`
-	# done
-	wait
+	sleep 1m
+	npfinished=`ls ${outpre}.IamGroot.Rinput.*.TAD.labeled.tsv | wc -l`
+	while [ $npfinished -lt $np ]
+	do
+		sleep 30s
+		npfinished=`ls ${outpre}.IamGroot.Rinput.*.TAD.labeled.tsv | wc -l`
+	done
 	echo Finishing all pieces
-	date
 	cat ${outpre}.IamGroot.Rinput.*.TAD.labeled.tsv > ${outpre}.TAD.labeled.tsv
 	for f in ${outpre}.IamGroot.Rinput.*.TAD_*.tsv
 	do
