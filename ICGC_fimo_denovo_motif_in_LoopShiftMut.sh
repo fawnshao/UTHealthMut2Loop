@@ -41,7 +41,7 @@ sed -i 's/\t/|/' JASPAR.$pre.mut/fimo.txt
 cat JASPAR.$pre.ref/fimo.txt HOCOMOCO.$pre.ref/fimo.txt > $pre.ref.fimo.txt
 cat JASPAR.$pre.mut/fimo.txt HOCOMOCO.$pre.mut/fimo.txt > $pre.mut.fimo.txt
 cut -f 1-2 $pre.ref.fimo.txt | grep -vf - $pre.mut.fimo.txt > $pre.LoopBroken.motif.gain
-cut -f 1-2 $pre.mut.fimo.txt | grep -vf - $pre.ref.fimo.txt > $pre.LoopBroken.motif.lost
+cut -f 1-2 $pre.mut.fimo.txt | grep -vf - $pre.ref.fimo.txt > $pre.LoopBroken.motif.lose
 
 rm $pre.mut.fa $pre.ref.fa $pre.LoopBroken.left.fa $pre.LoopBroken.right.fa
 rm $pre.rawmut.txt

@@ -337,7 +337,7 @@ echo -n "disease	TAD	patient	Gene	" > ${outpre}.combined.tsv
 echo -n "mut.mean	ctr.mean	ctr.sd	fc	outlier.flag	zscore.1	zscore.2	" >> ${outpre}.combined.tsv
 echo -n "mut.exp	ctr.exp	mut.flag	alt.flag	" >> ${outpre}.combined.tsv
 echo -n "promoter.motif.count	promoter.motifs	mutated.sites	mutated.motifs" >> ${outpre}.combined.tsv
-echo "mut.motif.gain	mut.motif.lost" >> ${outpre}.combined.tsv
+echo "mut.motif.gain	mut.motif.lose" >> ${outpre}.combined.tsv
 for f in ${outpre}.TAD_*.tsv
 do
 	disease=`echo $f | awk -F"." '{print $1}'`
