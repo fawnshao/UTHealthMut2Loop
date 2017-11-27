@@ -9,7 +9,7 @@ HOCOMOCO=/home1/04935/shaojf/stampede2/myTools/MEME/motif_databases/HUMAN/HOCOMO
 coordinates=$pre.LoopBroken.bed
 rawmutation=simple_somatic_mutation.open.$pre.tsv.gz
 gunzip -c $rawmutation | cut -f 2,9-10,14,16-17 | uniq > $pre.rawmut.txt
-sed 's/~/\t/g' $pre.LoopBroken.bed | awk '{print $5"\t"$1"\t"$3}' | grep -wf - $pre.rawmut.txt > $pre.LoopBroken.mut.txt
+sed 's/~/\t/g' $pre.LoopBroken.bed | sort | uniq | awk '{print $5"\t"$1"\t"$3}' | grep -wf - $pre.rawmut.txt > $pre.LoopBroken.mut.txt
 
 # flanking 20 bp
 awk -vOFS="\t" '{print "chr"$2,$3-21,$3-1}' $pre.LoopBroken.mut.txt | bedtools getfasta -fi $refseq -bed - > $pre.LoopBroken.left.fa
