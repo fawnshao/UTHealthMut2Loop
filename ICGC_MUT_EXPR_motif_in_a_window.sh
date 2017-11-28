@@ -336,7 +336,7 @@ sh $bindir/ICGC_fimo_denovo_motif_in_LoopShiftMut.sh ${outpre}
 echo -n "disease	TAD	patient	Gene	" > ${outpre}.combined.tsv
 echo -n "mut.mean	ctr.mean	ctr.sd	fc	outlier.flag	zscore.1	zscore.2	" >> ${outpre}.combined.tsv
 echo -n "mut.exp	ctr.exp	mut.flag	alt.flag	" >> ${outpre}.combined.tsv
-echo -n "promoter.motif.count	promoter.motifs	mutated.sites	mutated.motifs" >> ${outpre}.combined.tsv
+echo -n "promoter.motif.count	promoter.motifs	mutated.sites	mutated.motifs	" >> ${outpre}.combined.tsv
 echo "mut.motif.gain	mut.motif.lose" >> ${outpre}.combined.tsv
 for f in ${outpre}.TAD_*.tsv
 do
@@ -358,7 +358,7 @@ do
 			tss=`echo "" | awk -v a=$gene '{print "~"a"|\n;"a"|"}' | grep -f - ${outpre}.LoopBroken.bed | awk '{print $4}' | grep -w $tad | grep -w $patient | sort | uniq | cut -d"~" -f3-4`
 			gains=`echo $tss | grep -f - ${outpre}.LoopBroken.motif.gain | awk '{print $1}' | sort | uniq | tr '\n' ';' | sed 's/;$//'`
 			losts=`echo $tss | grep -f - ${outpre}.LoopBroken.motif.lose | awk '{print $1}' | sort | uniq | tr '\n' ';' | sed 's/;$//'`
-			echo -n $position"	"$mutmotif"	"$gains"	"$losts >> ${outpre}.combined.tsv
+			echo $position"	"$mutmotif"	"$gains"	"$losts >> ${outpre}.combined.tsv
 		else
 			echo "" >> ${outpre}.combined.tsv
 		fi
