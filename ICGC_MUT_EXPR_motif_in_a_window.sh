@@ -368,7 +368,7 @@ do
 			# echo "" >> ${outpre}.combined.tsv
 			echo $motifcount"	"$motifs >> $f.tmp2
 		fi
-		echo $disease"	"$tad"	"$patient"	" >> $f.tmp1
+		echo $disease"	"$tad"	"$patient >> $f.tmp1
 	done
 
 	paste $f.tmp1 $f $f.tmp2 | sed -n '2,$p' >> ${outpre}.combined.tsv

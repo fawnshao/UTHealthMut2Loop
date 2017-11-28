@@ -14,14 +14,14 @@ do
 	patient=`echo $f | awk -F"." '{print $3}'`
 	mutgene=`awk -F"\t" '$11~/MutatedPromoter/{print $1}' $f | sed 's/"//g' | sed 's/^/-e /' | tr '\n' ' '`
 	
-	echo "disease	TAD	patient	Gene	" > $f.tmp1
+	echo "disease	TAD	patient	Gene" > $f.tmp1
 	echo "pearson	p.value	spearman	p.value" > $f.tmp2
 
 	sed -n '2,$p' $f | while read line
 	do
 		# echo -n $disease"	"$tad"	"$patient"	" >> $tsvpre.allwithcor.tsv
 		# echo -n $line | awk '{for(i=1;i<=NF;i++){printf "%s\t",$i}}' >> $tsvpre.allwithcor.tsv
-		if [[ `echo $line | grep -v MutatedPromoter` ]]; then
+		if [[ ! `echo $line | grep MutatedPromoter` ]]; then
 			target=`echo $line | awk '{print $1}' | sed 's/"//g'`
 			res=`grep -w $mutgene $CorrelationFile | grep -w $target | tr '\n' ';'`
 			# echo $res >> $tsvpre.allwithcor.tsv
