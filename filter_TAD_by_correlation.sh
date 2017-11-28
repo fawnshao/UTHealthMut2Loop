@@ -16,7 +16,7 @@ do
 	
 	echo "disease	TAD	patient	Gene	" > $f.tmp1
 	echo "pearson	p.value	spearman	p.value" > $f.tmp2
-	
+
 	sed -n '2,$p' $f | while read line
 	do
 		# echo -n $disease"	"$tad"	"$patient"	" >> $tsvpre.allwithcor.tsv
@@ -25,6 +25,9 @@ do
 			target=`echo $line | awk '{print $1}' | sed 's/"//g'`
 			res=`grep -w $mutgene $CorrelationFile | grep -w $target | tr '\n' ';'`
 			# echo $res >> $tsvpre.allwithcor.tsv
+			if [[ ! `echo $res | grep ";"` ]]; then
+				res="/"
+			fi
 		else
 			# echo "" >> $tsvpre.allwithcor.tsv
 			res="/"
