@@ -343,22 +343,27 @@ do
 	disease=`echo $f | awk -F"." '{print $1}'`
 	tad=`echo $f | awk -F"." '{print $2}'`
 	patient=`echo $f | awk -F"." '{print $3}'`
+
+	echo "disease	TAD	patient	Gene	" > $f.tmp1
+	echo "promoter.motif.count	promoter.motifs	mutated.sites	mutated.motifs	mut.motif.gain	mut.motif.lose" > $f.tmp2
+
 	sed -n '2,$p' $f | while read line
 	do
 		gene=`echo $line | awk '{print $1}' | sed 's/"//g'`
 		motifcount=`echo "" | awk -v a=$gene '{print "\t"a"|\n;"a"|"}' | grep -f - $promoterMOTIF | awk -F"\t" '{print $8}' |  tr ', ' '\n' | grep -v "^$" | sort | uniq | wc -l`
 		motifs=`echo "" | awk -v a=$gene '{print "\t"a"|\n;"a"|"}' | grep -f - $promoterMOTIF | awk -F"\t" '{print $8}' |  tr ', ' '\n' | grep -v "^$" | sort | uniq | tr '\n' ',' | sed 's/,$//'`
-		#echo $disease"	"$tad"	"$patient"	"$line"	"$motifcount"	"$motifs
-		echo -n $disease"	"$tad"	"$patient"	" >> ${outpre}.combined.tsv
-		echo -n $line | awk '{for(i=1;i<=NF;i++){printf "%s\t",$i}}' >> ${outpre}.combined.tsv
-		echo -n $motifcount"	"$motifs"	" >> ${outpre}.combined.tsv
+		# echo $disease"	"$tad"	"$patient"	"$line"	"$motifcount"	"$motifs
+		# echo -n $disease"	"$tad"	"$patient"	" >> ${outpre}.combined.tsv
+		# echo -n $line | awk '{for(i=1;i<=NF;i++){printf "%s\t",$i}}' >> ${outpre}.combined.tsv
+		# echo -n $motifcount"	"$motifs"	" >> ${outpre}.combined.tsv
 		if [[ `echo $line | grep MutatedPromoter` ]]; then
 			position=`echo "" | awk -v a=$gene '{print "~"a"|\n;"a"|"}' | grep -f - ${outpre}.LoopBroken.bed | awk '{print $4}' | grep -w $tad | grep -w $patient | sort | uniq | tr '\n' '#' | sed 's/#$//'`
 			mutmotif=`echo "" | awk -v a=$gene '{print "~"a"|\n;"a"|"}' | grep -f - ${outpre}.LoopBroken.motif | grep -w $tad | grep -w $patient | awk '{print $8}' | sort | uniq | tr '\n' ',' | sed 's/,$//'`
 			tss=`echo "" | awk -v a=$gene '{print "~"a"|\n;"a"|"}' | grep -f - ${outpre}.LoopBroken.bed | awk '{print $4}' | grep -w $tad | grep -w $patient | sort | uniq | cut -d"~" -f3-4`
 			gains=`echo $tss | grep -f - ${outpre}.LoopBroken.motif.gain | awk '{print $1}' | sort | uniq | tr '\n' ';' | sed 's/;$//'`
 			losts=`echo $tss | grep -f - ${outpre}.LoopBroken.motif.lose | awk '{print $1}' | sort | uniq | tr '\n' ';' | sed 's/;$//'`
-			echo $position"	"$mutmotif"	"$gains"	"$losts >> ${outpre}.combined.tsv
+			# echo $position"	"$mutmotif"	"$gains"	"$losts >> ${outpre}.combined.tsv
+			echo $position"	"$mutmotif"	"$gains"	"$losts >> $f.tmp2
 		else
 			echo "" >> ${outpre}.combined.tsv
 		fi
