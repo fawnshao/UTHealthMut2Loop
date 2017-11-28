@@ -31,6 +31,7 @@ for(i in 1:nrow(toprocess)){
 	tad.gene <- unlist(strsplit(as.vector(toprocess[i,4]), ","))
 	p.mut <- as.vector(toprocess[i,5])
 	tad.gene.withexpr <- intersect(gene.name, tad.gene)
+	tad.gene.withexpr <- tad.gene.withexpr[!is.na(tad.gene.withexpr)]
 	if(length(tad.gene.withexpr) > 1){
 		outlier.flag <- c()
 		ctr.mean <- c()
@@ -87,8 +88,9 @@ for(i in 1:nrow(toprocess)){
 			alt.flag <- (out[,6] / zs.mut < 0 | out[,7] / zs.mut < 0)
 			alt.flag[alt.flag == TRUE] <- "Opposite" 
 			alt.flag[alt.flag == FALSE] <- "" 
+			out.data <- data.frame(out, mut.flag, alt.flag)
 			if(flag == 1){
-				write.table(data.frame(out, mut.flag, alt.flag), 
+				write.table(out.data[out.data[,10]=="MutatedPromoter" | out.data[,11]=="Opposite", ], 
 					file = paste(outpre, tad.id, p.mut.s, "tsv", sep = "."), 
 					sep = "\t")
 				print(paste("Shoot:", outpre, tad.id, p.mut.s, sep = "    "))
