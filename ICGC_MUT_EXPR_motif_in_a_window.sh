@@ -344,7 +344,7 @@ do
 	tad=`echo $f | awk -F"." '{print $2}'`
 	patient=`echo $f | awk -F"." '{print $3}'`
 
-	echo "disease	TAD	patient	Gene	" > $f.tmp1
+	echo "disease	TAD	patient	Gene" > $f.tmp1
 	echo "promoter.motif.count	promoter.motifs	mutated.sites	mutated.motifs	mut.motif.gain	mut.motif.lose" > $f.tmp2
 
 	sed -n '2,$p' $f | while read line
@@ -356,6 +356,7 @@ do
 		# echo -n $disease"	"$tad"	"$patient"	" >> ${outpre}.combined.tsv
 		# echo -n $line | awk '{for(i=1;i<=NF;i++){printf "%s\t",$i}}' >> ${outpre}.combined.tsv
 		# echo -n $motifcount"	"$motifs"	" >> ${outpre}.combined.tsv
+		echo $disease"	"$tad"	"$patient >> $f.tmp1
 		if [[ `echo $line | grep MutatedPromoter` ]]; then
 			position=`echo "" | awk -v a=$gene '{print "~"a"|\n;"a"|"}' | grep -f - ${outpre}.LoopBroken.bed | awk '{print $4}' | grep -w $tad | grep -w $patient | sort | uniq | tr '\n' '#' | sed 's/#$//'`
 			mutmotif=`echo "" | awk -v a=$gene '{print "~"a"|\n;"a"|"}' | grep -f - ${outpre}.LoopBroken.motif | grep -w $tad | grep -w $patient | awk '{print $8}' | sort | uniq | tr '\n' ',' | sed 's/,$//'`
@@ -368,7 +369,6 @@ do
 			# echo "" >> ${outpre}.combined.tsv
 			echo $motifcount"	"$motifs >> $f.tmp2
 		fi
-		echo $disease"	"$tad"	"$patient >> $f.tmp1
 	done
 
 	paste $f.tmp1 $f $f.tmp2 | sed -n '2,$p' >> ${outpre}.combined.tsv

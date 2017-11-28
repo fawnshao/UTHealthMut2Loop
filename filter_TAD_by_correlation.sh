@@ -35,6 +35,7 @@ do
 		echo $disease"	"$tad"	"$patient >> $f.tmp1
 		echo $res >> $f.tmp2
 	done
+	sed -i 's/\s/\t/g' $f.tmp2
 	paste $f.tmp1 $f $f.tmp2 | sed -n '2,$p' >> $tsvpre.allwithcor.tsv
 	rm $f.tmp1 $f.tmp2
 done
