@@ -363,9 +363,15 @@ do
 			gains=`echo $tss | grep -f - ${outpre}.LoopBroken.motif.gain | awk '{print $1}' | sort | uniq | tr '\n' ';' | sed 's/;$//'`
 			losts=`echo $tss | grep -f - ${outpre}.LoopBroken.motif.lose | awk '{print $1}' | sort | uniq | tr '\n' ';' | sed 's/;$//'`
 			# echo $position"	"$mutmotif"	"$gains"	"$losts >> ${outpre}.combined.tsv
-			echo $position"	"$mutmotif"	"$gains"	"$losts >> $f.tmp2
+			echo $motifcount"	"$motifs"	"$position"	"$mutmotif"	"$gains"	"$losts >> $f.tmp2
 		else
-			echo "" >> ${outpre}.combined.tsv
+			# echo "" >> ${outpre}.combined.tsv
+			echo $motifcount"	"$motifs >> $f.tmp2
 		fi
+		echo $disease"	"$tad"	"$patient"	" >> $f.tmp1
 	done
+
+	paste $f.tmp1 $f $f.tmp2 | sed -n '2,$p' >> ${outpre}.combined.tsv
+	rm $f.tmp1 $f.tmp2
+
 done

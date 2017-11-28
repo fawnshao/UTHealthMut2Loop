@@ -32,7 +32,7 @@ do
 			# echo "" >> $tsvpre.allwithcor.tsv
 			res="/"
 		fi
-		echo $disease"	"$tad"	"$patient"	" >> $f.tmp1
+		echo $disease"	"$tad"	"$patient >> $f.tmp1
 		echo $res >> $f.tmp2
 	done
 	paste $f.tmp1 $f $f.tmp2 | sed -n '2,$p' >> $tsvpre.allwithcor.tsv
