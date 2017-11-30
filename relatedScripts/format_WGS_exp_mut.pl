@@ -10,7 +10,7 @@ open(IN, $ARGV[0]) or die "can not open $ARGV[0]\n\n";
 while(<IN>){
 	chomp;
 	@t = split(/\t/);
-	$id = $t[0].":"$t[1];
+	$id = $t[0].":".$t[1];
 	$exp{$id} = $t[2];
 	$expid{$t[0]} = 1;
 	$expgene{$t[1]} = 1;
@@ -21,10 +21,10 @@ open(IN, $ARGV[1]) or die "can not open $ARGV[1]\n";
 while(<IN>){
 	chomp;
 	@t = split(/\t/);
-	$id = $t[3].":".$t[0].":"$t[1].":".$t[2];
+	$id = $t[3].":".$t[0].":".$t[1].":".$t[2];
 	$mut{$id} = 1;
 	$mutid{$t[3]} = 1;
-	$id = $t[0].":"$t[1].":".$t[2];
+	$id = $t[0].":".$t[1].":".$t[2];
 	$mutpos{$id} = 1;
 }
 close(IN);
