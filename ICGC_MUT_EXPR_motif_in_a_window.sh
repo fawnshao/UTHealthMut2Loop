@@ -1,5 +1,6 @@
 #!/bin/sh
 bindir=/home1/04935/shaojf/myTools/UTHealthMut2Loop
+corDIR=/home1/04935/shaojf/stampede2/mutations/ICGC/correlation
 module load Rstats
 # TSS should be 6-column sorted bed files
 # in this version NO TAD is needed
@@ -329,8 +330,9 @@ rm ${outpre}.multiple.p.TAD ${outpre}.multiple.pMUT.TAD # ${outpre}.multiple.pMU
 # rm ${outpre}.extended.TAD ${outpre}.extended.TAD.mut
 # rm ${outpre}.IamGroot.Rinput ${outpre}.WGS.sampleid
 
-sh $bindir/ICGC_fimo_denovo_motif_in_LoopShiftMut.sh ${outpre}
-
+sh $bindir/ICGC_fimo_denovo_motif_in_LoopShiftMut.sh ${outpre} &
+sh $bindir/filter_TAD_by_correlation.sh ${outpre} $corDIR/correlated.${outpre}.tsv &
+wait
 # put all the results together
 # ${outpre}.LoopBroken.motif
 echo -n "disease	TAD	patient	Gene	" > ${outpre}.combined.tsv
