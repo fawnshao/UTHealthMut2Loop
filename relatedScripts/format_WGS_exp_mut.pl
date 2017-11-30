@@ -35,7 +35,7 @@ foreach $es (sort keys %expid){
 	}
 }
 
-$expout = $ARGV[2]."bothWGS.exp.tsv";
+$expout = $ARGV[2].".bothWGS.exp.tsv";
 open(OUT, ">$expout");
 print OUT "Gene";
 foreach $sample(sort keys %both){
@@ -56,7 +56,7 @@ foreach $g(sort keys %expgene){
 }
 close(OUT);
 
-$mutout = $ARGV[2]."bothWGS.mut.tsv";
+$mutout = $ARGV[2].".bothWGS.mut.tsv";
 open(OUT, ">$mutout");
 print OUT "Mut";
 foreach $sample(sort keys %both){
