@@ -34,6 +34,8 @@ foreach $es (sort keys %expid){
 		$both{$es} = 1;
 	}
 }
+undef %expid;
+undef %mutid;
 
 $expout = $ARGV[2].".bothWGS.exp.tsv";
 open(OUT, ">$expout");
@@ -55,6 +57,8 @@ foreach $g(sort keys %expgene){
 	print OUT "\n";
 }
 close(OUT);
+undef %exp;
+undef %expgene;
 
 $mutout = $ARGV[2].".bothWGS.mut.tsv";
 open(OUT, ">$mutout");
@@ -76,3 +80,6 @@ foreach $g(sort keys %mutpos){
 	print OUT "\n";
 }
 close(OUT);
+undef %mut;
+undef %mutpos;
+undef %both;
