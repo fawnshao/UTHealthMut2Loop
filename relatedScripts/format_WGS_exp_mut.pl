@@ -50,9 +50,13 @@ foreach $g(sort keys %expgene){
 	foreach $sample(sort keys %both){
 		$id = $sample.":".$g;
 		if(not exists $exp{$id}){
-			$exp{$id} = 0
+			# $exp{$id} = 0
+			print OUT "\t0";
 		}
-		print OUT "\t$exp{$id}";
+		else{
+			print OUT "\t$exp{$id}";
+		}
+		# print OUT "\t$exp{$id}";
 	}
 	print OUT "\n";
 }
@@ -73,9 +77,13 @@ foreach $g(sort keys %mutpos){
 	foreach $sample(sort keys %both){
 		$id = $sample.":".$g;
 		if(not exists $mut{$id}){
-			$mut{$id} = 0
+			# $mut{$id} = 0;
+			print OUT "\t0";
 		}
-		print OUT "\t$mut{$id}";
+		else{
+			print OUT "\t$mut{$id}";
+		}
+		# print OUT "\t$mut{$id}";
 	}
 	print OUT "\n";
 }
