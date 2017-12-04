@@ -2,6 +2,8 @@
 %hash = ();
 open(IN, $ARGV[0]) or die "can not open $ARGV[0]\n";
 <IN>;
+chomp;
+print "$_\n";
 while(<IN>){
 	chomp;
 	@t = split(/\s/);
