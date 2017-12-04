@@ -11,9 +11,9 @@ outpre <- args[4]
 data <- as.matrix(read.table(expr, sep = "\t", row.names = 1, skip = 1))
 gene.name <- rownames(data)
 sample.name <- as.matrix(read.table(expr, sep = "\t", row.names = 1, nrow = 1))
-m.data <- as.matrix(read.table(mutmat, sep = "\t", row.names = 1, skip = 1))
-m.gene.name <- rownames(m.data)
-m.sample.name <- as.matrix(read.table(mutmat, sep = "\t", row.names = 1, nrow = 1))
+# m.data <- as.matrix(read.table(mutmat, sep = "\t", row.names = 1, skip = 1))
+# m.gene.name <- rownames(m.data)
+# m.sample.name <- as.matrix(read.table(mutmat, sep = "\t", row.names = 1, nrow = 1))
 
 toprocess <- read.table(list, header = T)
 ifLoop <- rep(" ", nrow(toprocess))
