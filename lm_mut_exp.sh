@@ -18,3 +18,5 @@ bedtools closest -D b -a - -b $tssBED | \
 awk -F "\t" -v var=$promoterLEN -v OFS="\t" \
 '$(NF-6)!="." && $NF > -1 * var && $NF < var {print $1":"$2":"$3,$7"~"$10}' | \
 perl $bindir/relatedScripts/add_any_2files_together.pl $matrixdir/$pre.bothWGS.mut.tsv /dev/stdin 0 0 | cut -f 2,4- >> $pre.p.mut.tsv
+
+Rscript $bindir/ICGC_mut2exp_lm.R $expMAT.WGS.sim $f.title $f &

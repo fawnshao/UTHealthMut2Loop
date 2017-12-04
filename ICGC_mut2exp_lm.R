@@ -29,13 +29,15 @@ for(i in 1:nrow(toprocess)){
 	tad.gene.withexpr <- tad.gene.withexpr[!is.na(tad.gene.withexpr)]
 	if(length(tad.gene.withexpr) > 1){
 		x1 <- is.element(sample.name, p.mut.s)
+		x2 <- is.element(sample.name, tad.mut.s)
 		lm.res <- data.frame()
 		tad.expr <- data.frame()
 		for(j in 1:length(tad.gene.withexpr)){
-			lm.fit <- summary(lm(data[gene.name == tad.gene.withexpr[j], ] ~ x1))
+			lm.fit <- summary(lm(data[gene.name == tad.gene.withexpr[j], x1==TRUE | x2==FALSE] ~ x1[x1==TRUE | x2==FALSE]))
+			# summary(lm(data[gene.name == tad.gene.withexpr[j], ] ~ x1))
 			lm.res <- rbind.data.frame(lm.res, lm.fit$coefficients[2,c(1,4)])
 			mut <- paste(format(data[gene.name == tad.gene.withexpr[j], x1==TRUE], format = "e", digits = 2), collapse=";")
-			ctr <- paste(format(data[gene.name == tad.gene.withexpr[j], x1==FALSE], format = "e", digits = 2), collapse=";")
+			ctr <- paste(format(data[gene.name == tad.gene.withexpr[j], x1==FALSE & x2==FALSE], format = "e", digits = 2), collapse=";")
 			tad.expr <- rbind.data.frame(tad.expr, cbind(mut, ctr))
 		}
 		rownames(tad.expr) <- tad.gene.withexpr
