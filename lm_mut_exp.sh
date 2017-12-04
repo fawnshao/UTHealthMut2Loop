@@ -10,7 +10,7 @@ module load Rstats
 # promoterLEN=1000
 pre=COAD-US
 matrixdir=/home1/04935/shaojf/stampede2/mutations/ICGC/lm/mut_exp_matrix
-np=32
+np=68
 
 # head -1 $matrixdir/$pre.bothWGS.mut.tsv > $pre.p.mut.tsv
 # cut -f 1 $matrixdir/$pre.bothWGS.mut.tsv | \
