@@ -1,9 +1,9 @@
 #!/usr/bin/perl
 %hash = ();
 open(IN, $ARGV[0]) or die "can not open $ARGV[0]\n";
-<IN>;
-chomp;
-print "$_\n";
+$line = <IN>;
+chomp $line;
+print "$line\n";
 while(<IN>){
 	chomp;
 	@t = split(/\s/);
