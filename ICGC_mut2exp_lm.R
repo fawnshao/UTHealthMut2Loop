@@ -3,24 +3,23 @@
 # outpre <- "TAD.exp.COAD"
 args <- commandArgs(TRUE)
 expr <- args[1]
-mut <- args[2]
+mutmat <- args[2]
 list <- args[3]
 outpre <- args[4]
 
-# can not as.matrix, otherwise the expression will be strings, not numeric
-data <- read.table(expr, sep = "\t", header = T, row.names = 1)
-sample.name <- colnames(data)
+# some samples will have duplication, so not use header = T
+data <- as.matrix(read.table(expr, sep = "\t", row.names = 1, skip = 1))
 gene.name <- rownames(data)
-m.data <- read.table(mut, sep = "\t", header = T, row.names = 1)
-m.sample.name <- colnames(data)
-m.gene.name <- rownames(data)
+sample.name <- as.matrix(read.table(expr, sep = "\t", row.names = 1, nrow = 1))
+m.data <- as.matrix(read.table(mutmat, sep = "\t", row.names = 1, skip = 1))
+m.gene.name <- rownames(m.data)
+m.sample.name <- as.matrix(read.table(mutmat, sep = "\t", row.names = 1, nrow = 1))
 
 toprocess <- read.table(list, header = T)
 ifLoop <- rep(" ", nrow(toprocess))
-expr.cutoff <- summary(data[data>0])[2]
-print(paste("expression levels:", expr.cutoff, sep = "    "))
+# expr.cutoff <- summary(data[data>0])[2]
+# print(paste("expression levels:", expr.cutoff, sep = "    "))
 for(i in 1:nrow(toprocess)){
-	# print(toprocess[i,1:2])
 	tad.id <- unlist(strsplit(as.vector(toprocess[i,1]), ","))
 	p.mut.s <- unlist(strsplit(as.vector(toprocess[i,2]), ","))
 	tad.mut.s <- unlist(strsplit(as.vector(toprocess[i,3]), ","))
@@ -29,65 +28,41 @@ for(i in 1:nrow(toprocess)){
 	tad.gene.withexpr <- intersect(gene.name, tad.gene)
 	tad.gene.withexpr <- tad.gene.withexpr[!is.na(tad.gene.withexpr)]
 	if(length(tad.gene.withexpr) > 1){
-		x1 <- 
-		outlier.flag <- c()
-		ctr.mean <- c()
-		mut.mean <- c()
-		ctr.sd <- c()
-		mut.exp <- c()
-		ctr.exp <- c()
-		all.mean <- c()
-		all.sd <- c()
+		x1 <- is.element(sample.name, p.mut.s)
+		lm.res <- data.frame()
+		tad.expr <- data.frame()
 		for(j in 1:length(tad.gene.withexpr)){
-			ctr <- data[gene.name == tad.gene.withexpr[j] & !is.element(sample.name, tad.mut.s), 3]
-			mut <- data[gene.name == tad.gene.withexpr[j] & is.element(sample.name, p.mut.s), 3]
-			### some genes in some projects will be missed. make it to be 0
-			if(length(mut) == 0){
-				mut <- 0
-			}
-			###
-			mut.mean[j] <- mean(mut)
-			ctr.mean[j] <- mean(ctr)
-			ctr.sd[j] <- sd(ctr)
-			outlier.flag[j] <- paste(is.element(mut, boxplot.stats(c(ctr, mut))$out), collapse=";")
-			mut.exp[j] <- paste(format(mut, format = "e", digits = 2), collapse=";")
-			ctr.exp[j] <- paste(format(ctr, format = "e", digits = 2), collapse=";")
-			# all <- as.numeric(as.matrix(allx[allx.gene == tad.gene.withexpr[j], 3]))
-			all <- allx[allx.gene == tad.gene.withexpr[j], 3]
-			all.mean[j] <- mean(all)
-			all.sd[j] <- sd(all)
+			lm.fit <- summary(lm(data[gene.name == tad.gene.withexpr[j], ] ~ x1))
+			lm.res <- rbind.data.frame(lm.res, lm.fit$coefficients[2,c(1,4)])
+			mut <- paste(format(data[gene.name == tad.gene.withexpr[j], x1==TRUE], format = "e", digits = 2), collapse=";")
+			ctr <- paste(format(data[gene.name == tad.gene.withexpr[j], x1==FALSE], format = "e", digits = 2), collapse=";")
+			tad.expr <- rbind.data.frame(tad.expr, cbind(mut, ctr))
 		}
-		zscore.1 <- (mut.mean - ctr.mean) / ctr.sd
-		zscore.2 <- (mut.mean - all.mean) / all.sd
-		fc <- mut.mean / ctr.mean
-		t <- data.frame(mut.mean, ctr.mean, ctr.sd, fc, outlier.flag, zscore.1, zscore.2, mut.exp, ctr.exp)
-		rownames(t) <- tad.gene.withexpr
-		# colnames(t) <- c(p.mut.s, "Average-nonmut-Tumor-Sample", "SD-nonmut-Tumor-Sample", "Fold-Change", "is.outlier", "Z score")
-		# summary(data[data[,3] > 0,3])
+		rownames(tad.expr) <- tad.gene.withexpr
+		colnames(tad.expr) <- c("mut","non-mut")
+		rownames(lm.res) <- tad.gene.withexpr
+		colnames(lm.res) <- colnames(lm.fit$coefficients)[c(1,4)]
+		lm.res <- data.frame(lm.res, tad.expr)
+		lm.res <- na.omit(lm.res[lm.res[,2] < 0.1,])
 		# some are FPKM, and some are not. so use median value as cut off
-		out.1 <- t[(t[,6] > 1.645 | t[,7] > 1.645) & t[,1] > expr.cutoff, ]
-		out.2 <- t[(t[,6] < -1.645 | t[,7] < -1.645) & t[,2] > expr.cutoff, ]
-		if(nrow(out.1) > 0 && nrow(out.2) > 0){
-			out <- rbind.data.frame(out.1, out.2)
+		if(sum(lm.res[,1]>0) > 0 && sum(lm.res[,1]<0) > 0){
 			flag <- 0
 			zs.mut <- 1
-			mut.flag <- rep("", nrow(out))
-			for(j in 1:nrow(out)){
-				if(length(grep(pattern = paste("^", rownames(out)[j], "\\|", sep = ""), x = p.mut)) > 0 || 
-					length(grep(pattern = paste(";", rownames(out)[j], "\\|", sep = ""), x = p.mut)) > 0){
+			mut.flag <- rep("", nrow(lm.res))
+			for(j in 1:nrow(lm.res)){
+				if(length(grep(pattern = paste("^", rownames(lm.res)[j], "\\|", sep = ""), x = p.mut)) > 0 || 
+					length(grep(pattern = paste(";", rownames(lm.res)[j], "\\|", sep = ""), x = p.mut)) > 0){
 					flag <- 1
 					mut.flag[j] <- "MutatedPromoter"
-					# zs.mut <- out[j,6]
-					o <- out[j,6:7]
-					zs.mut <- o[abs(o)==max(abs(o))]
+					zs.mut <- lm.res[j,1]
 				}
 			}
-			alt.flag <- (out[,6] / zs.mut < 0 | out[,7] / zs.mut < 0)
-			alt.flag[alt.flag == TRUE] <- "Opposite" 
-			alt.flag[alt.flag == FALSE] <- "" 
-			out.data <- data.frame(out, mut.flag, alt.flag)
 			if(flag == 1){
-				write.table(out.data[out.data[,10]=="MutatedPromoter" | out.data[,11]=="Opposite", ], 
+				alt.flag <- (lm.res[,1] / zs.mut < 0)
+				alt.flag[alt.flag == TRUE] <- "Opposite" 
+				alt.flag[alt.flag == FALSE] <- "" 
+				out.data <- data.frame(lm.res, mut.flag, alt.flag)
+				write.table(out.data[out.data[,5]=="MutatedPromoter" | out.data[,6]=="Opposite", ], 
 					file = paste(outpre, tad.id, p.mut.s, "tsv", sep = "."), 
 					sep = "\t")
 				print(paste("Shoot:", outpre, tad.id, p.mut.s, sep = "    "))
