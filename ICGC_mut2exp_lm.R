@@ -3,9 +3,9 @@
 # outpre <- "TAD.exp.COAD"
 args <- commandArgs(TRUE)
 expr <- args[1]
-mutmat <- args[2]
-list <- args[3]
-outpre <- args[4]
+# mutmat <- args[2]
+list <- args[2]
+outpre <- args[3]
 
 # some samples will have duplication, so not use header = T
 data <- as.matrix(read.table(expr, sep = "\t", row.names = 1, skip = 1))
