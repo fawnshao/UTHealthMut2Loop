@@ -20,5 +20,5 @@ while(<IN>){
 }
 close(IN);
 foreach $k(keys %hash){
-	print "$hash{$k}\s$k\n";
+	print "$hash{$k} $k\n";
 }
