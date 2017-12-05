@@ -18,7 +18,7 @@ awk -F"\t" '{print ">"$1"."$2"."$3"\n"$5}' $pre.LoopBroken.mut.txt | paste $pre.
 awk -F"\t" '{print ">"$1"."$2"."$3"\n"$6}' $pre.LoopBroken.mut.txt | paste $pre.LoopBroken.left.fa - $pre.LoopBroken.right.fa | sed 's/\t//g' | sed '2~2s/-//g' > $pre.mut.fa
 
 # put the gene name in the fasta head
-grep ">" $pre.ref.fa  | cut -d">" -f 3 | awk -F"." '{print $2"\t"$3-1}' | grep -wf - $pre.LoopBroken.bed | sed 's/~/\t/g' | awk '{print $1"."$3"\t"$6"~"$7}' | uniq > $pre.a
+grep ">" $pre.ref.fa  | cut -d">" -f 3 | awk -F"." '{print $2"\t"$3-1}' | grep -wf - $pre.LoopBroken.bed | sed 's/~/\t/g' | awk '{print $1"."$3"\t"$6"~"$7}' | sort | uniq > $pre.a
 echo -n "" > $pre.b
 grep ">" $pre.ref.fa  | cut -d">" -f 3 | awk -F"." '{print $2"."$3}' | while read line
 do
