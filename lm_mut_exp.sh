@@ -20,23 +20,24 @@ np=69
 # '$(NF-6)!="." && $NF > -1 * var && $NF < var {print $1":"$2":"$3,$7"~"$10}' | \
 # perl $bindir/relatedScripts/add_any_2files_together.pl $matrixdir/$pre.bothWGS.mut.tsv /dev/stdin 0 0 | cut -f 2,4- >> $pre.p.mut.tsv
 
-count=`wc -l ${pre}.IamGroot.Rinput | awk '{print $1}'`
+perl $bindir/relatedScripts/remove_duplicates_for_IamGroot.pl ${pre}.IamGroot.Rinput > sim.${pre}.IamGroot.Rinput 
+count=`wc -l sim.${pre}.IamGroot.Rinput | awk '{print $1}'`
 echo +++++++++ Running Rscript to output loop translocate candidates  ++++++++
 # use Z score to find the expression alteration direction in the TAD
 if [ $count -lt 100 ]
 	then
 	echo Running in one piece
-	Rscript $bindir/ICGC_mut2exp_lm.R $matrixdir/$pre.bothWGS.exp.tsv $matrixdir/$pre.bothWGS.mut.tsv $pre.IamGroot.Rinput $pre
+	Rscript $bindir/ICGC_mut2exp_lm.R $matrixdir/$pre.bothWGS.exp.tsv sim.$pre.IamGroot.Rinput $pre
 else
 	echo Running in many pieces
 	date
 	each=`echo $count/$np | bc`
-	sed -n '2,$p' ${pre}.IamGroot.Rinput | split -l $each /dev/stdin ${pre}.IamGroot.Rinput.
+	sed -n '2,$p' sim.${pre}.IamGroot.Rinput | split -l $each /dev/stdin ${pre}.IamGroot.Rinput.
 	for f in ${pre}.IamGroot.Rinput.*
 	do
 		echo "TAD sample mutsample genes mutgene" | cat - $f > $f.title
 		rm $f
-		Rscript $bindir/ICGC_mut2exp_lm.R $matrixdir/$pre.bothWGS.exp.tsv $matrixdir/$pre.bothWGS.mut.tsv $f.title $f &
+		Rscript $bindir/ICGC_mut2exp_lm.R $matrixdir/$pre.bothWGS.exp.tsv $f.title $f &
 	done
 	wait
 	echo Finishing all pieces
