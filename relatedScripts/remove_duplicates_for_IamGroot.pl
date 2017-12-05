@@ -7,16 +7,22 @@ print "$line\n";
 while(<IN>){
 	chomp;
 	@t = split(/\s/);
-	@tt = split(/;/, $t[4]);
+	@tt = split(/,/, $t[4]);
 	%gene = ();
 	foreach $p(@tt){
-		@ttt = split(/\|/, $p);
-		$gene{$ttt[0]} = 1;
+		@ttt = split(/;/, $p);
+		foreach $pp(@ttt){
+			@tttt = split(/\|/, $pp);
+			$gene{$tttt[0]} = 1;
+		}
 	}
+	$mutp="";
 	foreach $g(keys %gene){
-		$id = join(" ", $t[1], $t[2], $t[3], $g);
-		$hash{$id} = $t[0];
+		$mutp .= $g.",";
 	}
+	$mutp =~ s/,$//;
+	$id = join(" ", $t[1], $t[2], $t[3], $mutp);
+	$hash{$id} = $t[0];
 }
 close(IN);
 foreach $k(keys %hash){

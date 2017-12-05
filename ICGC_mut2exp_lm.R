@@ -47,32 +47,48 @@ for(i in 1:nrow(toprocess)){
 		lm.res <- data.frame(lm.res, tad.expr)
 		lm.res <- na.omit(lm.res[lm.res[,2] < 0.1,])
 		# some are FPKM, and some are not. so use median value as cut off
-		if(sum(lm.res[,1]>0) > 0 && sum(lm.res[,1]<0) > 0){
-			flag <- 0
-			zs.mut <- 1
+		if(sum(lm.res[,1]>0) > 0 && sum(lm.res[,1]<0) > 0 && is.element(p.mut, rownames(lm.res))){
+			zs.mut <- lm.res[is.element(rownames(lm.res),p.mut), 1]
 			mut.flag <- rep("", nrow(lm.res))
-			for(j in 1:nrow(lm.res)){
-				if(length(grep(pattern = paste("^", rownames(lm.res)[j], "\\|", sep = ""), x = p.mut)) > 0 || 
-					length(grep(pattern = paste(";", rownames(lm.res)[j], "\\|", sep = ""), x = p.mut)) > 0){
-					flag <- 1
-					mut.flag[j] <- "MutatedPromoter"
-					zs.mut <- lm.res[j,1]
-				}
-			}
-			if(flag == 1){
-				alt.flag <- (lm.res[,1] / zs.mut < 0)
-				alt.flag[alt.flag == TRUE] <- "Opposite" 
-				alt.flag[alt.flag == FALSE] <- "" 
-				out.data <- data.frame(lm.res, mut.flag, alt.flag)
-				write.table(out.data[out.data[,5]=="MutatedPromoter" | out.data[,6]=="Opposite", ], 
-					file = paste(outpre, tad.id, p.mut.s, "tsv", sep = "."), 
-					sep = "\t")
-				print(paste("Shoot:", outpre, tad.id, p.mut.s, sep = "    "))
-				# write.table(data.frame(out, mut.flag), 
-				# 	file = paste(x, y, "csv", sep = "."), 
-				# 	sep = "\t", quote = TRUE, col.names = TRUE, row.names = TRUE)
-				ifLoop[i] <- "LoopBroken"
-			}
+			mut.flag[is.element(rownames(lm.res),p.mut)] <- "MutatedPromoter"
+			alt.flag <- (lm.res[,1] / zs.mut < 0)
+			alt.flag[alt.flag == TRUE] <- "Opposite" 
+			alt.flag[alt.flag == FALSE] <- "" 
+			out.data <- data.frame(lm.res, mut.flag, alt.flag)
+			write.table(out.data[out.data[,5]=="MutatedPromoter" | out.data[,6]=="Opposite", ], 
+				file = paste(outpre, tad.id, p.mut.s, "tsv", sep = "."), 
+				sep = "\t")
+			print(paste("Shoot:", outpre, tad.id, p.mut.s, sep = "    "))
+			# write.table(data.frame(out, mut.flag), 
+			# 	file = paste(x, y, "csv", sep = "."), 
+			# 	sep = "\t", quote = TRUE, col.names = TRUE, row.names = TRUE)
+			ifLoop[i] <- "LoopBroken"
+			# flag <- 0
+			# zs.mut <- 1
+			# mut.flag <- rep("", nrow(lm.res))
+			# for(j in 1:nrow(lm.res)){
+			# 	# if(length(grep(pattern = paste("^", rownames(lm.res)[j], "\\|", sep = ""), x = p.mut)) > 0 || 
+			# 	# 	length(grep(pattern = paste(";", rownames(lm.res)[j], "\\|", sep = ""), x = p.mut)) > 0){
+			# 		if(rownames(lm.res)[j] == p.mut){
+			# 		flag <- 1
+			# 		mut.flag[j] <- "MutatedPromoter"
+			# 		zs.mut <- lm.res[j,1]
+			# 	}
+			# }
+			# if(flag == 1){
+			# 	alt.flag <- (lm.res[,1] / zs.mut < 0)
+			# 	alt.flag[alt.flag == TRUE] <- "Opposite" 
+			# 	alt.flag[alt.flag == FALSE] <- "" 
+			# 	out.data <- data.frame(lm.res, mut.flag, alt.flag)
+			# 	write.table(out.data[out.data[,5]=="MutatedPromoter" | out.data[,6]=="Opposite", ], 
+			# 		file = paste(outpre, tad.id, p.mut.s, "tsv", sep = "."), 
+			# 		sep = "\t")
+			# 	print(paste("Shoot:", outpre, tad.id, p.mut.s, sep = "    "))
+			# 	# write.table(data.frame(out, mut.flag), 
+			# 	# 	file = paste(x, y, "csv", sep = "."), 
+			# 	# 	sep = "\t", quote = TRUE, col.names = TRUE, row.names = TRUE)
+			# 	ifLoop[i] <- "LoopBroken"
+			# }
 		}
 	}
 }
