@@ -17,9 +17,12 @@ close(IN);
 
 foreach $k(keys %hash){
 	# @genes = sort keys { map { $_ => 1 } @{$hash{$k}} };
+	# error for v5.10.0
 	@genes = uniq (@{$hash{$k}});
-	$gs = join(",", @genes);
-	print "$k\t$gs\n";
+	if(@genes > 1){
+		$gs = join(",", @genes);
+		print "$k\t$gs\n";
+	}
 }
 
 sub uniq {

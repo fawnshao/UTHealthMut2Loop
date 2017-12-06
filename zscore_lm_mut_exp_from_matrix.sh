@@ -18,7 +18,7 @@ awk -F "\t" -v var=$winSIZE -v OFS="\t" \
 cut -f 1 $matrixdir/$pre.bothWGS.mut.tsv | \
 sed 's/:/\t/g' | sed -n '2,$p' | bedtools intersect -wao -a - -b $tssBED.win.4.$pre | \
 awk '$NF > 0 {print $1":"$2":"$3"\t"$7}' | \
-perl $bindir/relatedScripts/make_mut_exp_pairs.pl /dev/stdin > $pre.win.mut.tsv
+perl $bindir/relatedScripts/make_mut_exp_pairs.pl /dev/stdin > $pre.mw.mut.tsv
 
 head -1 $matrixdir/$pre.bothWGS.mut.tsv > $pre.p.mut.tsv
 cut -f 1 $matrixdir/$pre.bothWGS.mut.tsv | \
@@ -28,7 +28,6 @@ awk -F "\t" -v var=$promoterLEN -v OFS="\t" \
 '$(NF-6)!="." && $NF > -1 * var && $NF < var {print $1":"$2":"$3,$7"~"$10}' | \
 perl $bindir/relatedScripts/add_any_2files_together.pl $matrixdir/$pre.bothWGS.mut.tsv /dev/stdin  0 0 | \
 cut -f 1-2,4- | sed 's/\t/:/' >> $pre.p.mut.tsv
-
 
 
 
