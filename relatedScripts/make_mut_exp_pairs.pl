@@ -14,8 +14,8 @@ while(<IN>){
 	}
 }
 close(IN);
-foreach my $k(keys %hash){
-	my @genes = sort keys { map { $_ => 1 } @{$hash{$k}} };
-	my $gs = join(",", @genes);
+foreach $k(keys %hash){
+	@genes = sort keys { map { $_ => 1 } @{$hash{$k}} };
+	$gs = join(",", @genes);
 	print "$k\t$gs\n";
 }
