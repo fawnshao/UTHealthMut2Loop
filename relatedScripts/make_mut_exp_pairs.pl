@@ -14,8 +14,15 @@ while(<IN>){
 	}
 }
 close(IN);
+
 foreach $k(keys %hash){
-	@genes = sort keys { map { $_ => 1 } @{$hash{$k}} };
+	# @genes = sort keys { map { $_ => 1 } @{$hash{$k}} };
+	@genes = uniq (@{$hash{$k}});
 	$gs = join(",", @genes);
 	print "$k\t$gs\n";
+}
+
+sub uniq {
+	my %seen;
+	return grep { !$seen{$_}++ } @_;
 }
