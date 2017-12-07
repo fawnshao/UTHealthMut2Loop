@@ -36,11 +36,11 @@ for(i in 1:nrow(m.data)){
 	tadgene <- intersect(unlist(strsplit(m.info[i,3], split=",")), gene.name)
 	for(j in 1:length(tadgene)){
 		lm.fit <- summary(lm(data[gene.name==tadgene[j],] ~ m.data[i,]))
-		wt <- sd(data[gene.name==tadgene[j], m.sample.name!=mutsample])
+		wt <- sd(data[gene.name==tadgene[j], m.data[i,]!=1])
 		if(wt == 0){
 			wt <- 1
 		}
-		z <- (mean(data[gene.name==tadgene[j],m.sample.name==mutsample]) - mean(data[gene.name==tadgene[j], m.sample.name!=mutsample])) / wt
+		z <- (mean(data[gene.name==tadgene[j], m.data[i,]==1]) - mean(data[gene.name==tadgene[j], m.data[i,]!=1])) / wt
 		if((lm.fit$coefficients[2,4] < 0.1 && !is.na(lm.fit$coefficients[2,4])) || abs(z) > 1.5){
 			mutation <- c(mutation, mutpos)
 			gene <-c(gene, tadgene[j])
@@ -48,8 +48,8 @@ for(i in 1:nrow(m.data)){
 			pvalue <- c(pvalue,lm.fit$coefficients[2,4])
 			sample <- c(sample, mutsample)
 			zscore <- c(zscore, z)
-			mutexp <- c(mutexp, paste(data[gene.name==tadgene[j], m.sample.name==mutsample], collapse = ","))
-			ctrexp <- c(ctrexp, paste(data[gene.name==tadgene[j], m.sample.name!=mutsample], collapse = ","))
+			mutexp <- c(mutexp, paste(data[gene.name==tadgene[j], m.data[i,]==1], collapse = ","))
+			ctrexp <- c(ctrexp, paste(data[gene.name==tadgene[j], m.data[i,]!=1], collapse = ","))
 			corval <- c.data[(c.data[,1]==tadgene[j] & c.data[,2]==mutgene) | (c.data[,2]==tadgene[j] & c.data[,1]==mutgene), 3:6]
 			if(nrow(corval) == 0){
 				corval <- rep("/", 4)
