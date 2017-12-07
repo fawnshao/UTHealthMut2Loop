@@ -62,6 +62,7 @@ for(i in 1:nrow(m.data)){
 		mutflag <- rep("", length(gene))
 		mutflag[gene==mutgene] <- "MutatedPromoter"
 		expfc <- zscore / zscore[gene==mutgene]
+		expflag <- rep("", length(gene))
 		expflag[expfc < 0] <- "Opposite"
 		expflag[expfc > 0] <- ""
 		# dimnames(cor.mat) <- c()
