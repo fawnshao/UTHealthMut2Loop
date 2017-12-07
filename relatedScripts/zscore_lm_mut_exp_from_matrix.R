@@ -54,7 +54,8 @@ for(i in 1:nrow(m.data)){
 			if(nrow(corval) == 0){
 				corval <- rep("/", 4)
 			}
-			cor.mat <- rbind(cor.mat, corval)
+			# dimnames(cor.mat) <- c()
+			cor.mat <- rbind(cor.mat, unlist(corval))
 		}
 	}
 	if(length(gene) > 1 && is.element(mutgene, gene) && length(zscore > 0) > 0 && length(zscore < 0) > 0){
