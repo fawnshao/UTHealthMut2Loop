@@ -1,12 +1,12 @@
 args <- commandArgs(TRUE)
 expr <- args[1]
 mutmat <- args[2]
-cor <- args[3]
+corr <- args[3]
 outpre <- args[4]
 
 # expr <- "mut_exp_matrix/COAD-US.bothWGS.exp.tsv"
 # mutmat <- "COAD-US.p.mut.tsv"
-# cor <- "correlation/correlated.COAD-US.tsv"
+# corr <- "correlation/correlated.COAD-US.tsv"
 # outpre <- "COAD-US"
 
 # some samples will have duplication, so not use header = T
@@ -16,7 +16,7 @@ gene.name <- rownames(data)
 m.data <- as.matrix(read.table(mutmat, sep = "\t", row.names = 1, skip = 1))
 m.info <- matrix(unlist(strsplit(rownames(m.data), split="%")), ncol = 3, byrow = T)
 m.sample.name <- as.matrix(read.table(mutmat, sep = "\t", row.names = 1, nrow = 1))
-c.data <- read.table(cor, sep = "\t")
+c.data <- read.table(corr, sep = "\t")
 # c.data[c.data[,1]=="APC" & c.data[,2]=="NIN",]
 # m.data[rowSums(m.data)>5,]
 for(i in 1:nrow(m.data)){
