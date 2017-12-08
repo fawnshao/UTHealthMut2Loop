@@ -4,10 +4,10 @@ mutmat <- args[2]
 corr <- args[3]
 outpre <- args[4]
 
-expr <- "../mut_exp_matrix/COAD-US.bothWGS.exp.tsv"
-mutmat <- "COAD-US.p.mut.tsv"
-corr <- "../correlation/correlated.COAD-US.tsv"
-outpre <- "COAD-US"
+# expr <- "../mut_exp_matrix/COAD-US.bothWGS.exp.tsv"
+# mutmat <- "COAD-US.p.mut.tsv"
+# corr <- "../correlation/correlated.COAD-US.tsv"
+# outpre <- "COAD-US"
 
 # some samples will have duplication, so not use header = T
 data <- as.matrix(read.table(expr, sep = "\t", row.names = 1, skip = 1))
