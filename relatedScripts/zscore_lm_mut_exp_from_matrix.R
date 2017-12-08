@@ -58,7 +58,7 @@ for(i in 1:nrow(m.data)){
 			cor.mat <- rbind(cor.mat, unlist(corval))
 		}
 	}
-	if(length(gene) > 1 && is.element(mutgene, gene) && length(zscore > 0) > 0 && length(zscore < 0) > 0){
+	if(length(gene) > 1 && is.element(mutgene, gene) && length(zscore[zscore>0]) > 0 && length(zscore[zscore<0]) > 0){
 		mutflag <- rep("", length(gene))
 		mutflag[gene==mutgene] <- "MutatedPromoter"
 		expfc <- zscore / zscore[gene==mutgene]
