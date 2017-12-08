@@ -44,7 +44,7 @@ do
 	Rscript $bindir/relatedScripts/zscore_lm_mut_exp_from_matrix.R $matrixdir/$pre.bothWGS.exp.tsv $f.title $cordir/correlated.$pre.tsv $f &
 done
 wait
-cat $pre.tmp.*.exp2mut.lm.tsv | sort | uniq > $pre.exp2mut.lm.tsv
+cat $pre.tmp.*.exp2mut.lm.tsv | sort -r | uniq > $pre.exp2mut.lm.tsv
 rm $pre.tmp.*
 echo ++++++++finished+++++++
 date
