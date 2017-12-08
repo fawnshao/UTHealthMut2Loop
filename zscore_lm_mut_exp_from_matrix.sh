@@ -2,7 +2,7 @@
 # cd /home1/04935/shaojf/stampede2/mutations/mut_exp_lm/
 module load Rstats
 module load bedtools
-np=33
+np=10
 pre=$1
 promoterLEN=1000
 winSIZE=500000
