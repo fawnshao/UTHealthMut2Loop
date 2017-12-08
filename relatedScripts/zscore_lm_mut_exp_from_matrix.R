@@ -22,6 +22,7 @@ c.data <- read.table(corr, sep = "\t")
 for(i in 1:nrow(m.data)){
 	print(i)
 	if(sum(m.data[i,]) > 0){
+		lm.res <- data.frame()
 		mutation <- c()
 		gene <- c()
 		slop <- c()
