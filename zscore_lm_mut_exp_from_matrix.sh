@@ -46,6 +46,12 @@ done
 wait
 cat $pre.tmp.*.exp2mut.lm.tsv | sort -r | uniq > $pre.exp2mut.lm.tsv
 rm $pre.tmp.*
+
+grep -v "mutation" loop-shift/res/$pre.exp2mut.lm.tsv | cut -f 1 | sed 's/"//g' | sort | uniq | awk -F":" -vOFS="\t" '{print $1,$2,$3,$0}' > $type.LoopBroken.bed
+~/myTools/UTHealthMut2Loop/ICGC_fimo_denovo_motif_in_LoopShiftMut.2.sh $type
+
+
+
 echo ++++++++finished+++++++
 date
 
