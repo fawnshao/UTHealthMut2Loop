@@ -10,6 +10,8 @@ matrixdir=/home1/04935/shaojf/stampede2/mutations/ICGC/lm/mut_exp_matrix
 bindir=/home1/04935/shaojf/myTools/UTHealthMut2Loop
 cordir=/home1/04935/shaojf/stampede2/mutations/ICGC/correlation
 tssBED=/home1/04935/shaojf/stampede2/refs/hg19.refGene.tss.uniq.srt.bed
+motifDIR=/home1/04935/shaojf/stampede2/mutations/mut_exp_lm/motifdir
+promoterMOTIF=/home1/04935/shaojf/stampede2/mutations/ICGC/p_motif/hg19.tss1k.motif.simcount
 
 date
 echo $pre
@@ -47,10 +49,37 @@ wait
 cat $pre.tmp.*.exp2mut.lm.tsv | sort -r | uniq > $pre.exp2mut.lm.tsv
 rm $pre.tmp.*
 
-grep -v "mutation" loop-shift/res/$pre.exp2mut.lm.tsv | cut -f 1 | sed 's/"//g' | sort | uniq | awk -F":" -vOFS="\t" '{print $1,$2,$3,$0}' > $type.LoopBroken.bed
-~/myTools/UTHealthMut2Loop/ICGC_fimo_denovo_motif_in_LoopShiftMut.2.sh $type
+# grep -v "mutation" loop-shift/res/$pre.exp2mut.lm.tsv | cut -f 1 | sed 's/"//g' | sort | uniq | awk -F":" -vOFS="\t" '{print $1,$2,$3,$0}' > $type.LoopBroken.bed
+grep -v "mutation" $pre.exp2mut.lm.tsv | cut -f 1 | sed 's/"//g' | sort | uniq | awk -F":" -vOFS="\t" '{print $1,$2,$3,$0}' > $type.LoopBroken.bed
+$bindir/ICGC_fimo_denovo_motif_in_LoopShiftMut.2.sh $type
 
+echo +++++++++ checking if the mutation is in any motif  ++++++++
+# echo "mutation-motif" > ${outpre}.LoopBroken.motif
+for m in `ls $motifDIR/`
+do
+	bedtools intersect -wao -a ${outpre}.LoopBroken.bed -b $motifDIR/$m | \
+	awk '$NF > 0' >> ${outpre}.LoopBroken.motif
+done
 
+echo "mutated.sites	gene	promoter.motif.count	promoter.motifs	mutated.motifs" > $outpre.motif.tsv
+while read line
+do
+	mutsite=`echo $line | awk '{print $1}' | sed 's/"//g'`
+	gene=`echo $line | awk '{print $2}' | sed 's/"//g'`
+	motifcount=`echo "" | awk -v a=$gene '{print "\t"a"|\n;"a"|"}' | \
+	grep -f - $promoterMOTIF | awk -F"\t" '{print $8}' |  tr ', ' '\n' | \
+	grep -v "^$" | sort | uniq | wc -l`
+	motifs=`echo "" | awk -v a=$gene '{print "\t"a"|\n;"a"|"}' | \
+	grep -f - $promoterMOTIF | awk -F"\t" '{print $8}' |  tr ', ' '\n' | \
+	grep -v "^$" | sort | uniq | tr '\n' ',' | sed 's/,$//'`
+	mutmotif=`awk -v a=$mutsite '$4==a{print $8}' ${outpre}.LoopBroken.motif | \
+	sort | uniq | tr '\n' ',' | sed 's/,$//'`
+	motifgained=`awk -v a=$mutsite '$2==a{print $1}' ${outpre}.LoopBroken.motif.gain | \
+	sort | uniq | tr '\n' ',' | sed 's/,$//'`
+	motiflost=`awk -v a=$mutsite '$2==a{print $1}' ${outpre}.LoopBroken.motif.lose | \
+	sort | uniq | tr '\n' ',' | sed 's/,$//'`
+	echo $mutsite"	"$gene"	"$motifcount"	"$motifs"	"$mutmotif"	"$motifgained"	"$motiflost >> $outpre.motif.tsv
+done < $outpre.exp2mut.lm.tsv
 
 echo ++++++++finished+++++++
 date
