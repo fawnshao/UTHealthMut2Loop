@@ -1,5 +1,5 @@
 #!/bin/sh
-myperl=/home1/04935/shaojf/myTools/UTHealthMut2Loop/GTEx_codes/add_any_2files_together.pl
+myperl=/home1/04935/shaojf/myTools/UTHealthMut2Loop/relatedScripts/add_any_2files_together.pl
 mycodes=/home1/04935/shaojf/myTools/UTHealthMut2Loop/GTEx_codes
 cancergene=/home1/04935/shaojf/stampede2/refs/Oncogene_TumorSuppressor/Cosmic.CancerGeneCensus.all.gene.anno
 tissue=$1
@@ -31,14 +31,16 @@ awk -vOFS="\t" '{print $15,$16,$17,$1">"$2">"$14">"$3">"$8,".",$18}' $tissue.mul
 ########## loop-shifting eVars #########
 sed 's/>/\t/g'  $tissue.multi-egenes.inpromoters.eGene.bed | perl $mycodes/opposite_eQTL.pl /dev/stdin > $tissue.multi-egenes.inpromoters.eGene.flags
 
-awk '$NF=="opposite"{print $4}' $tissue.multi-egenes.inpromoters.eGene.flags | sort | uniq | perl $myperl $tissue.multi-egenes.inpromoters.eGene.flags /dev/stdin 3 0 | awk '$NF!="/" || $(NF-1)=="promoter"' | cut -f 2-  > $tissue.multi-egenes.inpromoters.eGene.flags.loop-shifting.txt
+awk '$(NF-1)=="opposite"{print $4}' $tissue.multi-egenes.inpromoters.eGene.flags | sort | uniq | perl $myperl $tissue.multi-egenes.inpromoters.eGene.flags /dev/stdin 3 0 | awk '$(NF-1)!="/" || $(NF-2)=="promoter"' | cut -f 2-  > $tissue.multi-egenes.inpromoters.eGene.flags.loop-shifting.txt
 awk -vOFS="\t" '{print $1,$2,$3,$4">"$5">"$6">"$7">"$8,$9,$10}' $tissue.multi-egenes.inpromoters.eGene.flags.loop-shifting.txt > $tissue.multi-egenes.inpromoters.eGene.flags.loop-shifting.bed
 
-awk '$NF=="/"{print $4}' $tissue.multi-egenes.inpromoters.eGene.flags | sort | uniq | perl $myperl $tissue.multi-egenes.inpromoters.eGene.flags /dev/stdin 3 0 | awk '$NF!="/" || $(NF-1)=="promoter"' | cut -f 2-  > $tissue.multi-egenes.inpromoters.eGene.flags.loop-shifting.txt
-awk -vOFS="\t" '{print $1,$2,$3,$4">"$5">"$6">"$7">"$8,$9,$10}' $tissue.multi-egenes.inpromoters.eGene.flags.loop-shifting.txt > $tissue.multi-egenes.inpromoters.eGene.flags.loop-shifting.bed
-
-awk '$NF=="contradict"{print $4}' $tissue.multi-egenes.inpromoters.eGene.flags | sort | uniq | perl $myperl $tissue.multi-egenes.inpromoters.eGene.flags /dev/stdin 3 0 | awk '$NF!="/" || $(NF-1)=="promoter"' | cut -f 2-  > $tissue.multi-egenes.inpromoters.eGene.flags.contradict.txt
+awk '$(NF-1)=="contradict"{print $4}' $tissue.multi-egenes.inpromoters.eGene.flags | sort | uniq | perl $myperl $tissue.multi-egenes.inpromoters.eGene.flags /dev/stdin 3 0 | awk '$(NF-1)!="/" || $(NF-2)=="promoter"' | cut -f 2-  > $tissue.multi-egenes.inpromoters.eGene.flags.contradict.txt
 awk -vOFS="\t" '{print $1,$2,$3,$4">"$5">"$6">"$7">"$8,$9,$10}' $tissue.multi-egenes.inpromoters.eGene.flags.contradict.txt > $tissue.multi-egenes.inpromoters.eGene.flags.contradict.bed
+
+awk '$NF!~"opposite" && $NF!~"contradict" && $8<0' $tissue.multi-egenes.inpromoters.eGene.flags > $tissue.multi-egenes.inpromoters.eGene.flags.same-effect.down.txt
+awk '$NF!~"opposite" && $NF!~"contradict" && $8>0' $tissue.multi-egenes.inpromoters.eGene.flags | sed '1d' > $tissue.multi-egenes.inpromoters.eGene.flags.same-effect.up.txt
+awk -vOFS="\t" '{print $1,$2,$3,$4">"$5">"$6">"$7">"$8,$9,$10}' $tissue.multi-egenes.inpromoters.eGene.flags.same-effect.down.txt > $tissue.multi-egenes.inpromoters.eGene.flags.same-effect.down.bed
+awk -vOFS="\t" '{print $1,$2,$3,$4">"$5">"$6">"$7">"$8,$9,$10}' $tissue.multi-egenes.inpromoters.eGene.flags.same-effect.up.txt > $tissue.multi-egenes.inpromoters.eGene.flags.same-effect.up.bed
 
 ########## loop-shifting eVars in TAD #########
 awk '{print "chr"$0}' $tissue.multi-egenes.inpromoters.eGene.flags.loop-shifting.bed | bedtools intersect -wao -a - -b GM12878.TAD.bed > $tissue.multi-egenes.inpromoters.eGene.flags.loop-shifting.GM12878.TAD
@@ -50,9 +52,14 @@ awk '{print $4}' $tissue.multi-egenes.inpromoters.eGene.flags.loop-shifting.txt 
 sh $mycodes/motif_gainorloss.sh $tissue.LoopBroken
 perl $mycodes/motif_compare.pl $tissue.LoopBroken
 ##### backgroud motif #####
-awk '{print $2}' $tissue.v7.eVariants.count.txt | sed 's/_/\t/g' | awk -vOFS="\t" '{print $1,$2-1,$2+length($3)-1,$1"_"$2"_"$3"_"$4"_"$5}' | sort | uniq | grep -v variant_id > $tissue.eVar.bed
-sh $mycodes/motif_gainorloss.sh $tissue.eVar
-perl $mycodes/motif_compare.pl $tissue.eVar
+### too much ###
+# awk '{print $2}' $tissue.v7.eVariants.count.txt | sed 's/_/\t/g' | awk -vOFS="\t" '{print $1,$2-1,$2+length($3)-1,$1"_"$2"_"$3"_"$4"_"$5}' | sort | uniq | grep -v variant_id > $tissue.eVar.bed
+# sh $mycodes/motif_gainorloss.sh $tissue.eVar
+# perl $mycodes/motif_compare.pl $tissue.eVar
+### same-effect ###
+awk '{print $4}' $tissue.multi-egenes.inpromoters.eGene.flags.same-effect.up.txt | sed 's/_/\t/g' | awk -vOFS="\t" '{print $1,$2-1,$2+length($3)-1,$1"_"$2"_"$3"_"$4"_"$5}' | sort | uniq > $tissue.same-effect.up.bed
+sh $mycodes/motif_gainorloss.sh $tissue.same-effect.up
+perl $mycodes/motif_compare.pl $tissue.same-effect.up
 
 ########## final #########
 perl $myperl $tissue.LoopBroken.motif.cmp $tissue.multi-egenes.inpromoters.eGene.flags.loop-shifting.GM12878.interaction 0 3 > $tissue.LoopBroken.GM12878.interaction.motif

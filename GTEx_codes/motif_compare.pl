@@ -7,7 +7,7 @@ $refin = $ARGV[0].".ref.fimo.txt";
 $mutin = $ARGV[0].".mut.fimo.txt";
 # $gain = $ARGV[0].".LoopBroken.motif.gain";
 # $lose = $ARGV[0].".LoopBroken.motif.lose";
-$out = $ARGV[0].".LoopBroken.motif.cmp";
+$out = $ARGV[0].".motif.cmp";
 
 open(IN, $refin);
 while(<IN>){
