@@ -29,6 +29,8 @@ fimo -oc HOCOMOCO.$pre.mut $HOCOMOCO $pre.mut.fa
 
 sed -i 's/\t/|/' JASPAR.$pre.ref/fimo.txt
 sed -i 's/\t/|/' JASPAR.$pre.mut/fimo.txt
+sed -i 's/\t//' HOCOMOCO.$pre.ref/fimo.txt
+sed -i 's/\t//' HOCOMOCO.$pre.mut/fimo.txt
 cat JASPAR.$pre.ref/fimo.txt HOCOMOCO.$pre.ref/fimo.txt > $pre.ref.fimo.txt
 cat JASPAR.$pre.mut/fimo.txt HOCOMOCO.$pre.mut/fimo.txt > $pre.mut.fimo.txt
 ## may need big memory

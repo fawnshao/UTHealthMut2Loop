@@ -56,10 +56,24 @@ perl $mycodes/motif_compare.pl $tissue.LoopBroken
 # awk '{print $2}' $tissue.v7.eVariants.count.txt | sed 's/_/\t/g' | awk -vOFS="\t" '{print $1,$2-1,$2+length($3)-1,$1"_"$2"_"$3"_"$4"_"$5}' | sort | uniq | grep -v variant_id > $tissue.eVar.bed
 # sh $mycodes/motif_gainorloss.sh $tissue.eVar
 # perl $mycodes/motif_compare.pl $tissue.eVar
+
+### single targeting promoter eVars ###
+awk '{print $1}' $tissue.single-egenes.inpromoters.up.tsv | sed 's/_/\t/g' | awk -vOFS="\t" '{print $1,$2-1,$2+length($3)-1,$1"_"$2"_"$3"_"$4"_"$5}' | sort | uniq > $tissue.single.up.bed
+sh $mycodes/motif_gainorloss.sh $tissue.single.up
+perl $mycodes/motif_compare.pl $tissue.single.up
+
+awk '{print $1}' $tissue.single-egenes.inpromoters.down.tsv | sed 's/_/\t/g' | awk -vOFS="\t" '{print $1,$2-1,$2+length($3)-1,$1"_"$2"_"$3"_"$4"_"$5}' | sort | uniq > $tissue.single.down.bed
+sh $mycodes/motif_gainorloss.sh $tissue.single.down
+perl $mycodes/motif_compare.pl $tissue.single.down
+
 ### same-effect ###
 awk '{print $4}' $tissue.multi-egenes.inpromoters.eGene.flags.same-effect.up.txt | sed 's/_/\t/g' | awk -vOFS="\t" '{print $1,$2-1,$2+length($3)-1,$1"_"$2"_"$3"_"$4"_"$5}' | sort | uniq > $tissue.same-effect.up.bed
 sh $mycodes/motif_gainorloss.sh $tissue.same-effect.up
 perl $mycodes/motif_compare.pl $tissue.same-effect.up
+
+awk '{print $4}' $tissue.multi-egenes.inpromoters.eGene.flags.same-effect.down.txt | sed 's/_/\t/g' | awk -vOFS="\t" '{print $1,$2-1,$2+length($3)-1,$1"_"$2"_"$3"_"$4"_"$5}' | sort | uniq > $tissue.same-effect.down.bed
+sh $mycodes/motif_gainorloss.sh $tissue.same-effect.down
+perl $mycodes/motif_compare.pl $tissue.same-effect.down
 
 ########## final #########
 perl $myperl $tissue.LoopBroken.motif.cmp $tissue.multi-egenes.inpromoters.eGene.flags.loop-shifting.GM12878.interaction 0 3 > $tissue.LoopBroken.GM12878.interaction.motif
@@ -71,4 +85,19 @@ awk '$8<0 && $11=="promoter" && $12=="/"' $tissue.LoopBroken.motif > $tissue.Loo
 awk '$8>0 && $11=="promoter" && $12=="/"' $tissue.LoopBroken.motif > $tissue.LoopBroken.promoter.up.motif
 perl $mycodes/calc_neighboring_TSS_dis.pl $tissue.LoopBroken.motif > $tissue.LoopBroken.motif.tssdis
 perl $myperl $cancergene $tissue.LoopBroken.motif.tssdis 0 6 > $tissue.LoopBroken.motif.tssdis.cancergene
+
+####### for statitics ########
+echo all.evars"	"`wc -l $tissue.v7.eVariants.count.txt | awk '{print $1}'` >$tissue.eVar.counts.tsv
+echo single.evars"	"`awk '$1==1' $tissue.v7.eVariants.count.txt | wc -l` >>$tissue.eVar.counts.tsv
+echo multiple.evars"	"`awk '$1>1' $tissue.v7.eVariants.count.txt | wc -l` >>$tissue.eVar.counts.tsv
+echo single.promoter"	"`wc -l $tissue.single-egenes.inpromoters.tsv | awk '{print $1}'` >>$tissue.eVar.counts.tsv
+echo single.promoter.down"	"`wc -l $tissue.single-egenes.inpromoters.down.tsv | awk '{print $1}'` >>$tissue.eVar.counts.tsv
+echo single.promoter.up"	"`wc -l $tissue.single-egenes.inpromoters.up.tsv | awk '{print $1}'` >>$tissue.eVar.counts.tsv
+echo multiple.promoter"	"`cut -f 1 $tissue.multi-egenes.inpromoters.tsv | sort | uniq | wc -l` >>$tissue.eVar.counts.tsv
+echo multiple.promoter.opposite"	"`cut -f 4 $tissue.multi-egenes.inpromoters.eGene.flags.loop-shifting.txt | sort | uniq | wc -l` >>$tissue.eVar.counts.tsv
+echo multiple.promoter.opposite.promoterdown"	"`cut -f 4 $tissue.LoopBroken.promoter.down.motif | sort | uniq | wc -l` >>$tissue.eVar.counts.tsv
+echo multiple.promoter.opposite.promoterup"	"`cut -f 4 $tissue.LoopBroken.promoter.up.motif | sort | uniq | wc -l` >>$tissue.eVar.counts.tsv
+echo multiple.promoter.same-effect.down"	"`cut -f 4 $tissue.multi-egenes.inpromoters.eGene.flags.same-effect.down.txt | sort | uniq | wc -l` >>$tissue.eVar.counts.tsv
+echo multiple.promoter.same-effect.up"	"`cut -f 4 $tissue.multi-egenes.inpromoters.eGene.flags.same-effect.up.txt | sort | uniq | wc -l` >>$tissue.eVar.counts.tsv
+echo multiple.promoter.contradict"	"`cut -f 4 $tissue.multi-egenes.inpromoters.eGene.flags.contradict.txt | sort | uniq | wc -l` >>$tissue.eVar.counts.tsv
 
