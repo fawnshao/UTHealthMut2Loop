@@ -1,6 +1,6 @@
 #!/bin/sh
-myperl=/home1/04935/shaojf/myScripts/add_any_2files_together.pl
-mycodes=/home1/04935/shaojf/stampede2/loop_shifting_variations/codes
+myperl=/home1/04935/shaojf/myTools/UTHealthMut2Loop/GTEx_codes/add_any_2files_together.pl
+mycodes=/home1/04935/shaojf/myTools/UTHealthMut2Loop/GTEx_codes
 cancergene=/home1/04935/shaojf/stampede2/refs/Oncogene_TumorSuppressor/Cosmic.CancerGeneCensus.all.gene.anno
 tissue=$1
 # tissue=Cells_EBV-transformed_lymphocytes

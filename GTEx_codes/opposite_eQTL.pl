@@ -23,7 +23,8 @@ while(<IN>){
 }
 close(IN);
 
-print "gene.chr\tgene.start\tgene.end\tvar\tgene.id\tgene.name\tdis_var_tss\tslope\tNULL\tgene.strand\tpromoter.flag\texp.flag\n";
+%alleffect = ();
+%vareffect = ();
 foreach $pair (sort keys %info){
 	($varid, $geneid) = split(/\t/, $pair);
 	@promoterslope = @{$pslope{$varid}};
@@ -56,5 +57,13 @@ foreach $pair (sort keys %info){
 			$flag = "/";
 		}
 	}
-	print "$info{$pair}\t$pflag{$pair}\t$flag\n";
+	$vareffect{$pair} = $flag;
+	$alleffect{$varid} .= $flag . ";";
+	# print "$info{$pair}\t$pflag{$pair}\t$flag\n";
+}
+
+print "gene.chr\tgene.start\tgene.end\tvar\tgene.id\tgene.name\tdis_var_tss\tslope\tNULL\tgene.strand\tpromoter.flag\texp.flag\tallexp.flag\n";
+foreach $pair (sort keys %info){
+	($varid, $geneid) = split(/\t/, $pair);
+	print "$info{$pair}\t$pflag{$pair}\t$vareffect{$pair}\t$alleffect{$varid}\n";
 }
