@@ -2,6 +2,7 @@
 myperl=/home1/04935/shaojf/myTools/UTHealthMut2Loop/relatedScripts/add_any_2files_together.pl
 mycodes=/home1/04935/shaojf/myTools/UTHealthMut2Loop/GTEx_codes
 cancergene=/home1/04935/shaojf/stampede2/refs/Oncogene_TumorSuppressor/Cosmic.CancerGeneCensus.all.gene.anno
+motifids=/work/04935/shaojf/stampede2/loop_shifting_variations/motif.files/motif.id
 tissue=$1
 # tissue=Cells_EBV-transformed_lymphocytes
 
@@ -101,3 +102,4 @@ echo multiple.promoter.same-effect.down"	"`cut -f 4 $tissue.multi-egenes.inpromo
 echo multiple.promoter.same-effect.up"	"`cut -f 4 $tissue.multi-egenes.inpromoters.eGene.flags.same-effect.up.txt | sort | uniq | wc -l` >>$tissue.eVar.counts.tsv
 echo multiple.promoter.contradict"	"`cut -f 4 $tissue.multi-egenes.inpromoters.eGene.flags.contradict.txt | sort | uniq | wc -l` >>$tissue.eVar.counts.tsv
 
+cut -f 15 $tissue.LoopBroken.promoter.down.motif | sort | uniq -c | awk -vOFS="\t" '{print $2,$1}' | perl $myperl /dev/stdin $motifids 0 0 > b
