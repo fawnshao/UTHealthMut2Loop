@@ -1,100 +1,58 @@
 args <- commandArgs(TRUE)
-eqtl.list <- args[1]
-outpre <- args[2]
+evarfile <- paste(args[1], "eVar.counts.tsv", sep = ".")
+motiffile <- paste(args[1], "motif.cmp.txt", sep = ".")
 
-# can not as.matrix, otherwise the expression will be strings, not numeric
-data <- read.table(expr, sep = "\t")
-sample.name <- as.vector(data[, 1])
-gene.name <- as.vector(data[, 2])
-# expr.value <- data[,3]
-allx <- read.table(allexpr, sep = "\t", header = T)
-allx.gene <- as.vector(allx[, 2])
+# $tissue.motif.cmp.txt
+# $tissue.eVar.counts.tsv
+# do hypergeometric exact test for motif count
+# Usage:
 
-toprocess <- read.table(list, header = T)
-ifLoop <- rep(" ", nrow(toprocess))
-# TADid promoter_mutated_TCGAsample TCGAsample_with_NCV_in_extended_regions genes_in_the_TAD promoter_mutated_gene
-# Z-score (if comparing mt vs. wt) = [(value gene X in mt Y) - (mean gene X in wt)] / (standard deviation of gene X in wt)
-# https://www.easycalculation.com/statistics/p-value-for-z-score.php
-# p(z=1.645)=0.05 
-expr.cutoff <- summary(data[data[,3] > 0,3])[2]
-print(paste("expression levels:", expr.cutoff, sep = "    "))
-for(i in 1:nrow(toprocess)){
-	# print(toprocess[i,1:2])
-	tad.id <- unlist(strsplit(as.vector(toprocess[i,1]), ","))
-	p.mut.s <- unlist(strsplit(as.vector(toprocess[i,2]), ","))
-	tad.mut.s <- unlist(strsplit(as.vector(toprocess[i,3]), ","))
-	tad.gene <- unlist(strsplit(as.vector(toprocess[i,4]), ","))
-	p.mut <- as.vector(toprocess[i,5])
-	tad.gene.withexpr <- intersect(gene.name, tad.gene)
-	tad.gene.withexpr <- tad.gene.withexpr[!is.na(tad.gene.withexpr)]
-	if(length(tad.gene.withexpr) > 1){
-		outlier.flag <- c()
-		ctr.mean <- c()
-		mut.mean <- c()
-		ctr.sd <- c()
-		mut.exp <- c()
-		ctr.exp <- c()
-		all.mean <- c()
-		all.sd <- c()
-		for(j in 1:length(tad.gene.withexpr)){
-			ctr <- data[gene.name == tad.gene.withexpr[j] & !is.element(sample.name, tad.mut.s), 3]
-			mut <- data[gene.name == tad.gene.withexpr[j] & is.element(sample.name, p.mut.s), 3]
-			### some genes in some projects will be missed. make it to be 0
-			if(length(mut) == 0){
-				mut <- 0
-			}
-			###
-			mut.mean[j] <- mean(mut)
-			ctr.mean[j] <- mean(ctr)
-			ctr.sd[j] <- sd(ctr)
-			outlier.flag[j] <- paste(is.element(mut, boxplot.stats(c(ctr, mut))$out), collapse=";")
-			mut.exp[j] <- paste(format(mut, format = "e", digits = 2), collapse=";")
-			ctr.exp[j] <- paste(format(ctr, format = "e", digits = 2), collapse=";")
-			# all <- as.numeric(as.matrix(allx[allx.gene == tad.gene.withexpr[j], 3]))
-			all <- allx[allx.gene == tad.gene.withexpr[j], 3]
-			all.mean[j] <- mean(all)
-			all.sd[j] <- sd(all)
+#      dhyper(x, m, n, k, log = FALSE)
+#      phyper(q, m, n, k, lower.tail = TRUE, log.p = FALSE)
+#      qhyper(p, m, n, k, lower.tail = TRUE, log.p = FALSE)
+#      rhyper(nn, m, n, k)
+     
+# Arguments:
+
+#     x, q: vector of quantiles representing the number of white balls
+#           drawn without replacement from an urn which contains both
+#           black and white balls.
+
+#        m: the number of white balls in the urn.
+
+#        n: the number of black balls in the urn.
+
+#        k: the number of balls drawn from the urn.
+evarcount <- read.table(evarfile, sep = "\t", row.names = 1)
+usedevarcount <- evarcount[c(9,9,10,10,11,11,12,12,5,5,6,6),]
+motifcount <- read.table(motiffile, sep = "\t", header = T, row.names = 1, na.strings = "/")
+motifpvalue <- matrix(nrow = nrow(motifcount), ncol = 8)
+motiffisher <- matrix(nrow = nrow(motifcount), ncol = 8)
+for(i in 1:nrow(motifcount)){
+	for(j in 1:4){
+		motifpvalue[i, j] <- phyper(motifcount[i, j], motifcount[i, j+4], 
+			usedevarcount[j+4] - motifcount[i, j+4], usedevarcount[j], 
+			lower.tail = FALSE)
+		motifpvalue[i, j+4] <- phyper(motifcount[i, j], motifcount[i, j+8], 
+			usedevarcount[j+8] - motifcount[i, j+8], usedevarcount[j], 
+			lower.tail = FALSE)
+		cmat <- matrix(c(motifcount[i, j],usedevarcount[j]-motifcount[i, j],
+			motifcount[i, j+4],usedevarcount[j+4] - motifcount[i, j+4]), nrow = 2, byrow = TRUE)
+		if(sum(is.na(cmat)) == 0){
+			motiffisher[i, j] <- fisher.test(cmat)$p.value
 		}
-		zscore.1 <- (mut.mean - ctr.mean) / ctr.sd
-		zscore.2 <- (mut.mean - all.mean) / all.sd
-		fc <- mut.mean / ctr.mean
-		t <- data.frame(mut.mean, ctr.mean, ctr.sd, fc, outlier.flag, zscore.1, zscore.2, mut.exp, ctr.exp)
-		rownames(t) <- tad.gene.withexpr
-		# colnames(t) <- c(p.mut.s, "Average-nonmut-Tumor-Sample", "SD-nonmut-Tumor-Sample", "Fold-Change", "is.outlier", "Z score")
-		# summary(data[data[,3] > 0,3])
-		# some are FPKM, and some are not. so use median value as cut off
-		out.1 <- t[(t[,6] > 1.645 | t[,7] > 1.645) & t[,1] > expr.cutoff, ]
-		out.2 <- t[(t[,6] < -1.645 | t[,7] < -1.645) & t[,2] > expr.cutoff, ]
-		if(nrow(out.1) > 0 && nrow(out.2) > 0){
-			out <- rbind.data.frame(out.1, out.2)
-			flag <- 0
-			zs.mut <- 1
-			mut.flag <- rep("", nrow(out))
-			for(j in 1:nrow(out)){
-				if(length(grep(pattern = paste("^", rownames(out)[j], "\\|", sep = ""), x = p.mut)) > 0 || 
-					length(grep(pattern = paste(";", rownames(out)[j], "\\|", sep = ""), x = p.mut)) > 0){
-					flag <- 1
-					mut.flag[j] <- "MutatedPromoter"
-					# zs.mut <- out[j,6]
-					o <- out[j,6:7]
-					zs.mut <- o[abs(o)==max(abs(o))]
-				}
-			}
-			alt.flag <- (out[,6] / zs.mut < 0 | out[,7] / zs.mut < 0)
-			alt.flag[alt.flag == TRUE] <- "Opposite" 
-			alt.flag[alt.flag == FALSE] <- "" 
-			out.data <- data.frame(out, mut.flag, alt.flag)
-			if(flag == 1){
-				write.table(out.data[out.data[,10]=="MutatedPromoter" | out.data[,11]=="Opposite", ], 
-					file = paste(outpre, tad.id, p.mut.s, "tsv", sep = "."), 
-					sep = "\t")
-				print(paste("Shoot:", outpre, tad.id, p.mut.s, sep = "    "))
-				# write.table(data.frame(out, mut.flag), 
-				# 	file = paste(x, y, "csv", sep = "."), 
-				# 	sep = "\t", quote = TRUE, col.names = TRUE, row.names = TRUE)
-				ifLoop[i] <- "LoopBroken"
-			}
+		cmat <- matrix(c(motifcount[i, j],usedevarcount[j]-motifcount[i, j],
+			motifcount[i, j+8],usedevarcount[j+8] - motifcount[i, j+8]), nrow = 2, byrow = TRUE)
+		if(sum(is.na(cmat)) == 0){
+			motiffisher[i, j+4] <- fisher.test(cmat)$p.value
 		}
 	}
 }
-write.table(data.frame(toprocess, ifLoop), file = paste(outpre, "TAD.labeled", "tsv", sep = "."), sep= "\t")
+colnames(motifpvalue) <- colnames(motifcount)[5:12]
+colnames(motiffisher) <- colnames(motifcount)[5:12]
+rownames(motifpvalue) <- rownames(motifcount)
+rownames(motiffisher) <- rownames(motifcount)
+write.table(rbind(usedevarcount,motifcount), file = paste("final.count", args[1], "tsv", sep = "."), quote = F, sep = "\t")
+write.table(motifpvalue, file = paste("final.phyper", args[1], "tsv", sep = "."), quote = F, sep = "\t")
+write.table(motiffisher, file = paste("final.fisher", args[1], "tsv", sep = "."), quote = F, sep = "\t")
+
