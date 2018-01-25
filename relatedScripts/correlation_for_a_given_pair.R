@@ -1,7 +1,7 @@
 args <- commandArgs(TRUE)
 pairs <- read.table(args[1], sep = "\t")
 exprs <- as.matrix(read.table(args[2], sep = "\t", row.names = 1))
-genes <- rownnames(exprs)
+genes <- rownames(exprs)
 res <- matrix(ncol = 8, nrow = nrow(pairs))
 for(i in 1:nrow(pairs)){
 	x1 <- exprs[genes==pairs[i,1],]
