@@ -1,0 +1,83 @@
+# args <- commandArgs(TRUE)
+# library(pheatmap)
+# library(data.table)
+# args <- c("GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_tpm.gct", "GTEx_sample.tissue.txt")
+# exprs <- fread(args[1], header = T, sep = "\t")
+# tpm <- exprs[,-1]
+# rownames(tpm) <- as.matrix(exprs[,1])
+# exprs <- as.matrix(read.table("GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_tpm.gct", header = T, sep = "\t", row.names = 1))
+
+# exprs <- as.matrix(read.table(args[1], sep = "\t", row.names = 1, header = T))
+# info <- as.matrix(read.table(args[2], sep = "\t"))
+# tissues <- unique(info[,2])
+load("GTEx.RData")
+ave.tissues <- matrix(ncol = length(tissues), nrow = nrow(exprs))
+sd.tissues <- matrix(ncol = length(tissues), nrow = nrow(exprs))
+ave.all <- c()
+sd.all <- c()
+# exprs <- log(exprs, 2)
+for(i in 1:nrow(exprs)){
+	for(j in 1:length(tissues)){
+		ave.tissues[i,j] <- mean(log(exprs[i, info[,2]==tissues[j]],2))
+		sd.tissues[i,j] <- sd(log(exprs[i, info[,2]==tissues[j]],2))
+	}
+	ave.all[i] <- mean(log(exprs[i,],2))
+	sd.all[i] <- sd(log(exprs[i,],2))
+}
+# ave.all <- apply(exprs, 1, mean)
+# sd.all <- apply(exprs, 1, sd)
+
+rownames(ave.tissues) <- rownames(exprs)
+rownames(sd.tissues) <- rownames(exprs)
+colnames(ave.tissues) <- tissues
+colnames(sd.tissues) <- tissues
+
+# write.table(ave.tissues, file = paste(args[1], "mean.tsv", sep = "."), sep = "\t", row.names = TRUE, quote = FALSE)
+# write.table(sd.tissues, file = paste(args[1], "sd.tsv", sep = "."), sep = "\t", row.names = TRUE, quote = FALSE)
+
+write.table(data.frame(ave.all, ave.tissues), file = paste(args[1], "mean.log2.tsv", sep = "."), sep = "\t", row.names = TRUE, quote = FALSE)
+write.table(data.frame(sd.all, sd.tissues), file = paste(args[1], "sd.log2.tsv", sep = "."), sep = "\t", row.names = TRUE, quote = FALSE)
+
+sd.mean <- apply(sd.tissues,1, mean)
+allgene <- data.frame(sd.mean, ave.all, ave.tissues, sd.all, sd.tissues)
+housekeepinggene <- allgene[sd.mean < 0.5 & !is.na(sd.mean) & sd.all < 0.5 & !is.na(sd.all),]
+# save.image("GTEx.log2.mean.sd.RData")
+# range(ave.all,na.rm=TRUE, finite=TRUE)
+
+#########
+# read in the previous results
+args <- c("GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_tpm.gct", "GTEx_sample.tissue.txt")
+logave <- read.table(paste(args[1], "mean.log2.tsv", sep = "."), sep="\t", header=T, row.names=1)
+logsd <- read.table(paste(args[1], "sd.log2.tsv", sep = "."), sep="\t", header=T, row.names=1)
+library(pheatmap)
+dist_methods <- c("correlation", "euclidean", "maximum", "manhattan", "canberra", "minkowski")
+clust_methods <- c("ward.D", "ward.D2", "complete", "average", "mcquitty", "median", "centroid")
+i <- 2
+j <- 2
+breaklists <- c(seq(0, 2, by = 0.01),seq(2.1, 5.7, by = 0.1))
+colorn <- length(breaklists)
+colors <- colorRampPalette(c("blue", "yellow", "red"))(colorn)
+output <- "sd.log2"
+nacount <- apply(logsd,1, function(x){sum(is.na(x))})
+# table(nacount==0,)
+png(filename = paste(output, dist_methods[i], clust_methods[j], "png", sep = "."), width = 1800, height = 2000)
+p1 <- pheatmap(logsd[nacount==0,], scale = "none", show_rownames = F, show_colnames = F, 
+         color = colors, cluster_cols = F, clustering_distance_rows = dist_methods[i], 
+         clustering_method = clust_methods[j], breaks = breaklists,
+         cutree_row = 10)
+dev.off()
+cluster <- cutree(p1$tree_row, k = 10)
+write.table(data.frame(cluster[p1$tree_row$order], 
+	rownames(logsd[nacount==0,])[p1$tree_row$order],
+	logsd[nacount==0,]), 
+	file = paste(output, "pheatmap.tsv", sep = "."), 
+	sep = "\t", row.names = FALSE, quote = FALSE)
+
+candidates <- logsd[nacount==0,]
+maxsd <- apply(candidates,1, max)
+candave <- logave[nacount==0,]
+# length(maxsd[maxsd<1])
+table(round(candidates[,1],2))
+write.table(data.frame(rownames(candidates)[maxsd<1],candidates[maxsd<1,],candave[maxsd<1,]), 
+	file = paste(output, "candidates.tsv", sep = "."), 
+	sep = "\t", row.names = FALSE, quote = FALSE)
