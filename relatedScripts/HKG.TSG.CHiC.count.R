@@ -5,10 +5,10 @@ data[is.na(data)] <- 0
 # breaklists <- c(seq(0, 2, by = 0.01),seq(2.1, 5.7, by = 0.1))
 # colorn <- length(breaklists)
 # colors <- colorRampPalette(c("blue", "yellow", "red"))(colorn)
-colors <- colorRampPalette(c("blue", "yellow", "red"))(150)
+colors <- colorRampPalette(c("blue", "yellow", "red"))(100)
 
 png(filename = paste(args[1], "pheatmap.png", sep = "."), width = 800, height = 1000)
-p1 <- pheatmap(data, scale = "none", show_rownames = F, show_colnames = T, 
+p1 <- pheatmap(log2(data + 1), scale = "none", show_rownames = F, show_colnames = T, 
          color = colors, 
          clustering_distance_cols = "euclidean", clustering_distance_rows = "euclidean", 
          clustering_method = "ward.D2"
