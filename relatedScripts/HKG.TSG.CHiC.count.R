@@ -7,6 +7,12 @@ data[is.na(data)] <- 0
 # colors <- colorRampPalette(c("blue", "yellow", "red"))(colorn)
 colors <- colorRampPalette(c("blue", "yellow", "red"))(100)
 
+png(filename = paste(args[1], "nocluster.pheatmap.png", sep = "."), width = 800, height = 1000)
+pheatmap(log2(data + 1), scale = "none", show_rownames = F, show_colnames = T, 
+         color = colors, cluster_rows = F, cluster_cols = F
+         )
+dev.off()
+
 png(filename = paste(args[1], "pheatmap.png", sep = "."), width = 800, height = 1000)
 p1 <- pheatmap(log2(data + 1), scale = "none", show_rownames = F, show_colnames = T, 
          color = colors, 
