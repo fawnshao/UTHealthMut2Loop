@@ -135,8 +135,8 @@ write.table(data.frame(cluster[p1$tree_row$order],
 	file = "HKG.v1.2.median.pheatmap.tsv", 
 	sep = "\t", row.names = FALSE, quote = FALSE)
 
-png(filename = "HKG.v1.2.median.png", width = 1000, height = 1500)
-data <- housekeepinggene.median
+png(filename = "HKG.v1.2.iqr.png", width = 1000, height = 1500)
+data <- housekeepinggene.iqr
 pheatmap(data[p1$tree_row$order,p1$tree_col$order], scale = "none", 
 	show_rownames = F, show_colnames = T, color = colors, 
 	cluster_cols = F, cluster_rows = F, breaks = breaklists)
