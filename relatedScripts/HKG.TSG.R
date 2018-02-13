@@ -73,9 +73,9 @@ for(i in 1:nrow(raw.table)){
 	}
 }
 
-write.table(housekeepinggene, file = "HKG.v1.1.by.percentage.tsv", 
+write.table(housekeepinggene, file = "HKG.v1.2.by.percentage.tsv", 
 	sep = "\t", row.names = FALSE, quote = FALSE)
-write.table(data.frame(tissueflags, tissuespecificgene), file = "TSG.v1.1.by.percentage.tsv", 
+write.table(data.frame(tissueflags, tissuespecificgene), file = "TSG.v1.2.by.percentage.tsv", 
 	sep = "\t", row.names = FALSE, quote = FALSE)
 
 hkg.mean <- as.matrix(housekeepinggene[,6:54])
@@ -99,7 +99,7 @@ breaklists2 <- c(seq(0, 6, by = 0.05),seq(6.1, 16, by = 0.1))
 colorn2 <- length(breaklists2)
 colors2 <- colorRampPalette(c("blue", "yellow", "red"))(colorn2)
 
-png(filename = "HKG.by.percentage.mean.png", width = 1000, height = 1500)
+png(filename = "HKG.v1.2.by.percentage.mean.png", width = 1000, height = 1500)
 data <- hkg.mean
 p1 <- pheatmap(data, scale = "none", show_rownames = F, show_colnames = T, 
          color = colors2, cluster_cols = T, breaks = breaklists2,
@@ -114,14 +114,14 @@ write.table(data.frame(cluster[p1$tree_row$order],
 	file = "HKG.by.percentage.mean.pheatmap.tsv", 
 	sep = "\t", row.names = FALSE, quote = FALSE)
 
-png(filename = "HKG.by.percentage.sd.png", width = 1000, height = 1500)
+png(filename = "HKG.v1.2.by.percentage.sd.png", width = 1000, height = 1500)
 data <- hkg.sd
 pheatmap(data[p1$tree_row$order,p1$tree_col$order], scale = "none", 
 	show_rownames = F, show_colnames = T, color = colors, 
 	cluster_cols = F, cluster_rows = F, breaks = breaklists)
 dev.off()
 
-png(filename = "TSG.by.percentage.mean.png", width = 1000, height = 1500)
+png(filename = "TSG.v1.2.by.percentage.mean.png", width = 1000, height = 1500)
 data <- tsg.mean
 p2 <- pheatmap(data, scale = "none", show_rownames = F, show_colnames = T, 
          color = colors2, cluster_cols = T, breaks = breaklists2,
@@ -137,7 +137,7 @@ write.table(data.frame(cluster[p2$tree_row$order],
 	file = "TSG.by.percentage.mean.pheatmap.tsv", 
 	sep = "\t", row.names = FALSE, quote = FALSE)
 
-png(filename = "TSG.by.percentage.sd.png", width = 1000, height = 1500)
+png(filename = "TSG.v1.2.by.percentage.sd.png", width = 1000, height = 1500)
 data <- tsg.sd
 pheatmap(data[p2$tree_row$order,p2$tree_col$order], scale = "none", 
 	show_rownames = F, show_colnames = T, color = colors, 
