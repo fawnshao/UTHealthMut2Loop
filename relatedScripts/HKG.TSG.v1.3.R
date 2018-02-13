@@ -97,6 +97,9 @@ nullcount.sum <- apply(nullcount, 1, sum)
 log2tpm.Tau.max <- apply(log2tpm.Tau, 1, function(x) {max(x[is.finite(x)], na.rm = T)})
 log2tpm.Tau.min <- apply(log2tpm.Tau, 1, function(x) {min(x[is.finite(x)], na.rm = T)})
 
+print("Saving RData")
+save.image("v1.3.Tau.RData")
+
 print("Looking for housekeeping genes")
 all.stats <- data.frame(rownames(tpm), log2tpm.mean.mean, log2tpm.mean.Tau, 
 	nullcount.sum, log2tpm.Tau.max, log2tpm.Tau.min, 
@@ -105,10 +108,8 @@ rownames(all.stats) <- rownames(tpm)
 housekeepinggene <- all.stats[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < 0.15 & !is.na(log2tpm.mean.Tau) & log2tpm.mean.Tau < 0.15, ]
 housekeepinggene.mean <- log2tpm.mean[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < 0.15 & !is.na(log2tpm.mean.Tau) & log2tpm.mean.Tau < 0.15, ]
 housekeepinggene.Tau <- log2tpm.Tau[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < 0.15 & !is.na(log2tpm.mean.Tau) & log2tpm.mean.Tau < 0.15, ]
-colnames(housekeepinggene.mean) <- tissues
-rownames(housekeepinggene.mean) <- all.stats[,1]
-colnames(housekeepinggene.Tau) <- tissues
-rownames(housekeepinggene.Tau) <- all.stats[,1]
+rownames(housekeepinggene.mean) <- housekeepinggene[,1]
+rownames(housekeepinggene.Tau) <- housekeepinggene[,1]
 # housekeepinggene[grep("GAPDH", as.matrix(housekeepinggene[,1])), 1]
 
 ## check ENSG00000204983.8|PRSS1 Pancreas
@@ -138,10 +139,8 @@ for(i in 1:nrow(all.stats)){
 }
 tissuespecificgene.mean <- log2tpm.mean[rindex, ]
 tissuespecificgene.Tau <- log2tpm.Tau[rindex, ]
-colnames(tissuespecificgene.mean) <- tissues
-rownames(tissuespecificgene.mean) <- all.stats[,1]
-colnames(tissuespecificgene.Tau) <- tissues
-rownames(tissuespecificgene.Tau) <- all.stats[,1]
+rownames(tissuespecificgene.mean) <- tissuespecificgene[,1]
+rownames(tissuespecificgene.Tau) <- tissuespecificgene[,1]
 
 print("Writing output files")
 write.table(housekeepinggene, file = "HKG.v1.3.tsv", 
@@ -157,9 +156,6 @@ write.table(data.frame(rownames(tpm), log2tpm.Tau), file = "v1.3.log2tpm.Tau.tsv
 	sep = "\t", row.names = FALSE, quote = FALSE)
 write.table(all.stats, file = "v1.3.allstats.tsv", 
 	sep = "\t", row.names = FALSE, quote = FALSE)
-
-print("Saving RData")
-save.image("v1.3.Tau.RData")
 
 print("Clustering")
 breaklists <- c(seq(0, 1, by = 0.01))
