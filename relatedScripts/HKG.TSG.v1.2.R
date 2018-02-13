@@ -4,6 +4,7 @@ args <- c("GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_tpm.gct", "GTEx_sample
 
 ## read in data
 # tpm <- as.matrix(read.table(args[1], sep = "\t", row.names = 1, header = T))
+print("Reading Data")
 raw.table <- fread(args[1], sep = "\t", header = T)
 tpm <- as.matrix(raw.table[,-1])
 rownames(tpm) <- as.matrix(raw.table[,1])
@@ -12,6 +13,7 @@ tissues <- unique(info[,2])
 tissues <- tissues[-c(7,24,25,53)]
 
 ## calculate
+print("Calculating nullcount, median, IQR and Score for each tissue")
 nullcount <- matrix(ncol = length(tissues), nrow = nrow(tpm))
 log2tpm.median <- matrix(ncol = length(tissues), nrow = nrow(tpm))
 log2tpm.iqr <- matrix(ncol = length(tissues), nrow = nrow(tpm))
@@ -30,6 +32,7 @@ colnames(log2tpm.iqr) <- tissues
 colnames(log2tpm.Sscore) <- tissues
 colnames(log2tpm.Vscore) <- tissues
 
+print("Calculating nullcount, median, IQR and across tissues")
 log2tpm.median.median <- apply(log2tpm.median, 1, function(x) {quantile(x[is.finite(x)], probs = 0.5, na.rm = T)})
 log2tpm.median.iqr <- apply(log2tpm.median, 1, function(x) {quantile(x[is.finite(x)], probs = 0.75, na.rm = T) - quantile(x[is.finite(x)], probs = 0.25, na.rm = T)})
 
@@ -42,6 +45,7 @@ nullcount.sum <- apply(nullcount, 1, sum)
 log2tpm.Vscore.max <- apply(log2tpm.Vscore, 1, function(x) {max(x[is.finite(x)], na.rm = T)})
 log2tpm.Sscore.max <- apply(log2tpm.Sscore, 1, function(x) {max(x[is.finite(x)], na.rm = T)})
 
+print("Looking for housekeeping genes")
 all.stats <- data.frame(rownames(tpm), log2tpm.median.median, log2tpm.median.iqr, 
 	log2tpm.median.Sscore, log2tpm.median.Sprimescore, log2tpm.median.Vscore,
 	nullcount.sum, log2tpm.Sscore.max, log2tpm.Vscore.max)
@@ -54,6 +58,7 @@ housekeepinggene.iqr <- log2tpm.iqr[nullcount.sum == 0 & is.finite(log2tpm.Vscor
 ## check ENSG00000204983.8|PRSS1 Pancreas
 # tissuespecificgene[grep("PRSS1",as.matrix(tissuespecificgene[,1])),1]
 # raw.table[grep("PRSS1",as.matrix(raw.table[,1])),1:5][10,]
+print("Looking for tissue specific genes")
 tissuespecificgene <- data.frame()
 tissuehigh <- c()
 tissuelow <- c()
@@ -84,6 +89,7 @@ for(i in 1:nrow(all.stats)){
 tissuespecificgene.median <- log2tpm.median[rindex, ]
 tissuespecificgene.iqr <- log2tpm.iqr[rindex, ]
 
+print("Writing output files")
 write.table(housekeepinggene, file = "HKG.v1.2.by.percentage.tsv", 
 	sep = "\t", row.names = FALSE, quote = FALSE)
 write.table(data.frame(tissuespecificgene, tissuehigh, tissuelow), file = "TSG.v1.2.by.percentage.tsv", 
@@ -102,8 +108,10 @@ write.table(data.frame(rownames(tpm), log2tpm.Sscore), file = "v1.2.log2tpm.Ssco
 write.table(data.frame(rownames(tpm), all.stats), file = "v1.2.allstats.tsv", 
 	sep = "\t", row.names = FALSE, quote = FALSE)
 
+print("Saving RData")
 save.image("v1.2.iqr.RData")
 
+print("Clustering")
 breaklists <- c(seq(0, 2, by = 0.01),seq(2.1, 5.7, by = 0.1))
 colorn <- length(breaklists)
 colors <- colorRampPalette(c("blue", "yellow", "red"))(colorn)
