@@ -1,7 +1,7 @@
 library(data.table)
 library(pheatmap)
 args <- c("GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_tpm.gct", 
-	"GTEx_sample.tissue.txt", "v1.3.3", "0.25", "0.5", "0.1")
+	"GTEx_sample.tissue.txt", "v1.4", "0.25", "0.5", "0.1")
 # expression tissuename outputpre tissue sample expressioncutoff[log2(tpm+1)]
 
 ### some functions ###
