@@ -88,9 +88,9 @@ for(i in 1:length(tissues)){
 for(i in 1:length(tissues)){
 	print(paste(tissues[i], nrow(log2tpm.Tau[log2tpm.Tau[,i] < 0.15,]), sep = ": "))
 }
-all.stats[grep("GAPDH", as.matrix(all.stats[,1])), 1]
-all.stats[Name.Description == "ENSG00000111640.10|GAPDH", 1]
-as.numeric(all.stats[ grep("\\|ACTB$",genes), ])
+# all.stats[grep("GAPDH", as.matrix(all.stats[,1])), 1]
+# all.stats[Name.Description == "ENSG00000111640.10|GAPDH", 1]
+# as.numeric(all.stats[ grep("\\|ACTB$",genes), ])
 
 print("Looking for housekeeping genes")
 housekeepinggene <- all.stats[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.mean.Tau) & log2tpm.mean.Tau < tissueTau, ]
@@ -108,12 +108,12 @@ tissuespecificgene <- data.frame()
 tissueflags <- c()
 rindex <- c()
 for(i in 1:nrow(all.stats)){
-	if(!is.na(log2tpm.mean.Tau[i]) && log2tpm.mean.Tau[i] > 0.7 && !is.na(log2tpm.Tau.min[i]) && log2tpm.Tau.min[i] < 0.3 && min(nullcount[i,], na.rm = T) == 0){
+	if(!is.na(log2tpm.mean.Tau[i]) && log2tpm.mean.Tau[i] > 1 - tissueTau && !is.na(log2tpm.Tau.min[i]) && log2tpm.Tau.min[i] < sampleTau && min(nullcount[i,], na.rm = T) == 0){
 		flag <- 0
 		tflags <- c()
 		for(j in 1:length(tissues)){
 			temp <- log2tpm.mean[i,j]/fmax(log2tpm.mean[i,])
-			if(nullcount[i,j] == 0 && !is.na(log2tpm.Tau[i,j]) && log2tpm.Tau[i,j] < 0.3 &&  !is.na(temp) && temp > 0.7){
+			if(nullcount[i,j] == 0 && !is.na(log2tpm.Tau[i,j]) && log2tpm.Tau[i,j] < sampleTau &&  !is.na(temp) && temp > 1 - tissueTau){
 				flag <- 1
 				tflags <- c(tflags, tissues[j])
 			}

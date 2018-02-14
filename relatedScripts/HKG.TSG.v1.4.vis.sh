@@ -4,7 +4,7 @@ library(ggplot2)
 library(reshape2)
 
 print("Reading Data")
-args <- c("v1.3.2", "GTEx_sample.tissue.txt", "0.25", "0.25")
+args <- c("v1.4", "GTEx_sample.tissue.txt", "0.25", "0.25")
 all.stats.file <- paste(args[1], "allstats.tsv", sep = ".")
 all.stats <- fread(all.stats.file, , sep = "\t", header = T)
 # all.stats <- data.frame(rownames(tpm), log2tpm.mean.mean, log2tpm.mean.Tau, 

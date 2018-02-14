@@ -169,7 +169,7 @@ for(i in 1:nrow(all.stats)){
 		}
 	}
 }
-tissuespecificgene.median <- log2tpm.mdian[rindex, ]
+tissuespecificgene.median <- log2tpm.median[rindex, ]
 tissuespecificgene.Tau <- log2tpm.Tau[rindex, ]
 rownames(tissuespecificgene.median) <- tissuespecificgene[,1]
 rownames(tissuespecificgene.Tau) <- tissuespecificgene[,1]
