@@ -68,6 +68,7 @@ fTau <- function(x)
 # tpm <- as.matrix(read.table(args[1], sep = "\t", row.names = 1, header = T))
 print("Reading Data")
 raw.table <- fread(args[1], sep = "\t", header = T)
+# Read 56202 rows and 11689 (of 11689) columns from 2.622 GB file in 00:06:16
 tpm <- as.matrix(raw.table[,-1])
 rownames(tpm) <- as.matrix(raw.table[,1])
 info <- as.matrix(read.table(args[2], sep = "\t"))
@@ -97,17 +98,22 @@ nullcount.sum <- apply(nullcount, 1, sum)
 log2tpm.Tau.max <- apply(log2tpm.Tau, 1, function(x) {max(x[is.finite(x)], na.rm = T)})
 log2tpm.Tau.min <- apply(log2tpm.Tau, 1, function(x) {min(x[is.finite(x)], na.rm = T)})
 
+### it takes ~30min until this step
+
 print("Saving RData")
 save.image("v1.3.Tau.RData")
+### it takes ~50min until this step
 
+#load("v1.3.Tau.RData")
+#library(pheatmap)
 print("Looking for housekeeping genes")
 all.stats <- data.frame(rownames(tpm), log2tpm.mean.mean, log2tpm.mean.Tau, 
 	nullcount.sum, log2tpm.Tau.max, log2tpm.Tau.min, 
 	log2tpm.mean, log2tpm.Tau)
 rownames(all.stats) <- rownames(tpm)
-housekeepinggene <- all.stats[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < 0.15 & !is.na(log2tpm.mean.Tau) & log2tpm.mean.Tau < 0.15, ]
-housekeepinggene.mean <- log2tpm.mean[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < 0.15 & !is.na(log2tpm.mean.Tau) & log2tpm.mean.Tau < 0.15, ]
-housekeepinggene.Tau <- log2tpm.Tau[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < 0.15 & !is.na(log2tpm.mean.Tau) & log2tpm.mean.Tau < 0.15, ]
+housekeepinggene <- all.stats[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < 0.5 & !is.na(log2tpm.mean.Tau) & log2tpm.mean.Tau < 0.3, ]
+housekeepinggene.mean <- log2tpm.mean[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < 0.5 & !is.na(log2tpm.mean.Tau) & log2tpm.mean.Tau < 0.3, ]
+housekeepinggene.Tau <- log2tpm.Tau[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < 0.5 & !is.na(log2tpm.mean.Tau) & log2tpm.mean.Tau < 0.3, ]
 rownames(housekeepinggene.mean) <- housekeepinggene[,1]
 rownames(housekeepinggene.Tau) <- housekeepinggene[,1]
 # housekeepinggene[grep("GAPDH", as.matrix(housekeepinggene[,1])), 1]
@@ -120,12 +126,12 @@ tissuespecificgene <- data.frame()
 tissueflags <- c()
 rindex <- c()
 for(i in 1:nrow(all.stats)){
-	if(!is.na(log2tpm.mean.Tau[i]) && log2tpm.mean.Tau[i] > 0.85 && !is.na(log2tpm.Tau.min[i]) && log2tpm.Tau.min[i] < 0.15 && min(nullcount[i,], na.rm = T) == 0){
+	if(!is.na(log2tpm.mean.Tau[i]) && log2tpm.mean.Tau[i] > 0.7 && !is.na(log2tpm.Tau.min[i]) && log2tpm.Tau.min[i] < 0.3 && min(nullcount[i,], na.rm = T) == 0){
 		flag <- 0
 		tflags <- c()
 		for(j in 1:length(tissues)){
 			temp <- log2tpm.mean[i,j]/fmax(log2tpm.mean[i,])
-			if(nullcount[i,j] == 0 && !is.na(log2tpm.Tau[i,j]) && log2tpm.Tau[i,j] < 0.15 &&  !is.na(temp) && temp > 0.85){
+			if(nullcount[i,j] == 0 && !is.na(log2tpm.Tau[i,j]) && log2tpm.Tau[i,j] < 0.3 &&  !is.na(temp) && temp > 0.7){
 				flag <- 1
 				tflags <- c(tflags, tissues[j])
 			}
@@ -174,7 +180,7 @@ p1 <- pheatmap(data, scale = "none", show_rownames = F, show_colnames = T,
          clustering_method = "ward.D2"
          )
 dev.off()
-cluster <- cutree(p1$tree_row, k = 10)
+cluster <- cutree(p1$tree_row, k = 5)
 write.table(data.frame(cluster[p1$tree_row$order], 
 	rownames(data)[p1$tree_row$order],
 	data[p1$tree_row$order, p1$tree_col$order]), 
@@ -196,7 +202,7 @@ p2 <- pheatmap(data, scale = "none", show_rownames = F, show_colnames = T,
          clustering_method = "ward.D2"
          )
 dev.off()
-cluster <- cutree(p2$tree_row, k = 10)
+cluster <- cutree(p2$tree_row, k = 5)
 write.table(data.frame(cluster[p2$tree_row$order], 
 	tissueflags[p2$tree_row$order],
 	rownames(data)[p2$tree_row$order],
