@@ -1,8 +1,9 @@
 library(data.table)
 library(pheatmap)
+
 args <- c("GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_tpm.gct", 
 	"GTEx_sample.tissue.txt", "v1.4", "0.25", "0.5", "0.1")
-# expression tissuename outputpre tissue sample expressioncutoff[log2(tpm+1)]
+# expression tissuename outputpre tissueTau sampleTau expressioncutoff[log2(tpm+1)]
 
 ### some functions ###
 ###+++###
@@ -129,14 +130,26 @@ log2tpm.Tau.min <- apply(log2tpm.Tau, 1, function(x) {min(x[is.finite(x)], na.rm
 # save.image("v1.3.Tau.RData")
 # ### it takes ~50min until this step
 
-#load("v1.3.Tau.RData")
-#library(pheatmap)
-print("Looking for housekeeping genes")
+print("Writing raw output files")
 all.stats <- data.frame(rownames(tpm), log2tpm.mean.mean, log2tpm.mean.Tau, 
 	log2tpm.median.mean, log2tpm.median.Tau, 
 	nullcount.sum, log2tpm.Tau.max, log2tpm.Tau.min, 
 	log2tpm.mean, log2tpm.median, log2tpm.Tau)
 rownames(all.stats) <- rownames(tpm)
+write.table(data.frame(rownames(tpm), nullcount), file = paste(outputpre, "nullcount.tsv", sep = "."), 
+	sep = "\t", row.names = FALSE, quote = FALSE)
+write.table(data.frame(rownames(tpm), log2tpm.mean), file = paste(outputpre, "log2tpm.mean.tsv", sep = "."), 
+	sep = "\t", row.names = FALSE, quote = FALSE)
+write.table(data.frame(rownames(tpm), log2tpm.median), file = paste(outputpre, "log2tpm.median.tsv", sep = "."), 
+	sep = "\t", row.names = FALSE, quote = FALSE)
+write.table(data.frame(rownames(tpm), log2tpm.Tau), file = paste(outputpre, "log2tpm.Tau.tsv", sep = "."), 
+	sep = "\t", row.names = FALSE, quote = FALSE)
+write.table(all.stats, file = paste(outputpre, "allstats.tsv", sep = "."), 
+	sep = "\t", row.names = FALSE, quote = FALSE)
+
+#load("v1.3.Tau.RData")
+#library(pheatmap)
+print("Looking for housekeeping genes")
 housekeepinggene <- all.stats[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau, ]
 housekeepinggene.median <- log2tpm.median[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau, ]
 housekeepinggene.Tau <- log2tpm.Tau[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau, ]
@@ -174,21 +187,10 @@ tissuespecificgene.Tau <- log2tpm.Tau[rindex, ]
 rownames(tissuespecificgene.median) <- tissuespecificgene[,1]
 rownames(tissuespecificgene.Tau) <- tissuespecificgene[,1]
 
-print("Writing output files")
+print("Writing HKG/TSG output files")
 write.table(housekeepinggene, file = paste(outputpre, "HKG.tsv", sep = "."), 
 	sep = "\t", row.names = FALSE, quote = FALSE)
 write.table(data.frame(tissuespecificgene, tissueflags), file = paste(outputpre, "TSG.tsv", sep = "."), 
-	sep = "\t", row.names = FALSE, quote = FALSE)
-
-write.table(data.frame(rownames(tpm), nullcount), file = paste(outputpre, "nullcount.tsv", sep = "."), 
-	sep = "\t", row.names = FALSE, quote = FALSE)
-write.table(data.frame(rownames(tpm), log2tpm.mean), file = paste(outputpre, "log2tpm.mean.tsv", sep = "."), 
-	sep = "\t", row.names = FALSE, quote = FALSE)
-write.table(data.frame(rownames(tpm), log2tpm.median), file = paste(outputpre, "log2tpm.median.tsv", sep = "."), 
-	sep = "\t", row.names = FALSE, quote = FALSE)
-write.table(data.frame(rownames(tpm), log2tpm.Tau), file = paste(outputpre, "log2tpm.Tau.tsv", sep = "."), 
-	sep = "\t", row.names = FALSE, quote = FALSE)
-write.table(all.stats, file = paste(outputpre, "allstats.tsv", sep = "."), 
 	sep = "\t", row.names = FALSE, quote = FALSE)
 
 print("Clustering")

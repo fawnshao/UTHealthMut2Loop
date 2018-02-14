@@ -4,12 +4,14 @@ library(ggplot2)
 library(reshape2)
 
 print("Reading Data")
-args <- c("v1.4", "GTEx_sample.tissue.txt", "0.25", "0.25")
+# outputpre tissuename tissueTau sampleTau
+args <- c("v1.4", "GTEx_sample.tissue.txt", "0.25", "0.5")
 all.stats.file <- paste(args[1], "allstats.tsv", sep = ".")
 all.stats <- fread(all.stats.file, , sep = "\t", header = T)
 # all.stats <- data.frame(rownames(tpm), log2tpm.mean.mean, log2tpm.mean.Tau, 
+# 	log2tpm.median.mean, log2tpm.median.Tau, 
 # 	nullcount.sum, log2tpm.Tau.max, log2tpm.Tau.min, 
-# 	log2tpm.mean, log2tpm.Tau)
+# 	log2tpm.mean, log2tpm.median, log2tpm.Tau)
 info <- as.matrix(read.table(args[2], sep = "\t"))
 tissues <- unique(info[,2])
 tissues <- tissues[-c(7,24,25,53)]
@@ -129,3 +131,75 @@ tissuespecificgene.mean <- log2tpm.mean[rindex, ]
 tissuespecificgene.Tau <- log2tpm.Tau[rindex, ]
 rownames(tissuespecificgene.mean) <- tissuespecificgene[,1]
 rownames(tissuespecificgene.Tau) <- tissuespecificgene[,1]
+
+
+
+print("Writing output files")
+write.table(housekeepinggene, file = paste(outputpre, "HKG.tsv", sep = "."), 
+	sep = "\t", row.names = FALSE, quote = FALSE)
+write.table(data.frame(tissuespecificgene, tissueflags), file = paste(outputpre, "TSG.tsv", sep = "."), 
+	sep = "\t", row.names = FALSE, quote = FALSE)
+
+print("Clustering")
+breaklists <- c(seq(0, 1, by = 0.01))
+colorn <- length(breaklists)
+colors <- colorRampPalette(c("blue", "yellow", "red"))(colorn)
+
+breaklists2 <- c(seq(0, 6, by = 0.05),seq(6.1, 16, by = 0.1))
+colorn2 <- length(breaklists2)
+colors2 <- colorRampPalette(c("blue", "yellow", "red"))(colorn2)
+
+png(filename = paste(outputpre, "HKG.median.png", sep = "."), width = 1000, height = 1500)
+data <- data.frame(housekeepinggene.median, housekeepinggene[,4])
+p1 <- pheatmap(data, scale = "none", show_rownames = F, show_colnames = T, 
+         color = colors2, cluster_cols = T, breaks = breaklists2,
+         clustering_distance_cols = "euclidean", clustering_distance_rows = "euclidean", 
+         clustering_method = "ward.D2"
+         )
+dev.off()
+cluster <- cutree(p1$tree_row, k = 5)
+write.table(data.frame(cluster[p1$tree_row$order], 
+	rownames(data)[p1$tree_row$order],
+	data[p1$tree_row$order, p1$tree_col$order]), 
+	file = paste(outputpre, "HKG.median.pheatmap.tsv", sep = "."), 
+	sep = "\t", row.names = FALSE, quote = FALSE)
+
+png(filename = paste(outputpre, "HKG.Tau.png", sep = "."), width = 1000, height = 1500)
+data <- data.frame(housekeepinggene.Tau,housekeepinggene[,5])
+pheatmap(data[p1$tree_row$order,p1$tree_col$order], scale = "none", 
+	show_rownames = F, show_colnames = T, color = colors, 
+	cluster_cols = F, cluster_rows = F, breaks = breaklists)
+dev.off()
+write.table(data.frame(cluster[p1$tree_row$order], 
+	rownames(data)[p1$tree_row$order],
+	data[p1$tree_row$order, p1$tree_col$order]), 
+	file = paste(outputpre, "HKG.Tau.pheatmap.tsv", sep = "."), 
+	sep = "\t", row.names = FALSE, quote = FALSE)
+
+png(filename = paste(outputpre, "TSG.median.png", sep = "."), width = 1000, height = 1500)
+data <- data.frame(tissuespecificgene.median, tissuespecificgene[,4])
+p2 <- pheatmap(data, scale = "none", show_rownames = F, show_colnames = T, 
+         color = colors2, cluster_cols = T, breaks = breaklists2,
+         clustering_distance_cols = "euclidean", clustering_distance_rows = "euclidean", 
+         clustering_method = "ward.D2"
+         )
+dev.off()
+cluster <- cutree(p2$tree_row, k = 5)
+write.table(data.frame(cluster[p2$tree_row$order], 
+	tissueflags[p2$tree_row$order],
+	rownames(data)[p2$tree_row$order],
+	data[p2$tree_row$order, p2$tree_col$order]), 
+	file = paste(outputpre, "TSG.median.pheatmap.tsv", sep = "."), 
+	sep = "\t", row.names = FALSE, quote = FALSE)
+
+png(filename = paste(outputpre, "TSG.Tau.png", sep = "."), width = 1000, height = 1500)
+data <- data.frame(tissuespecificgene.Tau, tissuespecificgene[,4])
+pheatmap(data[p2$tree_row$order,p2$tree_col$order], scale = "none", 
+	show_rownames = F, show_colnames = T, color = colors, 
+	cluster_cols = F, cluster_rows = F, breaks = breaklists)
+dev.off()
+write.table(data.frame(cluster[p2$tree_row$order], 
+	rownames(data)[p2$tree_row$order],
+	data[p2$tree_row$order, p2$tree_col$order]), 
+	file = paste(outputpre, "TSG.Tau.pheatmap.tsv", sep = "."), 
+	sep = "\t", row.names = FALSE, quote = FALSE)
