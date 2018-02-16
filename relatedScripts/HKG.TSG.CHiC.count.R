@@ -10,7 +10,7 @@ x <- log2(data + 1)
 count <- as.numeric(args[2])
 if(!is.na(count)){
 	n <- ncol(data)
-	x <- data.frame(log2(data[,1:count] + 1), data[,c(count + 1:n)])
+	x <- data.frame(log2(data[,1:count] + 1), data[,c((count + 1):n)])
 }
 png(filename = paste(args[1], "nocluster.pheatmap.png", sep = "."), width = 800, height = 1000)
 pheatmap(x, scale = "none", show_rownames = F, show_colnames = T, 
