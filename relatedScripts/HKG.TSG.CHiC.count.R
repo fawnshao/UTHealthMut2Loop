@@ -8,7 +8,7 @@ data[is.na(data)] <- 0
 colors <- colorRampPalette(c("blue", "yellow", "red"))(100)
 x <- log2(data + 1)
 count <- as.numeric(args[2])
-if(args[2] > 0){
+if(!is.na(count)){
 	n <- ncol(data)
 	x <- data.frame(log2(data[,1:count] + 1), data[,c(count + 1:n)])
 }
