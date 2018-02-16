@@ -6,15 +6,19 @@ data[is.na(data)] <- 0
 # colorn <- length(breaklists)
 # colors <- colorRampPalette(c("blue", "yellow", "red"))(colorn)
 colors <- colorRampPalette(c("blue", "yellow", "red"))(100)
-
+x <- log2(data)
+if(args[2] eq "y"){
+	n <- ncol(data)
+	x <- data.frame(log2(data[,-c(n-1,n)]),data[,c(n-1,n)])
+}
 png(filename = paste(args[1], "nocluster.pheatmap.png", sep = "."), width = 800, height = 1000)
-pheatmap(log2(data + 1), scale = "none", show_rownames = F, show_colnames = T, 
+pheatmap(x, scale = "none", show_rownames = F, show_colnames = T, 
          color = colors, cluster_rows = F, cluster_cols = F
          )
 dev.off()
 
 png(filename = paste(args[1], "pheatmap.png", sep = "."), width = 800, height = 1000)
-p1 <- pheatmap(log2(data + 1), scale = "none", show_rownames = F, show_colnames = T, 
+p1 <- pheatmap(x, scale = "none", show_rownames = F, show_colnames = T, 
          color = colors, 
          clustering_distance_cols = "euclidean", clustering_distance_rows = "euclidean", 
          clustering_method = "ward.D2"

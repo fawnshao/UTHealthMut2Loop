@@ -1,8 +1,8 @@
-# cut -f 1-2 HKG.v1.1.by.percentage.tsv | sed -n '2,$p' | perl ~/myScripts/add_any_2files_together.pl gencode.v19.gene.bed /dev/stdin 3 0 | awk -vOFS="\t" '{print $3,$4,$5,$1,$2,$8}' | bedtools sort -i - > housekeepinggene.byGTEx.gene.bed
-# cut -f 1,3 HKG.v1.1.by.percentage.tsv | perl ~/myScripts/add_any_2files_together.pl /dev/stdin housekeepinggene.byGTEx.gene.bed 0 3 | cut -f 1-6,8 > HKG.mean.sd.txt
-# cut -f 2-3 TSG.v1.1.by.percentage.tsv | sed -n '2,$p' | perl ~/myScripts/add_any_2files_together.pl gencode.v19.gene.bed /dev/stdin 3 0 | awk -vOFS="\t" '{print $3,$4,$5,$1,$2,$8}' | bedtools sort -i - > tissuespecificgene.byGTEx.gene.bed
-# cut -f 2,4 TSG.v1.1.by.percentage.tsv | perl ~/myScripts/add_any_2files_together.pl /dev/stdin tissuespecificgene.byGTEx.gene.bed 0 3 | cut -f 1-6,8 > TSG.mean.sd.txt
-# cut -f 1-3 ../housekeepinggene.byGTEx.v1.1.raw.tsv| perl ~/myScripts/add_any_2files_together.pl /dev/stdin gencode.v19.gene.bed 0 3 | awk -vOFS="\t" '{print $1,$2,$3,$4,$8,$6,$9}' | grep -v "/" > all.mean.sd.txt
+# cut -f 1-2 HKG.v1.4.by.percentage.tsv | sed -n '2,$p' | perl ~/myScripts/add_any_2files_together.pl gencode.v19.gene.bed /dev/stdin 3 0 | awk -vOFS="\t" '{print $3,$4,$5,$1,$2,$8}' | bedtools sort -i - > housekeepinggene.byGTEx.gene.bed
+# cut -f 1,3 HKG.v1.4.by.percentage.tsv | perl ~/myScripts/add_any_2files_together.pl /dev/stdin housekeepinggene.byGTEx.gene.bed 0 3 | cut -f 1-6,8 > HKG.mean.sd.txt
+# cut -f 2-3 TSG.v1.4.by.percentage.tsv | sed -n '2,$p' | perl ~/myScripts/add_any_2files_together.pl gencode.v19.gene.bed /dev/stdin 3 0 | awk -vOFS="\t" '{print $3,$4,$5,$1,$2,$8}' | bedtools sort -i - > tissuespecificgene.byGTEx.gene.bed
+# cut -f 2,4 TSG.v1.4.by.percentage.tsv | perl ~/myScripts/add_any_2files_together.pl /dev/stdin tissuespecificgene.byGTEx.gene.bed 0 3 | cut -f 1-6,8 > TSG.mean.sd.txt
+# cut -f 1-3 ../housekeepinggene.byGTEx.v1.4.raw.tsv| perl ~/myScripts/add_any_2files_together.pl /dev/stdin gencode.v19.gene.bed 0 3 | awk -vOFS="\t" '{print $1,$2,$3,$4,$8,$6,$9}' | grep -v "/" > all.mean.sd.txt
 
 library(karyoploteR)
 hk.input <- read.table("HKG.mean.sd.txt", sep = "\t")
@@ -18,7 +18,7 @@ colnames(tad2) <- c("chr","start", "end")
 tad.gr2 <- makeGRangesFromDataFrame(df = tad2)
 
 # kp <- plotKaryotype(plot.type = 1, chromosomes = c("chr1", "chr2", "chr3"))
-pdf(file = "HKG.v1.1.byGTEx.pdf", width = 15, height = 12)
+pdf(file = "HKG.v1.4.byGTEx.pdf", width = 15, height = 12)
 kp <- plotKaryotype(genome="hg19", plot.type = 2)
 kpDataBackground(kp, r0 = 0, r1 = 0.8, data.panel = 1)
 kpDataBackground(kp, r0 = 0, r1 = 0.5, data.panel = 2)
@@ -33,7 +33,7 @@ kpPlotRegions(kp, r0 = 0, r1 = 0.2, data.panel = 2, data = tad.gr, col = "burlyw
 kpPlotRegions(kp, r0 = 0.3, r1 = 0.5, data.panel = 2, data = tad.gr2, col = "coral")
 dev.off()
 
-pdf(file = "TSG.v1.1.byGTEx.pdf", width = 15, height = 12)
+pdf(file = "TSG.v1.4.byGTEx.pdf", width = 15, height = 12)
 kp <- plotKaryotype(genome="hg19", plot.type = 2)
 kpDataBackground(kp, r0 = 0, r1 = 0.8, data.panel = 1)
 kpDataBackground(kp, r0 = 0, r1 = 0.5, data.panel = 2)
@@ -50,7 +50,7 @@ dev.off()
 
 # pdf(file = "housekeepinggene.byGTEx.karyoploteR.hESC_domains.pdf", width = 12, height = 10)
 # pdf(file = "all.hESC_domains.rect.pdf", width = 12, height = 10)
-pdf(file = "HKG.TSG.v1.1.byGTEx.vsALL.pdf", width = 15, height = 12)
+pdf(file = "HKG.TSG.v1.4.byGTEx.vsALL.pdf", width = 15, height = 12)
 kp <- plotKaryotype(genome="hg19", plot.type = 2)
 kpDataBackground(kp, r0 = 0, r1 = 0.8, data.panel = 1)
 kpDataBackground(kp, r0 = 0, r1 = 0.5, data.panel = 2)

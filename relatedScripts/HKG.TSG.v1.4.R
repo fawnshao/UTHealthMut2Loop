@@ -160,6 +160,9 @@ rownames(housekeepinggene.Tau) <- housekeepinggene[,1]
 ## check ENSG00000204983.8|PRSS1 Pancreas
 # tissuespecificgene[grep("PRSS1",as.matrix(tissuespecificgene[,1])),1]
 # raw.table[grep("PRSS1",as.matrix(raw.table[,1])),1:5][10,]
+# ENSG00000153266.8|FEZF2	Brain
+# ENSG00000055957.6|ITIH1	Liver
+# ENSG00000136574.13|GATA4	Artery - Coronary,Heart - Atrial Appendage,Heart - Left Ventricle,Ovary,Testis
 print("Looking for tissue specific genes")
 tissuespecificgene <- data.frame()
 tissueflags <- c()
@@ -246,7 +249,7 @@ write.table(data.frame(cluster[p2$tree_row$order],
 	sep = "\t", row.names = FALSE, quote = FALSE)
 
 png(filename = paste(outputpre, "TSG.Tau.png", sep = "."), width = 1000, height = 1500)
-data <- data.frame(tissuespecificgene.Tau, tissuespecificgene[,4])
+data <- data.frame(tissuespecificgene.Tau, tissuespecificgene[,5])
 pheatmap(data[p2$tree_row$order,p2$tree_col$order], scale = "none", 
 	show_rownames = F, show_colnames = T, color = colors, 
 	cluster_cols = F, cluster_rows = F, breaks = breaklists)
