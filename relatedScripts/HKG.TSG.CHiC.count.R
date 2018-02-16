@@ -7,7 +7,7 @@ data[is.na(data)] <- 0
 # colors <- colorRampPalette(c("blue", "yellow", "red"))(colorn)
 colors <- colorRampPalette(c("blue", "yellow", "red"))(100)
 x <- log2(data)
-if(args[2] eq "y"){
+if(args[2] == "y"){
 	n <- ncol(data)
 	x <- data.frame(log2(data[,-c(n-1,n)]),data[,c(n-1,n)])
 }
