@@ -6,10 +6,10 @@ data[is.na(data)] <- 0
 # colorn <- length(breaklists)
 # colors <- colorRampPalette(c("blue", "yellow", "red"))(colorn)
 colors <- colorRampPalette(c("blue", "yellow", "red"))(100)
-x <- log2(data)
+x <- log2(data + 1)
 if(args[2] == "y"){
 	n <- ncol(data)
-	x <- data.frame(log2(data[,-c(n-1,n)]),data[,c(n-1,n)])
+	x <- data.frame(log2(data[,-n)] + 1), data[,n)])
 }
 png(filename = paste(args[1], "nocluster.pheatmap.png", sep = "."), width = 800, height = 1000)
 pheatmap(x, scale = "none", show_rownames = F, show_colnames = T, 
