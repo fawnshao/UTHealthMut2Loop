@@ -7,9 +7,10 @@ data[is.na(data)] <- 0
 # colors <- colorRampPalette(c("blue", "yellow", "red"))(colorn)
 colors <- colorRampPalette(c("blue", "yellow", "red"))(100)
 x <- log2(data + 1)
-if(args[2] == "y"){
+count <- as.numeric(args[2])
+if(args[2] > 0){
 	n <- ncol(data)
-	x <- data.frame(log2(data[,-n] + 1), data[,n])
+	x <- data.frame(log2(data[,1:count] + 1), data[,c(count + 1:n)])
 }
 png(filename = paste(args[1], "nocluster.pheatmap.png", sep = "."), width = 800, height = 1000)
 pheatmap(x, scale = "none", show_rownames = F, show_colnames = T, 
@@ -30,3 +31,20 @@ write.table(data.frame(cluster[p1$tree_row$order],
 	data[p1$tree_row$order, p1$tree_col$order]), 
 	file = paste(args[1], "pheatmap.tsv", sep = "."), 
 	sep = "\t", row.names = FALSE, quote = FALSE)
+
+### the following is same
+# png(filename = paste(args[1], "a.png", sep = "."), width = 800, height = 1000)
+# p1 <- pheatmap(x, scale = "none", show_rownames = F, show_colnames = T, 
+#          color = colors, 
+#          clustering_distance_cols = "correlation", clustering_distance_rows = "correlation", 
+#          clustering_method = "average"
+#          )
+# dev.off()
+
+# library(gplots)
+# hc <- hclust(as.dist(1 - cor(t(x))), method="average")
+# hc2 <- hclust(as.dist(1 - cor(x)), method="average")
+# png(filename = paste(args[1], "b.png", sep = "."), width = 800, height = 1000)
+# heatmap(as.matrix(x), Rowv = as.dendrogram(hc), Colv = as.dendrogram(hc2), 
+# 	col=colors, labRow="", scale = "none")
+# dev.off()
