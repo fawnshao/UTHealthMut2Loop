@@ -10,13 +10,13 @@ x[x <= 0.1] <- 0
 # colors <- colorRampPalette(c("blue", "yellow", "red"))(colorn)
 colors <- colorRampPalette(c("blue", "yellow", "red"))(100)
 
-png(filename = paste(args[1], "nocluster.pheatmap.png", sep = "."), width = 800, height = 1000)
+png(filename = paste(args[1], "nocluster.pheatmap.bin.png", sep = "."), width = 800, height = 1000)
 pheatmap(x, scale = "none", show_rownames = F, show_colnames = T, 
          color = colors, cluster_rows = F, cluster_cols = F
          )
 dev.off()
 
-png(filename = paste(args[1], "pheatmap.png", sep = "."), width = 800, height = 1000)
+png(filename = paste(args[1], "pheatmap.bin.png", sep = "."), width = 800, height = 1000)
 p1 <- pheatmap(x, scale = "none", show_rownames = F, show_colnames = T, 
          color = colors, 
          clustering_distance_cols = "euclidean", clustering_distance_rows = "euclidean", 
@@ -27,7 +27,7 @@ cluster <- cutree(p1$tree_row, k = 10)
 write.table(data.frame(cluster[p1$tree_row$order], 
 	rownames(data)[p1$tree_row$order],
 	data[p1$tree_row$order, p1$tree_col$order]), 
-	file = paste(args[1], "pheatmap.tsv", sep = "."), 
+	file = paste(args[1], "pheatmap.bin.tsv", sep = "."), 
 	sep = "\t", row.names = FALSE, quote = FALSE)
 
 ### the following is same
