@@ -12,7 +12,7 @@ bigx <- x[,(smallcols+1):(ncol(x))]
 smallx[smallx < small] <- 0
 smallx[smallx >= small] <- 1
 bigx[bigx < big] <- 0
-bigx[bigx >= big] <- 1
+bigx[bigx >= big] <- 2
 x <- data.frame(bigx, smallx)
 # breaklists <- c(seq(0, 2, by = 0.01),seq(2.1, 5.7, by = 0.1))
 # colorn <- length(breaklists)
