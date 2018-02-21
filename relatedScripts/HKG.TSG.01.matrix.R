@@ -4,6 +4,7 @@ data <- as.matrix(read.table(args[1], sep = "\t", row.names = 1, header = T, na.
 x <- data
 x[is.na(x)] <- 0
 x[x > 0.1] <- 1
+x[x <= 0.1] <- 0
 # breaklists <- c(seq(0, 2, by = 0.01),seq(2.1, 5.7, by = 0.1))
 # colorn <- length(breaklists)
 # colors <- colorRampPalette(c("blue", "yellow", "red"))(colorn)
