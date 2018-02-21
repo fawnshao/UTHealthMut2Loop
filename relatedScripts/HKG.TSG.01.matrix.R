@@ -1,18 +1,18 @@
 library(pheatmap)
 args <- commandArgs(TRUE)
 data <- as.matrix(read.table(args[1], sep = "\t", row.names = 1, header = T, na.strings = "/"))
-bigcols <- as.numeric(args[2])
-big <- as.numeric(args[3])
-small <- as.numeric(args[4])
+smallcols <- as.numeric(args[2])
+small <- as.numeric(args[3])
+big <- as.numeric(args[4])
 
 x <- data
 x[is.na(x)] <- 0
-bigx<- x[,1:bigcols]
-smallx <- x[,(bigcols+1):(ncol(x))]
-bigx[bigx < big] <- 0
-bigx[bigx >= big] <- 1
+smallx <- x[,1:smallcols]
+bigx <- x[,(smallcols+1):(ncol(x))]
 smallx[smallx < small] <- 0
 smallx[smallx >= small] <- 1
+bigx[bigx < big] <- 0
+bigx[bigx >= big] <- 1
 x <- data.frame(bigx, smallx)
 # breaklists <- c(seq(0, 2, by = 0.01),seq(2.1, 5.7, by = 0.1))
 # colorn <- length(breaklists)
