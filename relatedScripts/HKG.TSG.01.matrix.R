@@ -27,7 +27,7 @@ dev.off()
 
 png(filename = paste(args[1], "pheatmap.bin.png", sep = "."), width = 800, height = 1000)
 p1 <- pheatmap(x, scale = "none", show_rownames = F, show_colnames = T, 
-         color = colors, 
+         color = colors, cutree_rows = 10, 
          clustering_distance_cols = "euclidean", clustering_distance_rows = "euclidean", 
          clustering_method = "ward.D2"
          )
