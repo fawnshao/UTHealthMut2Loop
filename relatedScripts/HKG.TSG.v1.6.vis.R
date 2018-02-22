@@ -28,10 +28,10 @@ all.stats.file <- paste(args[1], "allstats.tsv", sep = ".")
 all.stats <- fread(all.stats.file, sep = "\t", header = T)
 nullcount.file <- paste(args[1], "nullcount.tsv", sep = ".")
 nullcount <- as.matrix(fread(nullcount.file, sep = "\t", header = T)[,-1])
-# all.stats <- data.frame(rownames(tpm), log2tpm.mean.mean, log2tpm.mean.Tau, 
-# 	log2tpm.median.mean, log2tpm.median.Tau, 
-# 	nullcount.sum, log2tpm.Tau.max, log2tpm.Tau.min, 
-# 	log2tpm.mean, log2tpm.median, log2tpm.Tau)
+# all.stats <- data.frame(rownames(tpm), rawtpm.mean.mean, rawtpm.mean.Tau, 
+# 	rawtpm.median.mean, rawtpm.median.Tau, 
+# 	nullcount.sum, rawtpm.Tau.max, rawtpm.Tau.min, 
+# 	rawtpm.mean, rawtpm.median, rawtpm.Tau)
 info <- as.matrix(read.table(args[2], sep = "\t"))
 tissues <- unique(info[,2])
 tissues <- tissues[-c(7,24,25,53)]
@@ -44,22 +44,22 @@ medianthreshold <- as.numeric(args[5])
 ############
 
 genes <- as.matrix(all.stats[,1])
-log2tpm.mean.mean <- as.matrix(all.stats[,2])
-log2tpm.mean.Tau <- as.matrix(all.stats[,3])
-log2tpm.median.mean <- as.matrix(all.stats[,4])
-log2tpm.median.Tau <- as.matrix(all.stats[,5])
+rawtpm.mean.mean <- as.matrix(all.stats[,2])
+rawtpm.mean.Tau <- as.matrix(all.stats[,3])
+rawtpm.median.mean <- as.matrix(all.stats[,4])
+rawtpm.median.Tau <- as.matrix(all.stats[,5])
 nullcount.sum <- as.matrix(all.stats[,6])
-log2tpm.Tau.max <- as.matrix(all.stats[,7])
-log2tpm.Tau.min <- as.matrix(all.stats[,8])
-log2tpm.mean <- as.matrix(all.stats[,9:57])
-log2tpm.median <- as.matrix(all.stats[,58:106])
-log2tpm.Tau <- as.matrix(all.stats[,107:155])
-rownames(log2tpm.mean) <- genes
-colnames(log2tpm.mean) <- tissues
-rownames(log2tpm.median) <- genes
-colnames(log2tpm.median) <- tissues
-rownames(log2tpm.Tau) <- genes
-colnames(log2tpm.Tau) <- tissues
+rawtpm.Tau.max <- as.matrix(all.stats[,7])
+rawtpm.Tau.min <- as.matrix(all.stats[,8])
+rawtpm.mean <- as.matrix(all.stats[,9:57])
+rawtpm.median <- as.matrix(all.stats[,58:106])
+rawtpm.Tau <- as.matrix(all.stats[,107:155])
+rownames(rawtpm.mean) <- genes
+colnames(rawtpm.mean) <- tissues
+rownames(rawtpm.median) <- genes
+colnames(rawtpm.median) <- tissues
+rownames(rawtpm.Tau) <- genes
+colnames(rawtpm.Tau) <- tissues
 rownames(nullcount) <- genes
 colnames(nullcount) <- tissues
 
@@ -67,7 +67,7 @@ colnames(nullcount) <- tissues
 
 print("Plotting distribution for mean and Tau")
 
-data <- melt(log2tpm.Tau)
+data <- melt(rawtpm.Tau)
 colnames(data) <- c("gene", "tissue", "Tau")
 png(filename = paste(args[1], "Tau.png", sep = "."), width = 2000, height = 1000)
 ggplot(data, aes(x = tissue, y = Tau, fill = tissue)) + 
@@ -75,15 +75,15 @@ geom_violin() +
 theme(legend.position = "none") 
 dev.off()
 
-data <- melt(log2tpm.median.Tau)
+data <- melt(rawtpm.median.Tau)
 png(filename = paste(args[1], "tissueTau.png", sep = "."), width = 2000, height = 1000)
 ggplot(data, aes(x = value)) + 
 geom_histogram(bins = 50) + 
 theme(legend.position = "none") 
 dev.off()
 
-data <- melt(log2tpm.median[log2tpm.median.mean > 1,])
-# data <- melt(log2tpm.median)
+data <- melt(rawtpm.median[rawtpm.median.mean > 1,])
+# data <- melt(rawtpm.median)
 colnames(data) <- c("gene", "tissue", "mean")
 png(filename = paste(args[1], "median.png", sep = "."), width = 2000, height = 1000)
 ggplot(data, aes(x = tissue, y = mean, fill = tissue)) + 
@@ -91,14 +91,14 @@ geom_violin() + scale_y_continuous(limits = c(0,6)) +
 theme(legend.position = "none") 
 dev.off()
 
-data <- melt(log2tpm.median.mean)
+data <- melt(rawtpm.median.mean)
 png(filename = paste(args[1], "tissuemean.png", sep = "."), width = 2000, height = 1000)
 ggplot(data, aes(x = value)) + 
 geom_histogram(bins = 1000) + scale_x_continuous(limits = c(0,6)) +
 theme(legend.position = "none") 
 dev.off()
 
-data <- data.frame(log2tpm.median.mean, log2tpm.median.Tau)
+data <- data.frame(rawtpm.median.mean, rawtpm.median.Tau)
 colnames(data) <- c("mean", "Tau")
 png(filename = paste(args[1], "tissuemeanVStissueTau.png", sep = "."), width = 1500, height = 1500)
 ggplot(data, aes(x = Tau, y = mean)) + 
@@ -109,7 +109,7 @@ dev.off()
 scatterplot <- function(x){
 	require(ggplot2)
 	print(tissues[x])
-	data <- data.frame(log2tpm.median[,x], log2tpm.Tau[,x])
+	data <- data.frame(rawtpm.median[,x], rawtpm.Tau[,x])
 	colnames(data) <- c("median", "Tau")
 	# png(filename = paste(args[1], i, "medianVSTau.png", sep = "."), width = 1500, height = 1500)
 	p <- ggplot(data, aes(x = Tau, y = median)) + geom_point() + ggtitle(tissues[x])
@@ -117,7 +117,7 @@ scatterplot <- function(x){
 	# return(p)
 }
 for(i in 1:length(tissues)){
-	# data <- data.frame(log2tpm.median[,i], log2tpm.Tau[,i])
+	# data <- data.frame(rawtpm.median[,i], rawtpm.Tau[,i])
 	# colnames(data) <- c("median", "Tau")
 	# scatterplot(data, paste(args[1], i, "meanVSTau.png", sep = "."), tissues[i])
 	png(filename = paste(args[1], i, "medianVSTau.png", sep = "."), width = 1500, height = 1500)
@@ -129,7 +129,7 @@ for(i in 1:length(tissues)){
 scatterplot2 <- function(x){
 	require(ggplot2)
 	print(tissues[x])
-	data <- data.frame(log2tpm.mean[,x], log2tpm.Tau[,x])
+	data <- data.frame(rawtpm.mean[,x], rawtpm.Tau[,x])
 	colnames(data) <- c("mean", "Tau")
 	p <- ggplot(data, aes(x = Tau, y = mean)) + geom_point() + ggtitle(tissues[x])
 }
@@ -140,18 +140,19 @@ for(i in 1:length(tissues)){
 }
 
 for(i in 1:length(tissues)){
-	print(paste(tissues[i], nrow(log2tpm.Tau[log2tpm.Tau[,i] < 0.15,]), sep = ": "))
+	print(paste(tissues[i], nrow(rawtpm.Tau[rawtpm.Tau[,i] < 0.15,]), sep = ": "))
 }
 # all.stats[grep("GAPDH", as.matrix(all.stats[,1])), 1]
 # all.stats[Name.Description == "ENSG00000111640.10|GAPDH", 1]
 # as.numeric(all.stats[ grep("\\|ACTB$",genes), ])
-# all.stats[log2tpm.median.Tau < 0.1,1:6]
+# all.stats[rawtpm.median.Tau < 0.1,1:6]
 
 print("Looking for housekeeping genes")
-log2tpm.median.min <- apply(log2tpm.median, 1, function(x){min(x, na.rm = T)})
-housekeepinggene <- all.stats[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau & log2tpm.median.min > medianthreshold, ]
-housekeepinggene.median <- log2tpm.median[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau & log2tpm.median.min > medianthreshold, ]
-housekeepinggene.Tau <- log2tpm.Tau[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau & log2tpm.median.min > medianthreshold, ]
+rawtpm.median.min <- apply(rawtpm.median, 1, function(x){min(x, na.rm = T)})
+housekeepinggene <- all.stats[nullcount.sum == 0 & !is.na(rawtpm.median.Tau) & rawtpm.median.Tau < tissueTau & rawtpm.median.min > medianthreshold, ]
+housekeepinggene <- all.stats[nullcount.sum == 0 & !is.na(rawtpm.Tau.max) & rawtpm.Tau.max < sampleTau & !is.na(rawtpm.median.Tau) & rawtpm.median.Tau < tissueTau & rawtpm.median.min > medianthreshold, ]
+housekeepinggene.median <- rawtpm.median[nullcount.sum == 0 & !is.na(rawtpm.Tau.max) & rawtpm.Tau.max < sampleTau & !is.na(rawtpm.median.Tau) & rawtpm.median.Tau < tissueTau & rawtpm.median.min > medianthreshold, ]
+housekeepinggene.Tau <- rawtpm.Tau[nullcount.sum == 0 & !is.na(rawtpm.Tau.max) & rawtpm.Tau.max < sampleTau & !is.na(rawtpm.median.Tau) & rawtpm.median.Tau < tissueTau & rawtpm.median.min > medianthreshold, ]
 rownames(housekeepinggene.median) <- as.matrix(housekeepinggene[,1])
 rownames(housekeepinggene.Tau) <- as.matrix(housekeepinggene[,1])
 # housekeepinggene[grep("GAPDH", as.matrix(housekeepinggene[,1])), 1]
@@ -164,12 +165,12 @@ tissuespecificgene <- data.frame()
 tissueflags <- c()
 rindex <- c()
 for(i in 1:nrow(all.stats)){
-	if(!is.na(log2tpm.median.Tau[i]) && log2tpm.median.Tau[i] > 1 - tissueTau && !is.na(log2tpm.Tau.min[i]) && log2tpm.Tau.min[i] < sampleTau && min(nullcount[i,], na.rm = T) == 0){
+	if(!is.na(rawtpm.median.Tau[i]) && rawtpm.median.Tau[i] > 1 - tissueTau && !is.na(rawtpm.Tau.min[i]) && rawtpm.Tau.min[i] < sampleTau && min(nullcount[i,], na.rm = T) == 0){
 		flag <- 0
 		tflags <- c()
 		for(j in 1:length(tissues)){
-			temp <- log2tpm.median[i,j] / fmax(log2tpm.median[i,])
-			if(nullcount[i,j] == 0 && !is.na(log2tpm.Tau[i,j]) && log2tpm.Tau[i,j] < sampleTau &&  !is.na(temp) && temp > 1 - tissueTau && log2tpm.median[i,j] > medianthreshold){
+			temp <- rawtpm.median[i,j] / fmax(rawtpm.median[i,])
+			if(nullcount[i,j] == 0 && !is.na(rawtpm.Tau[i,j]) && rawtpm.Tau[i,j] < sampleTau &&  !is.na(temp) && temp > 1 - tissueTau && rawtpm.median[i,j] > medianthreshold){
 				flag <- 1
 				tflags <- c(tflags, tissues[j])
 			}
@@ -181,8 +182,8 @@ for(i in 1:nrow(all.stats)){
 		}
 	}
 }
-tissuespecificgene.median <- log2tpm.median[rindex, ]
-tissuespecificgene.Tau <- log2tpm.Tau[rindex, ]
+tissuespecificgene.median <- rawtpm.median[rindex, ]
+tissuespecificgene.Tau <- rawtpm.Tau[rindex, ]
 rownames(tissuespecificgene.median) <- as.matrix(tissuespecificgene[,1])
 rownames(tissuespecificgene.Tau) <- as.matrix(tissuespecificgene[,1])
 
@@ -192,7 +193,7 @@ write.table(housekeepinggene, file = paste(outputpre, "HKG.tsv", sep = "."),
 write.table(data.frame(tissuespecificgene, tissueflags), file = paste(outputpre, "TSG.tsv", sep = "."), 
 	sep = "\t", row.names = FALSE, quote = FALSE)
 
-missed <- setdiff(x = genes[log2tpm.median.Tau < tissueTau], y = as.matrix(housekeepinggene[,1]))
+missed <- setdiff(x = genes[rawtpm.median.Tau < tissueTau], y = as.matrix(housekeepinggene[,1]))
 missed.genes <- all.stats[genes %in% missed,]
 write.table(missed.genes, file = paste(outputpre, "lowexpr.hkg.tsv", sep = "."), 
 	sep = "\t", row.names = FALSE, quote = FALSE)
@@ -271,7 +272,7 @@ ggplot(data, aes(x = Tau, y = mean)) +
 geom_point() + scale_x_continuous(limits = c(0,1)) +
 theme(legend.position = "none") 
 dev.off()
-data1 <- data.frame(log2tpm.median.mean, log2tpm.median.Tau)
+data1 <- data.frame(rawtpm.median.mean, rawtpm.median.Tau)
 data2 <- housekeepinggene[,4:5]
 data3 <- tissuespecificgene[,4:5]
 colnames(data1) <- c("mean", "Tau")

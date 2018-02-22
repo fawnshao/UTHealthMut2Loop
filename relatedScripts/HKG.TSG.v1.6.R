@@ -154,6 +154,7 @@ write.table(all.stats, file = paste(outputpre, "allstats.tsv", sep = "."),
 #load("v1.3.Tau.RData")
 #library(pheatmap)
 print("Looking for housekeeping genes")
+rawtpm.median.min <- apply(rawtpm.median, 1, function(x){min(x, na.rm = T)})
 housekeepinggene <- all.stats[nullcount.sum == 0 & !is.na(rawtpm.Tau.max) & rawtpm.Tau.max < sampleTau & !is.na(rawtpm.median.Tau) & rawtpm.median.Tau < tissueTau & rawtpm.median.min > medianthreshold, ]
 housekeepinggene.median <- rawtpm.median[nullcount.sum == 0 & !is.na(rawtpm.Tau.max) & rawtpm.Tau.max < sampleTau & !is.na(rawtpm.median.Tau) & rawtpm.median.Tau < tissueTau & rawtpm.median.min > medianthreshold, ]
 housekeepinggene.Tau <- rawtpm.Tau[nullcount.sum == 0 & !is.na(rawtpm.Tau.max) & rawtpm.Tau.max < sampleTau & !is.na(rawtpm.median.Tau) & rawtpm.median.Tau < tissueTau & rawtpm.median.min > medianthreshold, ]
