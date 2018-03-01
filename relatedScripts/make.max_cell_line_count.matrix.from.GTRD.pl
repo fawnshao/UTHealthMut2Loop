@@ -1,16 +1,15 @@
 #!/usr/bin/perl
 ### GTRD cell line count from bedtools intersect
+%maxcount = ();
+%genes = ();
+%tfs = ();
 open(IN, $ARGV[0]);
 while(<IN>){
 	chomp;
 	@t = split(/\t/);
-	print "$t[0]";
-	for($i = 1; $i < @t; $i++){
-		@tt = split(/\),/, $t[$i]);
-		print STDERR "$tt[0]\n";
-		$a = @tt;
-		print "\t$a";
-	}
-	print "\n";
+	$tfs{$t[3]} = 1;
+	$genes{$t[9]} = 1;
+	$id = $t[3].":".$t[9];
+	if(not exists)
 }
 close(IN);
