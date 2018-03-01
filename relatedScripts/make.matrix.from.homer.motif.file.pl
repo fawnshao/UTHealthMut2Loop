@@ -10,7 +10,7 @@ while(IN){
 	@t = split(/\t/);
 	print "$t[0]";
 	for($i = 1; $i < @t; $i++){
-		@tt = split(/),/, $t[$i]);
+		@tt = split(/\),/, $t[$i]);
 		$a = length(@tt);
 		print "\t$a";
 	}
