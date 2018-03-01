@@ -10,7 +10,7 @@ while(<IN>){
 	$tfs{$t[0]} = 1;
 	$genes{$t[1]} = 1;
 	$id = $t[0].":".$t[1];
-	$count{$id} = $t[3];
+	$count{$id} = $t[2];
 }
 close(IN);
 
