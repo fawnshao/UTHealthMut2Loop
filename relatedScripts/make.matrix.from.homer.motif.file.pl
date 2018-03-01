@@ -11,7 +11,8 @@ while(IN){
 	print "$t[0]";
 	for($i = 1; $i < @t; $i++){
 		@tt = split(/\),/, $t[$i]);
-		$a = scalar(@tt);
+		print STDERR "$tt[0]\n";
+		$a = @tt;
 		print "\t$a";
 	}
 	print "\n";
