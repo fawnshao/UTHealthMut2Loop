@@ -2,9 +2,9 @@
 ### annotatePeaks.pl
 # after cut
 open(IN, $ARGV[0]);
-<IN>;
-chomp;
-print "$_\n";
+$line = <IN>;
+chomp $line;
+print "$line\n";
 while(<IN>){
 	chomp;
 	@t = split(/\t/);
