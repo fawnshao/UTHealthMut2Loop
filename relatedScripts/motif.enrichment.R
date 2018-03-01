@@ -2,7 +2,46 @@ library(data.table)
 library(ggplot2)
 # library(reshape2)
 library(pheatmap)
+args <- c("housekeepinggene.known.motifs.mat", 
+          "tissuespecificgene.known.motifs.mat")
+hkg <- fread(args[1], sep = "\t", header = T)
+tsg <- fread(args[2], sep = "\t", header = T)
+hkg.score <- hkg[,-1]
+tsg.score <- tsg[,-1]
+rownames(hkg.score) <- as.matrix(hkg[,1])
+rownames(tsg.score) <- as.matrix(tsg[,1])
 
+colorn <- 10
+colors <- colorRampPalette(c("white", "blue"))(colorn)
+
+data <- data.matrix(hkg.score)
+png(filename = "hkg.homer.motif.png", width = 1500, height = 1200)
+myplot <- pheatmap(data, scale = "column", 
+	show_rownames = F, show_colnames = F, color = colors, 
+	cluster_cols = F, cluster_rows = T)
+dev.off()
+cluster <- cutree(myplot$tree_row, k = 5)
+write.table(data.frame(cluster[myplot$tree_row$order], 
+	rownames(data)[myplot$tree_row$order],
+	data[myplot$tree_row$order, ]), 
+	file = "hkg.homer.motif.tsv", 
+	sep = "\t", row.names = FALSE, quote = FALSE)
+
+data <- data.matrix(tsg.score)
+png(filename = "tsg.homer.motif.png", width = 1500, height = 1200)
+myplot <- pheatmap(data, scale = "column", 
+	show_rownames = F, show_colnames = F, color = colors, 
+	cluster_cols = F, cluster_rows = T)
+dev.off()
+cluster <- cutree(myplot$tree_row, k = 5)
+write.table(data.frame(cluster[myplot$tree_row$order], 
+	rownames(data)[myplot$tree_row$order],
+	data[myplot$tree_row$order, ]), 
+	file = "tsg.homer.motif.tsv", 
+	sep = "\t", row.names = FALSE, quote = FALSE)
+save.image("homer.motif.RData")
+
+##################
 args <- c("housekeepinggene.known.motifs.txt", 
           "tissuespecificgene.known.motifs.txt") #, 
           # "GTEx.100way.tab")
