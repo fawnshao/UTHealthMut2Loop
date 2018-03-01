@@ -5,8 +5,9 @@ open(IN, $ARGV[0]);
 $line = <IN>;
 chomp $line;
 @t = split(/\t/,$line);
+$size = scalar(@t);
 print "$t[0]";
-for($i = 1; $i < scalar(@t); $i++){
+for($i = 1; $i < $size; $i++){
 	print "\t$t[$i]";
 }
 print "\n";
@@ -15,7 +16,7 @@ while(<IN>){
 	@t = split(/\t/);
 	print "$t[0]";
 	# print STDERR "@t\n";
-	for($i = 1; $i < scalar(@t); $i++){
+	for($i = 1; $i < $size; $i++){
 		if($t[$i] eq ''){
 			$a = 0;
 		}
