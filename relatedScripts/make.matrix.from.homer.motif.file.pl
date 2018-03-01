@@ -14,7 +14,7 @@ while(<IN>){
 	chomp;
 	@t = split(/\t/);
 	print "$t[0]";
-	print STDERR "@t\n";
+	print STDERR "\@t\n";
 	for($i = 1; $i < @t; $i++){
 		if($t[$i] eq ''){
 			$a = 0;
