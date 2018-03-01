@@ -41,7 +41,8 @@ for(i in 1:nrow(tsg.score)){
 }
 rownames(hkg.score) <- as.matrix(hkg[,1])
 rownames(tsg.score) <- as.matrix(tsg[,1])
-
+write.csv(hkg.score, "hkg.homer.motifs.occurence.csv")
+write.csv(tsg.score, "tsg.homer.motifs.occurence.csv")
 # all.dis <- unique(all[,c(1,6)])
 
 colorn <- 10
@@ -72,7 +73,7 @@ write.table(data.frame(cluster[myplot$tree_row$order],
 	data[myplot$tree_row$order, ]), 
 	file = "tsg.homer.motif.tsv", 
 	sep = "\t", row.names = FALSE, quote = FALSE)
-
+save.image("homer.motif.RData")
 
 #############################################################
 args <- c("housekeepinggene.homer.motifs/knownResults.txt", 

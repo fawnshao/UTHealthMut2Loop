@@ -24,9 +24,10 @@ makematrix <- function(x) {
 	rownames(out.matrix) <- row.lists
 	return(out.matrix)
 }
-hkg.score <- matrix(hkg)
-hkg.score <- matrix(hkg)
-
+hkg.score <- makematrix(hkg)
+hkg.score <- makematrix(hkg)
+write.csv(hkg.score, "hkg.GTRD.occurence.csv")
+write.csv(tsg.score, "tsg.GTRD.occurence.csv")
 # all.dis <- unique(all[,c(1,6)])
 
 colorn <- 10
