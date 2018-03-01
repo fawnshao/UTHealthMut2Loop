@@ -1,6 +1,47 @@
+library(data.table)
 library(ggplot2)
 library(pheatmap)
+args <- c("housekeepinggene.GTRD.mat", 
+          "tissuespecificgene.GTRD.mat")
+# hkg <- read.table(args[1], sep = "\t", header = T, row.names = 1)
+hkg <- fread(args[1], sep = "\t", header = T)
+tsg <- fread(args[2], sep = "\t", header = T)
+hkg.score <- hkg[,-1]
+tsg.score <- tsg[,-1]
+rownames(hkg.score) <- as.matrix(hkg[,1])
+rownames(tsg.score) <- as.matrix(tsg[,1])
 
+colorn <- 100
+colors <- colorRampPalette(c("blue", "white", "red"))(colorn)
+
+data <- log2(data.matrix(hkg.score) + 1)
+png(filename = "hkg.GTRD.png", width = 1500, height = 1200)
+myplot <- pheatmap(data, scale = "column", 
+	show_rownames = F, show_colnames = F, color = colors, 
+	cluster_cols = F, cluster_rows = T)
+dev.off()
+cluster <- cutree(myplot$tree_row, k = 5)
+write.table(data.frame(cluster[myplot$tree_row$order], 
+	rownames(data)[myplot$tree_row$order],
+	data[myplot$tree_row$order, ]), 
+	file = "hkg.GTRD.tsv", 
+	sep = "\t", row.names = FALSE, quote = FALSE)
+
+data <- log2(data.matrix(tsg.score) + 1)
+png(filename = "tsg.GTRD.png", width = 1500, height = 1200)
+myplot <- pheatmap(data, scale = "column", 
+	show_rownames = F, show_colnames = F, color = colors, 
+	cluster_cols = F, cluster_rows = T)
+dev.off()
+cluster <- cutree(myplot$tree_row, k = 5)
+write.table(data.frame(cluster[myplot$tree_row$order], 
+	rownames(data)[myplot$tree_row$order],
+	data[myplot$tree_row$order, ]), 
+	file = "tsg.GTRD.tsv", 
+	sep = "\t", row.names = FALSE, quote = FALSE)
+save.image("GTRD.RData")
+
+#####################
 args <- c("housekeepinggene.GTRD.count.txt", 
           "tissuespecificgene.GTRD.count.txt") #, 
           # "GTEx.100way.tab")

@@ -4,6 +4,7 @@ library(ggplot2)
 library(pheatmap)
 args <- c("housekeepinggene.known.motifs.mat", 
           "tissuespecificgene.known.motifs.mat")
+# hkg <- read.table(args[1], sep = "\t", header = T, row.names = 1)
 hkg <- fread(args[1], sep = "\t", header = T)
 tsg <- fread(args[2], sep = "\t", header = T)
 hkg.score <- hkg[,-1]
@@ -11,10 +12,10 @@ tsg.score <- tsg[,-1]
 rownames(hkg.score) <- as.matrix(hkg[,1])
 rownames(tsg.score) <- as.matrix(tsg[,1])
 
-colorn <- 10
-colors <- colorRampPalette(c("white", "blue"))(colorn)
+colorn <- 100
+colors <- colorRampPalette(c("blue", "white", "red"))(colorn)
 
-data <- data.matrix(hkg.score)
+data <- log2(data.matrix(hkg.score) + 1)
 png(filename = "hkg.homer.motif.png", width = 1500, height = 1200)
 myplot <- pheatmap(data, scale = "column", 
 	show_rownames = F, show_colnames = F, color = colors, 
@@ -27,7 +28,7 @@ write.table(data.frame(cluster[myplot$tree_row$order],
 	file = "hkg.homer.motif.tsv", 
 	sep = "\t", row.names = FALSE, quote = FALSE)
 
-data <- data.matrix(tsg.score)
+data <- log2(data.matrix(tsg.score) + 1)
 png(filename = "tsg.homer.motif.png", width = 1500, height = 1200)
 myplot <- pheatmap(data, scale = "column", 
 	show_rownames = F, show_colnames = F, color = colors, 
