@@ -42,6 +42,25 @@ write.table(data.frame(cluster[myplot$tree_row$order],
 	sep = "\t", row.names = FALSE, quote = FALSE)
 save.image("homer.motif.RData")
 
+
+### PCA
+data <- rbind(data.matrix(hkg.score),data.matrix(tsg.score))
+types <- factor(c(rep("hkg", nrow(hkg.score)),rep("tsg", nrow(tsg.score))))
+# data[data > 0 & data < 2] <- 1
+# data[data > 1] <- 2
+myPCA <- prcomp(data, scale. = F, center = F)
+pca.scores <- as.data.frame(myPCA$x)
+png(filename = "hkg_tsg.homer.motif.PCA.png", width = 1500, height = 1200)
+# plot(myPCA$x[,1:2], col = factor(anno[,1]))
+# biplot(myPCA)
+ggplot(data = pca.scores, aes(x = PC1, y = PC2)) + #, label = rownames(pca.scores))) +
+	geom_point(aes(colour = types, alpha = 1/10)) +
+	# geom_hline(yintercept = 0, colour = "gray65") +
+	# geom_vline(xintercept = 0, colour = "gray65") +
+	# geom_text(colour = "tomato", alpha = 0.8, size = 4) +
+	ggtitle("PCA plot of homer motifs")
+dev.off()
+
 ##################
 args <- c("housekeepinggene.known.motifs.txt", 
           "tissuespecificgene.known.motifs.txt") #, 
