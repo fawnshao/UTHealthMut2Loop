@@ -1,11 +1,34 @@
 # devtools::install_github('thomasp85/ggraph')
 # install.packages(c("dplyr", "ggraph", "igraph"))
+# library(devtools)
+# if(!('reprtree' %in% installed.packages())){
+#     install_github('araastat/reprtree')
+# }
+
 library(randomForest)
 library(dplyr)
 library(ggraph)
 library(igraph)
-setwd("/Volumes/GoogleDrive/My Drive/housekeeping_genes/ML_test")
-data <- read.csv("GTEx.GTRD.forWeka.csv", row.names = 1)
+library(data.table)
+library(pheatmap)
+library(reprtree)
+# setwd("/Volumes/GoogleDrive/My Drive/housekeeping_genes/ML_test")
+setwd("/Volumes/GoogleDrive/My Drive/hkg_tsg/GM_Liver_as_control")
+# data <- fread("pc.hkg.subsettsg.genes.HiC.HiChIP")
+# colnames(data)[3] <- "HiC.CH12.LX"
+# colnames(data)[4] <- "HiC.GM12878"
+data <- read.table("pc.hkg.subsettsg.genes.HiC.HiChIP", header = T, sep = "\t", row.names = 1)
+# data[is.na(data)] <- 0
+# data <- read.csv("GTEx.GTRD.forWeka.csv", row.names = 1)
+rf <- randomForest(type ~ ., data = data[,c(1,11:15)])
+a <- importance(rf)
+a[order(a[,1]),]
+getTree(rf, k = 1, labelVar=TRUE)
+reprtree:::plot.getTree(rf)
+data <- data[,-1]
+data[data > 5] <- 5
+pheatmap(data, scale = "none", cluster_rows = F, cluster_cols = T, show_rownames = F)
+
 tree_func <- function(final_model, 
                       tree_num) {
     

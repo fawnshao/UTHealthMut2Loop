@@ -224,3 +224,39 @@ Peak_input_normalization_wrapper.pl $IPA.$IPB.manifest.txt $normalizedpeaks
 wait
 mv *.bw $bw_dir/
 mv *r2.peaks* $clippeaks/
+# peaks.l2inputnormnew.bed
+# Chr \t start \t stop \t log10(p-value eCLIP vs SMInput) \t log2(fold-enrichmentin eCLIP vs SMInput) \t strand
+# peaks.l2inputnormnew.bed.full
+# Chr \t start \t stop \t peakID:CLIPer pvalue \t **** \t log10(p-value eCLIP vs SMInput) \t log2(fold-enrichmentin eCLIP vs SMInput)
+
+
+
+### conda install -c bioconda PureCLIP
+# hg19file=/home1/04935/shaojf/scratch/star_index/hg19.fa
+# peak: 61.2% memory
+# Run time 11:31:24
+for pre in $IPA $IPB
+do
+	pureclip -i ${pre}.rmRep.genome.sorted.r2.bam -bai ${pre}.rmRep.genome.sorted.r2.bam.bai -g $hg19file -o ${pre}.called_crosslinksites.bed -or ${pre}.called_bindingregions.bed -p ${pre}.learnedparameters.txt -ibam $inputfile.rmRep.genome.sorted.bam -ibai $inputfile.rmRep.genome.sorted.bam.bai -nt 68 -tmp ./${pre}.tmp/ &
+done
+wait
+
+### conda install -c bioconda piranha
+# peak: 2.2% memory
+# Run time 00:12:50
+for pre in $inputfile $IPA $IPB
+do
+	Piranha -o ${pre}.piranha.bed -b 10 -s ${pre}.rmRep.genome.sorted.r2.bam &
+done
+wait
+
+genomesize=/home1/04935/shaojf/scratch/star_index/hg19.chrom.sizes
+for f in *.bed
+do
+	new=`echo $f | sed 's/bed$/bigbed/'`
+	bedSort $f a.bed
+	awk -vOFS="\t" '{print $1,$2,$3,$4"|"$5}' a.bed > b.bed
+	bedToBigBed -type=bed4 b.bed $genomesize $new
+	rm a.bed b.bed
+done
+

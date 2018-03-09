@@ -24,7 +24,7 @@ pathology=/work/04935/shaojf/stampede2/refs/ProteinAtlas/pathology.tsv
 
 ### use the following order to concatenate all the fetures together
 list=total.type
-perl $myperl <(cut -f 4 housekeepinggene.byGTEx.gene.bed) <(cut -f 4 GTEx.proteincoding.noMT.bed) 0 0 | perl $myperl <(cut -f 1 tissuespecificgene.byGTEx.gene.bed) /dev/stdin 0 0 | tail -n +2 | awk -vOFS="\t" 'BEGIN{print "Gene","type"}{a="other";if($2!="/"){a="hkg";}if($3!="/"){a="tsg";}print $1,a}' > $list
+perl $myperl <(cut -f 4 housekeepinggene.byGTEx.gene.bed) <(cut -f 4 GTEx.proteincoding.noMT.bed) 0 0 | perl $myperl <(cut -f 4 tissuespecificgene.byGTEx.gene.bed) /dev/stdin 0 0 | tail -n +2 | awk -vOFS="\t" 'BEGIN{print "Gene","type"}{a="other";if($2!="/"){a="hkg";}if($3!="/"){a="tsg";}print $1,a}' > $list
 echo "HiC.CH12-LX HiC.GM12878_primary+replicate HiC.HeLa HiC.HMEC HiC.HUVEC HiC.IMR90 HiC.K562 HiC.KBM7 HiC.NHEK" | tr " " "\t" > a
 perl $myperl <(cut -f 1-2,4,6- gencode.HiC-Loop.count) $list 0 0 | tail -n +2 | cut -f 4- | sed 's?/?0?g' >> a
 paste $list a > $list.HiC
