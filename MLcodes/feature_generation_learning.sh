@@ -3,10 +3,13 @@ myperl=/home1/04935/shaojf/myScripts/add_any_2files_together.pl
 pathology=/work/04935/shaojf/stampede2/refs/ProteinAtlas/pathology.tsv
 myR=/home1/04935/shaojf/myTools/UTHealthMut2Loop/MLcodes/feature_generation_learning.R
 
-list=total.type
-
+list=total.type.srt
+# rclone sync formated_features/ mygoogle:hkg_tsg/formated_features/
 ##### input files, prepared elsewhere
 ln -s ../motifs/total.type
+head -1 total.type > total.type.srt
+tail -n +2 total.type | sort -k2 >> total.type.srt 
+
 ln -s ../conservation/promoter.1k/GTEx.100way.tab
 
 ln -s ../motifs/GTEx.vert.known.motifs.mat
@@ -20,7 +23,6 @@ ln -s ../motifs/GTEx.GTRD.mat
 
 cut -f 1-2,4- ../motifs/total.type.HiC.HiChIP > total.type.HiC.HiChIP
 
-list=total.type
 ###### general information from sequence, no matter in which cell or tissue
 head -1 GTEx.sequenceFeatures.txt | cut -f 2- > a
 perl $myperl GTEx.sequenceFeatures.txt $list 0 0 | cut -f 4- | tail -n +2 | sed 's?/?0?g' >> a
@@ -62,6 +64,11 @@ paste $list.GTRD.roadmap a > $list.GTRD.roadmap.meth
 rm a
 
 ###### loops, with cell information
+head -1 total.type.HiC.HiChIP | cut -f 3- > a
+perl $myperl total.type.HiC.HiChIP $list 0 0 | cut -f 5- | tail -n +2 | sed 's?/?0?g' >> a
+paste $list a > $list.HiC.HiChIP
+rm a
+
 head -1 gencode.Cell_Javierre_17cells.count | cut -f 2- | tr "\t" "\n" | awk '{print "PCHiC."$1}' | tr "\n" "\t" | sed 's/\t$/\n/' > a
 perl $myperl gencode.Cell_Javierre_17cells.count $list 0 0 | cut -f 4- | tail -n +2 | sed 's?/?0?g' >> a
 paste $list.HiC.HiChIP a > $list.HiC.HiChIP.PCHiC
@@ -77,9 +84,18 @@ Rscript $myR $list.GTRD.roadmap.meth &
 Rscript $myR $list.sequenceFeatures.cage.phastCons.Homer &
 
 
+##########################
+ln -s ../GM_Liver_as_control/pc.hkg.subsettsg.genes
+subs=pc.hkg.subsettsg.genes
+for post in HiC.HiChIP.PCHiC.oe GTRD.roadmap.meth sequenceFeatures.cage.phastCons.Homer
+do
+	head -1 $list.$post > $subs.$post
+	perl $myperl $list.$post $subs 0 0 | cut -f 1-2,5- >> $subs.$post
+done
 
-
-
+Rscript $myR $subs.HiC.HiChIP.PCHiC.oe &
+Rscript $myR $subs.GTRD.roadmap.meth &
+Rscript $myR $subs.sequenceFeatures.cage.phastCons.Homer &
 
 
 
