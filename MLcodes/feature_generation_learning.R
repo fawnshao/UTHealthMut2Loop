@@ -56,7 +56,7 @@ ggplot(data = pca.scores, aes(x = PC1, y = PC2)) + #, label = rownames(pca.score
 	geom_point(aes(colour = types, alpha = 1/10)) +
 	ggtitle(args[1])
 dev.off()
-myPCA.t <- prcomp(t(scores), scale. = T, center = T)
+myPCA.t <- prcomp(t(scores))
 pca.scores.t <- as.data.frame(myPCA.t$x)
 png(filename = paste(args[1], "pca.t.png", sep = "."), width = 1500, height = 1500)
 ggplot(data = pca.scores.t, aes(x = PC1, y = PC2, label = rownames(pca.scores.t))) +
