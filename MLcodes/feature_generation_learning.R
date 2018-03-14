@@ -16,7 +16,7 @@ input <- fread(args[1], sep = "\t", header = T)
 # write.csv(data.frame(input[,c(1,3:ncol(input)),with=FALSE],input[,2,with=FALSE]),"pc.hkg.subsettsg.genes.HiC.HiChIP.GM.Liver.CAGE.Homer.csv", row.names = F)
 ### notice: HiC.CH12-LX.is.mouse.B-lymphoblasts
 ### just remove it
-scores <- data.matrix(input[,-c(1:3)])
+scores <- data.matrix(input[,-c(1:2)])
 genes <- as.matrix(input[,1])
 class <- as.matrix(input[,2])
 types <- factor(class)

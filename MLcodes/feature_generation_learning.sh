@@ -1,6 +1,8 @@
 #!/bin/sh
 myperl=/home1/04935/shaojf/myScripts/add_any_2files_together.pl
 pathology=/work/04935/shaojf/stampede2/refs/ProteinAtlas/pathology.tsv
+myR=/home1/04935/shaojf/myTools/UTHealthMut2Loop/MLcodes/feature_generation_learning.R
+
 list=total.type
 
 ##### input files, prepared elsewhere
@@ -70,7 +72,9 @@ perl $myperl gencode.Cell_Javierre_17cells.oe.count $list 0 0 | cut -f 4- | tail
 paste $list.HiC.HiChIP.PCHiC a > $list.HiC.HiChIP.PCHiC.oe
 rm a
 
-
+Rscript $myR $list.HiC.HiChIP.PCHiC.oe &
+Rscript $myR $list.GTRD.roadmap.meth &
+Rscript $myR $list.sequenceFeatures.cage.phastCons.Homer &
 
 
 
