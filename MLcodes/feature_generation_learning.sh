@@ -3,6 +3,7 @@ myperl=/home1/04935/shaojf/myScripts/add_any_2files_together.pl
 pathology=/work/04935/shaojf/stampede2/refs/ProteinAtlas/pathology.tsv
 myR=/home1/04935/shaojf/myTools/UTHealthMut2Loop/MLcodes/feature_generation_learning.R
 myboxplot=/home1/04935/shaojf/myTools/UTHealthMut2Loop/MLcodes/features.boxplot.R
+mybarplot=/home1/04935/shaojf/myTools/UTHealthMut2Loop/MLcodes/features.percentage.R
 
 list=total.type.srt
 # rclone sync formated_features/ mygoogle:hkg_tsg/formated_features/
@@ -102,6 +103,12 @@ for post in HiC.HiChIP.PCHiC.oe GTRD.roadmap.meth sequenceFeatures.cage.phastCon
 do
 	Rscript $myboxplot pc.hkg.subsettsg.genes.$post &
 	Rscript $myboxplot total.type.srt.$post &
+done
+
+for post in HiC.HiChIP.PCHiC.oe GTRD.roadmap.meth sequenceFeatures.cage.phastCons.Homer
+do
+	Rscript $mybarplot pc.hkg.subsettsg.genes.$post &
+	Rscript $mybarplot total.type.srt.$post
 done
 
 # for post in sequenceFeatures.cage.phastCons.Homer GTRD.roadmap.meth

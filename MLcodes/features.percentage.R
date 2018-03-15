@@ -9,6 +9,9 @@ for (i in 3:ncol(input)){
 	datax <- input[,c(2,i),with = FALSE]
 	colnames(datax) <- c("type", "value")
 	a <- table(datax[datax$value > 0,1])
+	if(length(a) < 3){
+		a <- count - table(datax[datax$value == 0,1])
+	}
 	b <- a/count
 	datay <- as.data.frame(b)
 	myplot <- ggplot(data = datay, aes(x = Var1, y = Freq, fill = Var1)) + 
