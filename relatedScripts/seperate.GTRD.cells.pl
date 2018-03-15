@@ -28,7 +28,12 @@ foreach $g(keys %genes){
 	print "$g";
 	foreach $a(sort keys %tfs){
 		$id = $a.":".$g;
-		print "\t$hash{$id}";
+		if(exists $hash{$id}){
+			print "\t$hash{$id}";
+		}
+		else{
+			print "\t0";
+		}
 	}
 	print "\n";
 }
