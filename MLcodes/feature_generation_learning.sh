@@ -108,7 +108,7 @@ done
 for post in HiC.HiChIP.PCHiC.oe GTRD.roadmap.meth sequenceFeatures.cage.phastCons.Homer
 do
 	Rscript $mybarplot pc.hkg.subsettsg.genes.$post &
-	Rscript $mybarplot total.type.srt.$post
+	Rscript $mybarplot total.type.srt.$post &
 done
 
 # for post in sequenceFeatures.cage.phastCons.Homer GTRD.roadmap.meth

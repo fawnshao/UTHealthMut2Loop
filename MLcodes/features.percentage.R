@@ -3,13 +3,14 @@ library(ggplot2)
 args <- commandArgs(TRUE)
 input <- fread(args[1], sep = "\t", header = T)
 count <- table(input[,2])
+class <- length(count)
 
 for (i in 3:ncol(input)){
 	png(filename = paste(args[1], colnames(input)[i], "barplot.png", sep = "."), width = 400, height = 400)
 	datax <- input[,c(2,i),with = FALSE]
 	colnames(datax) <- c("type", "value")
 	a <- table(datax[datax$value > 0,1])
-	if(length(a) < 3){
+	if(length(a) < class){
 		a <- count - table(datax[datax$value == 0,1])
 	}
 	b <- a/count
