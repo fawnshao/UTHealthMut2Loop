@@ -125,6 +125,51 @@ done
 # done
 
 
+##########################
+### test GTRD, with cell names labled.
+ln -s ../GTRD/GTEx.GTRD.bin.mat
+
+head -1 GTEx.GTRD.bin.mat | cut -f2- | tr "\t" "\n" | awk '{print "GTRD."$0}' | tr "\n" "\t" | sed 's/\t$/\n/' > a
+perl $myperl GTEx.GTRD.bin.mat $list 0 0 | cut -f 4- | tail -n +2 | sed 's?/?0?g' >> a
+paste $list a > $list.binGTRD
+rm a
+
+for post in binGTRD
+do
+	head -1 $list.$post > $subs.$post
+	perl $myperl $list.$post $subs 0 0 | cut -f 1-2,5- >> $subs.$post
+done
+
+for post in binGTRD
+do
+	for pre in $list $subs
+	do
+		# Rscript $myboxplot $pre.$post &
+		# Rscript $mybarplot $pre.$post &
+		# Rscript $mystatR $pre.$post &
+		# Rscript $myR $pre.$post &
+	done
+done
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ### use the following order to concatenate all the fetures together
