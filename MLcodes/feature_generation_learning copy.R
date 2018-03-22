@@ -4,16 +4,23 @@ library(ggplot2)
 library(pheatmap)
 library(cluster)
 library(randomForest)
-# library(lars)
-library(glmnet)
 # install.packages("Rtsne")
-# library(Rtsne)
-# devtools::install_github('mlampros/FeatureSelection')
-# library(FeatureSelection)
+library(Rtsne)
 args <- commandArgs(TRUE)
-# args <- c("total.type.srt.all", "total.type.srt.gm.liver")
+# args <- c("total.type.srt.all")
+# args <- c("selected.sequenceFeatures.cage.phastCons.Homer.GTRD.roadmap.meth.HiC.HiChIP.PCHiC.oe")
+# args <- c("GTEx.GTRD.mat","GTRD.maxcells.GTEx.hkg.tsg.txt")
+# args <- c("housekeepinggene.GTRD.mat","GTRD.maxcells.GTEx.hkg.tsg.txt")
+# scores <- as.matrix(read.table(args[1], sep = "\t", header = T, row.names = 1))
+# class <- as.matrix(read.table(args[2], sep = "\t", header = T, row.names = 1))
+# args <- c("pc.hkg.subsettsg.genes.HiC.HiChIP.GM.Liver.CAGE.Homer")
+# args <- c("total.type.HiC.HiChIP.GTRD.homer.cage.sequenceFeatures")
+# input <- read.table(args[1], sep = "\t", header = T, row.names = 1)
+# args <- c("pc.hkg.subsettsg.genes.HiC.HiChIP.roadmap")
 input <- fread(args[1], sep = "\t", header = T)
-input.subs <- fread(args[2], sep = "\t", header = T)
+# write.csv(data.frame(input[,c(1,3:ncol(input)),with=FALSE],input[,2,with=FALSE]),"pc.hkg.subsettsg.genes.HiC.HiChIP.GM.Liver.CAGE.Homer.csv", row.names = F)
+### notice: HiC.CH12-LX.is.mouse.B-lymphoblasts
+### just remove it
 ### for old data.table
 # scores <- data.matrix(input[,.SD, .SDcols = c(3:170)])
 # genes <- as.matrix(input[, .SD, .SDcols = 1])
@@ -24,146 +31,8 @@ genes <- as.matrix(input[,1])
 class <- as.matrix(input[,2])
 types <- factor(class)
 rownames(scores) <- genes
-class.subs <- as.matrix(input.subs[,3])
-types.subs <- factor(class.subs)
-
-###################################################
-#####         look at the following           #####
-###################################################
-############## prepare the data
-range01 <- function(x, ...){(x - min(x, ...)) / (max(x, ...) - min(x, ...))}
-scaled.scores <- apply(scores, 2, range01)
-subsets <- scaled.scores[types!="other",]
-subsets.types <- factor(types[types!="other"], levels = unique(types[types!="other"]))
-subsets.subs <- scaled.scores[types.subs!="others",]
-subsets.types.subs <- factor(types.subs[types.subs!="others"], levels = unique(types.subs[types.subs!="others"]))
-############## PCA
-myPCA.a <- prcomp(subsets, scale. = F, center = F)
-myPCA.b <- prcomp(subsets.subs, scale. = F, center = F)
-myPCA.a.t <- prcomp(t(subsets), scale. = F, center = F)
-myPCA.b.t <- prcomp(t(subsets.subs), scale. = F, center = F)
-subsets.pca.scores <- as.data.frame(myPCA.a$x)
-pdf(file = paste(args[1], "range01.subsets.pca.pdf", sep = "."), width = 15, height = 12)
-ggplot(data = subsets.pca.scores, aes(x = PC1, y = PC2)) +
-	geom_point(aes(colour = subsets.types, alpha = 1/10)) +
-	ggtitle(args[1])
-dev.off()
-subsets.pca.scores <- as.data.frame(myPCA.b$x)
-pdf(file = paste(args[1], "range01.subsets.gmliver.pca.pdf", sep = "."), width = 15, height = 12)
-ggplot(data = subsets.pca.scores, aes(x = PC1, y = PC2)) +
-	geom_point(aes(colour = subsets.types.subs, alpha = 1/10)) +
-	ggtitle(args[1])
-dev.off()
-subsets.pca.scores <- as.data.frame(myPCA.a.t$x)
-pdf(file = paste(args[1], "range01.subsets.t.pca.pdf", sep = "."), width = 15, height = 12)
-ggplot(data = subsets.pca.scores, aes(x = PC1, y = PC2, label = rownames(subsets.pca.scores))) +
-	geom_point(aes(alpha = 1/10)) +
-	geom_text(colour = "tomato", alpha = 0.8, size = 2) +
-	ggtitle(args[1])
-dev.off()
-subsets.pca.scores <- as.data.frame(myPCA.b.t$x)
-pdf(file = paste(args[1], "range01.subsets.gmliver.t.pca.pdf", sep = "."), width = 15, height = 12)
-ggplot(data = subsets.pca.scores, aes(x = PC1, y = PC2, label = rownames(subsets.pca.scores))) +
-	geom_point(aes(alpha = 1/10)) +
-	geom_text(colour = "tomato", alpha = 0.8, size = 2) +
-	ggtitle(args[1])
-dev.off()
-save.image("all.PCA.RData")
-## feature selection
-write.csv(subsets.pca.scores, paste(args[1], "range01.subsets.gmliver.t.pca.csv", sep = "."))
-feature.select <- order(abs(subsets.pca.scores[,1]), decreasing=T)[1:500]
-colnames(subsets)[feature.select]
-subsets.pca.scores[feature.select,1]
-colors <- colorRampPalette(c("blue", "white", "red"))(10)
-datax <- rbind.data.frame(scaled.scores[types.subs=="hkg",], scaled.scores[types.subs=="GM",], scaled.scores[types.subs=="Liver",])
-data <- datax[,feature.select]
-pdf(file = paste(args[1], "range01.subsets.gmliver.top500.pheatmap.pdf", sep = "."), width = 15, height = 12)
-myplot <- pheatmap(data, scale = "none", 
-	show_rownames = F, show_colnames = T, color = colors, 
-	cluster_cols = F, cluster_rows = F)
-dev.off()
-############## LASSO
-# load("all.PCA.RData")
-# lmdata <- data.frame(subsets, as.numeric(subsets.types))
-# my.lm <- lm(subsets.types ~ ., data = lmdata)
-# anova(my.lm)
-# summary(my.lm)
-my.lasso <- glmnet(subsets, as.numeric(subsets.types), standardize = TRUE, alpha = 1)
-# a <- coef(my.lasso, s = 0.1)
-png(filename = paste(args[1], "lasso.lambda.png", sep = "."), width = 1500, height = 1200)
-plot(my.lasso, xvar = "lambda", label = TRUE)
-dev.off()
-# my.lasso.cv <- cv.glmnet(subsets, as.numeric(subsets.types), standardize = TRUE, alpha = 1, type.measure = "mse", nfolds = 5)
-save.image("all.LASSO.RData")
-############## FeatureSelection
-# install_github('mlampros/FeatureSelection') 
-# load("all.PCA.RData")
-library(FeatureSelection)
-params_glmnet <- list(alpha = 1, family = 'gaussian', nfolds = 5, parallel = TRUE)
-params_xgboost <- list( params = list("objective" = "reg:linear", "bst:eta" = 0.001, "subsample" = 0.75, "max_depth" = 5, 
-                                     "colsample_bytree" = 0.75, "nthread" = 6),
-                                      nrounds = 1000, print.every.n = 250, maximize = FALSE)
-params_ranger <- list(dependent.variable.name = 'y', probability = FALSE, num.trees = 1000, verbose = TRUE, mtry = 5, 
-                     min.node.size = 10, num.threads = 60, classification = FALSE, importance = 'permutation')
-params_features <- list(keep_number_feat = NULL, union = TRUE)
-feat <- wrapper_feat_select(X = subsets, y = as.numeric(subsets.types), params_glmnet = params_glmnet, params_xgboost = params_xgboost, 
-                          params_ranger = params_ranger, xgb_sort = 'Gain', CV_folds = 5, stratified_regr = FALSE, 
-                          scale_coefs_glmnet = FALSE, cores_glmnet = 5, params_features = params_features, verbose = TRUE)
-str(feat)
-params_barplot < list(keep_features = 300, horiz = TRUE, cex.names = 1.0)
-png(filename = paste(args[1], "FeatureSelection.bar.png", sep = "."), width = 1500, height = 1200)
-barplot_feat_select(feat, params_barplot, xgb_sort = 'Cover')
-dev.off()
-dat <- data.frame(p = as.numeric(subsets.types), subsets)
-cor_feat <- func_correlation(dat, target = 'p', correlation_thresh = 0.1, use_obs = 'complete.obs', correlation_method = 'pearson')
-out_lst < lapply(feat$all_feat, function(x) which(rownames(cor_feat) %in% x[1:100, 1]))
-cor_lasso <- func_correlation(subsets[, feat$all_feat$`glmnet-lasso`[, 1]], target = NULL, correlation_thresh = 0.9, 
-                             use_obs = 'complete.obs', correlation_method = 'pearson')
-cor_xgb = func_correlation(subsets[, feat$all_feat$xgboost[, 1][1:100]], target = NULL, correlation_thresh = 0.9, 
-                           use_obs = 'complete.obs', correlation_method = 'pearson')
-cor_rf = func_correlation(subsets[, feat$all_feat$ranger[, 1][1:100]], target = NULL, correlation_thresh = 0.9,
-                          use_obs = 'complete.obs', correlation_method = 'pearson')
-write.csv(cor_feat,paste(args[1], "FeatureSelection.cor_feat.csv", sep = "."))
-write.csv(cor_lasso,paste(args[1], "FeatureSelection.cor_lasso.csv", sep = "."))
-write.csv(cor_xgb,paste(args[1], "FeatureSelection.cor_xgb.csv", sep = "."))
-write.csv(cor_rf,paste(args[1], "FeatureSelection.cor_rf.csv", sep = "."))
-save.image("all.FeatureSelection.RData")
-############## Caret
-# load("all.PCA.RData")
-# library(mlbench)
-library(caret)
-set.seed(123)
-mydata <- data.frame(subsets, as.numeric(subsets.types))
-# calculate correlation matrix
-correlationMatrix <- cor(mydata)
-# summarize the correlation matrix
-print(correlationMatrix)
-# find attributes that are highly corrected (ideally >0.75)
-highlyCorrelated <- findCorrelation(correlationMatrix, cutoff = 0.5)
-# print indexes of highly correlated attributes
-print(highlyCorrelated)
-# prepare training scheme
-control <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
-# train the model
-# model <- train(subsets.types ~ ., data = mydata, method = "lvq", preProcess = "scale", trControl = control)
-model <- train(subsets.types ~ ., data = mydata, method = "lvq", trControl = control)
-# estimate variable importance
-importance <- varImp(model, scale=FALSE)
-# summarize importance
-print(importance)
-# plot importance
-plot(importance)
-############## MXM
-# load("all.PCA.RData")
-library(MXM)
-set.seed(123)
-mydata <- data.frame(subsets, as.numeric(subsets.types))
-sesObject <- SES(target, dataset, max_k = 5, threshold = 0.2, test = "testIndFisher", hash = TRUE, hashObject = NULL))
-# please also ref to: 
-# http://r-statistics.co/Variable-Selection-and-Importance-With-R.html
-###################################################
-#####           look at the above             #####
-###################################################
+#### PCA
+# [class[,1]!="other",]
 
 ####
 # colors <- colorRampPalette(c("blue", "white", "red"))(10)
@@ -192,8 +61,6 @@ sesObject <- SES(target, dataset, max_k = 5, threshold = 0.2, test = "testIndFis
 ###################################################
 subsets <- scores[types!="other",]
 subsets.types <- factor(types[types!="other"], levels = unique(types[types!="other"]))
-range01 <- function(x, ...){(x - min(x, ...)) / (max(x, ...) - min(x, ...))}
-scaled.scores <- apply(scores, 2, range01)
 ### PCA
 subsets.myPCA.a <- prcomp(subsets, scale. = T, center = T)
 subsets.pca.scores <- as.data.frame(subsets.myPCA.a$x)
@@ -229,6 +96,9 @@ ggplot(data = subsets.pca.scores, aes(x = PC1, y = PC2, label = rownames(subsets
 dev.off()
 
 # subsets.pca.scores <- as.data.frame(t.subsets.myPCA.a$x)
+range01 <- function(x, ...){(x - min(x, ...)) / (max(x, ...) - min(x, ...))}
+# scaled.scores <- scale(scores)
+scaled.scores <- apply(scores, 2, range01)
 subsets <- scaled.scores[types!="other",]
 t.scale.subsets.myPCA.b <- prcomp(t(subsets), scale. = F, center = F)
 subsets.pca.scores <- as.data.frame(t.scale.subsets.myPCA.b$x)
@@ -429,3 +299,148 @@ myplot <- pheatmap(data, scale = "none",
 	show_rownames = F, show_colnames = T, color = colors, 
 	cluster_cols = F, cluster_rows = F)
 dev.off()
+# colors <- colorRampPalette(c("white", "red"))(2)
+# data[data > 0] <- 1 
+# png(filename = paste(args[1], "topimportance.heatmap.bin.png", sep = "."), width = 1500, height = 1200)
+# myplot <- pheatmap(data, scale = "none", 
+# 	show_rownames = F, show_colnames = T, color = colors, 
+# 	cluster_cols = F, cluster_rows = F)
+# dev.off()
+
+
+#### boxplot for top 50 features
+#### add 2 for the real column in raw input
+# columns <- order(a, decreasing = T)[1:50] + 2
+# columns <- order(a, decreasing = T)[1:50] + 3
+# for(i in columns){
+# 	datax <- input[,c(2,i),with=FALSE]
+# 	colnames(datax) <- c("type", "value")
+# 	png(filename = paste(args[1], i, "boxplot.png", sep = "."), width = 400, height = 400)
+# 	ymax <- quantile(datax$value, probs = 0.95)
+# 	myplot <- ggplot(data = datax, aes(x = type, y = value, fill = type)) + 
+# 		geom_boxplot(position = position_dodge(1), outlier.alpha = 0.1, outlier.size = 0.1) + 
+# 		scale_y_continuous(limits = c(0, ymax)) +
+# 		ggtitle(colnames(input)[i]) + theme(legend.position = "none")
+# 	print(myplot)
+# 	dev.off()
+# }
+# save.image("a.RData")
+
+# # seprate rf
+# iris[1:4], iris$Species,
+
+
+
+# rf.1 <- randomForest(types ~ ., data = scores)
+
+
+
+# plot for hkg:tsg:other
+###### for sequence feature
+# for (i in 3:6){
+# 	png(filename = paste(args[1], colnames(input)[i], "boxplot.png", sep = "."), width = 400, height = 400)
+# 	datax <- input[,c(2,i),with = FALSE]
+# 	colnames(datax) <- c("type", "value")
+# 	ymax <- quantile(datax$value,probs = 0.95)
+# 	myplot <- ggplot(data = datax, aes(x = type, y = value, fill = type)) + 
+# 		geom_boxplot(position = position_dodge(1), outlier.alpha = 0.1, outlier.size = 0.1) + 
+# 		scale_y_continuous(limits = c(0, ymax)) +
+# 		ggtitle(colnames(input)[i]) + theme(legend.position = "none")
+# 	print(myplot)
+# 	dev.off()
+# }
+
+
+
+
+
+
+
+
+
+
+
+# i <- 206
+# datax <- input[,c(2,i),with=FALSE]
+# colnames(datax) <- c("type", "count")
+# png(filename = paste(args[1], i, "boxplot.png", sep = "."), width = 400, height = 400)
+# ggplot(data = datax, aes(x = type, y = count, fill = type)) + 
+# 	geom_boxplot(position = position_dodge(1), outlier.alpha = 0.1, outlier.size = 0.1) + 
+# 	ggtitle("count") + theme(legend.position = "none")
+# dev.off()
+
+
+
+# scores.bak <- scores
+# scores[scores > 0] <- 1
+# rf.b <- randomForest(types ~ ., data = scores)
+# aa <- importance(rf)
+# rownames(aa) <- rawname
+# bb <- aa[order(aa, decreasing = T),][1:50]
+
+
+
+
+
+
+
+
+
+# colors <- colorRampPalette(c("blue", "white", "red"))(100)
+# data <- scores
+# png(filename = "GTRD.maxexp.png", width = 1500, height = 1200)
+# myplot <- pheatmap(data, scale = "column", 
+# 	show_rownames = F, show_colnames = F, color = colors, 
+# 	cluster_cols = F, cluster_rows = F)
+# dev.off()
+
+# colors <- colorRampPalette(c("white", "red"))(2)
+# data[data > 0] <- 1
+# torm <- sample(1:2506,2230)
+# png(filename = "GTRD.maxexp.binary.png", width = 1500, height = 1200)
+# myplot <- pheatmap(data[-torm,], scale = "none", 
+# 	show_rownames = F, show_colnames = F, color = colors, 
+# 	cluster_cols = F, cluster_rows = F)
+# dev.off()
+
+# subdata <- data[-torm,feature.select]
+# annotation_row <- data.frame(type = types[-torm])
+# rownames(annotation_row) <- genes[-torm]
+# # ann_colors <- list(type = c("white", "firebrick"))
+# png(filename = "subGTRD.maxexp.binary.png", width = 1500, height = 1200)
+# myplot <- pheatmap(data[-torm,feature.select], scale = "none", 
+# 	show_rownames = F, show_colnames = T, color = colors, 
+# 	annotation_row = annotation_row, 
+# 	cluster_cols = T, cluster_rows = T)
+# dev.off()
+# png(filename = "subGTRD.maxexp.binary.1.png", width = 1500, height = 1200)
+# myplot <- pheatmap(data[-torm,feature.select], scale = "none", 
+# 	show_rownames = F, show_colnames = T, color = colors, 
+# 	annotation_row = annotation_row, 
+# 	cluster_cols = T, cluster_rows = F)
+# dev.off()
+
+
+# myPCA.b <- prcomp(data, scale. = T, center = T)
+# pca.scores.b <- as.data.frame(myPCA.b$x)
+# png(filename = paste(args[1], "pca.binary.png", sep = "."), width = 1500, height = 1200)
+# ggplot(data = pca.scores.b, aes(x = PC1, y = PC2)) + #, label = rownames(pca.scores))) +
+# 	geom_point(aes(colour = types, alpha = 1/10)) +
+# 	ggtitle("PCA plot of HiC.HiChIP.GM.Liver.CAGE.Homer")
+# dev.off()
+# # rownames(pca.scores.t[abs(pca.scores.t[,1])> 500 | abs(pca.scores.t[,2])> 500,])
+# # rownames(pca.scores.t[order(abs(pca.scores.t[,1]),decreasing=T),1:2])[1:30]
+# # order(abs(pca.scores.t[,1]),decreasing=T)[1:30]
+
+# # kmeans(x,1)$withinss # trivial one-cluster, (its W.SS == ss(x))
+
+# ## random starts do help here with too many clusters
+# ## (and are often recommended anyway!):
+# # subs <- sample(1:nrow(scores), 1000)
+# cl <- kmeans(scores, 3, nstart = 25)
+# png(filename = paste(args[1], "kmeans.3.png", sep = "."), width = 1500, height = 600)
+# # plot(scores, col = cl$cluster)
+# # points(cl$centers, col = 1:5, pch = 8)
+# # labels = 2, 
+# clusplot(scores, cl$cluster, color = TRUE, shade = TRUE, lines = 0)
+# dev.off()

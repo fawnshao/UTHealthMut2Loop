@@ -144,29 +144,81 @@ for post in binGTRD
 do
 	for pre in $list $subs
 	do
-		# Rscript $myboxplot $pre.$post &
-		# Rscript $mybarplot $pre.$post &
-		# Rscript $mystatR $pre.$post &
-		# Rscript $myR $pre.$post &
+		Rscript $myboxplot $pre.$post &
+		Rscript $mybarplot $pre.$post &
+		Rscript $mystatR $pre.$post &
+		Rscript $myR $pre.$post &
+	done
+done
+
+######
+list=total.type.srt
+subs=pc.hkg.subsettsg.genes
+head -1 GTEx.histone.bin.mat | cut -f2- | tr "\t" "\n" | awk '{print "histone."$0}' | tr "\n" "\t" | sed 's/\t$/\n/' > a
+perl $myperl GTEx.histone.bin.mat $list 0 0 | cut -f 4- | tail -n +2 | sed 's?/?0?g' >> a
+paste $list a > $list.binhist
+rm a
+head -1 GTEx.DNase.bin.mat | cut -f2- | tr "\t" "\n" | awk '{print "DNase."$0}' | tr "\n" "\t" | sed 's/\t$/\n/' > a
+perl $myperl GTEx.DNase.bin.mat $list 0 0 | cut -f 4- | tail -n +2 | sed 's?/?0?g' >> a
+paste $list.binhist a > $list.binhist.binDNase
+rm a
+
+for post in binhist.binDNase
+do
+	head -1 $list.$post > $subs.$post
+	perl $myperl $list.$post $subs 0 0 | cut -f 1-2,5- >> $subs.$post
+done
+
+for post in binhist.binDNase
+do
+	for pre in $list $subs
+	do
+		Rscript $mybarplot $pre.$post &
+		Rscript $mystatR $pre.$post &
+		Rscript $myR $pre.$post &
 	done
 done
 
 
+awk '$2>0.8 && $2/$4>2' total.type.srt.binhist.binDNase.stats.tsv > binhist.binDNase.enriched.tsv
+awk '$2<0.2 && $4/$2>2' total.type.srt.binhist.binDNase.stats.tsv > binhist.binDNase.lessenriched.tsv
+
+cat total.type.srt.*.tsv | awk '$2>0.8 && $2/$4>2' > enriched.tsv
+cat total.type.srt.*.tsv | awk '$2<0.2 && $4-$2>0.2' > lessenriched.tsv
+
+sed -i 's/GTRD.C.EBP/GTRD.CEBP/' enriched.tsv 
+cut -f 1 enriched.tsv | sort | uniq | grep -v "histone" | grep -v "GTRD" | sed 's/"//g' > enriched.factors.txt
+cut -f 1 enriched.tsv | grep "histone" | awk -F"_" '{print $2}' | sed 's/"//g' | sort | uniq >> enriched.factors.txt
+cut -f 1 enriched.tsv | grep "GTRD" | awk -F"." '{print $2}' | sed 's/"//g' | sort | uniq >> enriched.factors.txt
+cut -f 1 lessenriched.tsv | awk -F"_" '{print $2}' | sed 's/"//g' | sort  | uniq -c > lessenriched.factors.txt
+
+grep Homer total.type.srt.sequenceFeatures.cage.phastCons.Homer.stats.tsv | awk '$2>0.2 && $2/$4>1.5' > motif
+
+# head_line total.type.srt.sequenceFeatures.cage.phastCons.Homer | grep -wf <(head -15 feaures.txt) | awk '{print $1}' | tr "\n" ","
+cut -f 1-2,5,7,8,50,61,63,65,76,79,80,90,215,217,298,341 total.type.srt.sequenceFeatures.cage.phastCons.Homer > selected.sequenceFeatures.cage.phastCons.Homer
+# tail -n +17 feaures.txt > a
+# head_line total.type.srt.GTRD.roadmap.meth | grep -wf a | grep -v "GTRD.B-" | grep -v "\-L1(TRF2)" > b
+# head_line total.type.srt.GTRD.roadmap.meth | grep -wf <(grep "\[" a | cut -d "[" -f 1) > c
+# cat c b | awk '{print $1}' | tr "\n" ','
+paste selected.sequenceFeatures.cage.phastCons.Homer <(cut -f 42,64,65,162,272,289,390,458,466,497,524,535,7,8,9,15,18,20,28,39,44,58,63,84,85,88,90,96,97,103,112,114,119,123,124,135,146,150,151,152,153,156,172,183,184,195,201,226,241,247,249,251,257,258,260,282,283,299,302,310,313,315,319,325,327,331,344,345,347,351,366,374,377,382,399,403,418,442,444,446,447,449,451,453,459,462,478,484,488,489,644,646,647,648,649,650,651,656,657,658,660,661,662,663,664,665 total.type.srt.GTRD.roadmap.meth) > selected.sequenceFeatures.cage.phastCons.Homer.GTRD.roadmap.meth
+
+paste selected.sequenceFeatures.cage.phastCons.Homer.GTRD.roadmap.meth <(cut -f 3- total.type.srt.HiC.HiChIP.PCHiC.oe) > selected.sequenceFeatures.cage.phastCons.Homer.GTRD.roadmap.meth.HiC.HiChIP.PCHiC.oe
+
+
+
+
+#####
+paste total.type.srt.sequenceFeatures.cage.phastCons.Homer <(cut -f 3- total.type.srt.binGTRD) <(cut -f 3- total.type.srt.meth) <(cut -f 3- total.type.srt.binhist.binDNase) <(cut -f 3- total.type.srt.HiC.HiChIP.PCHiC.oe) > total.type.srt.all
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
+#########################
+head -1 total.type.srt.class > onlyhkg.tsg.class
+awk '$2=="hkg"' total.type.srt.class | sort -k1 >> onlyhkg.tsg.class 
+awk '$2!="hkg" && $2!="other" && $2!="Type"' total.type.srt.class | sort -k2 >> onlyhkg.tsg.class 
+perl ~/myScripts/add_any_2files_together.pl total.type.srt.all onlyhkg.tsg.class 0 0 | cut -f 1-2,5- > onlyhkg.tsg.all
 
 
 

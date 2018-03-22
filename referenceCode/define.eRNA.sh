@@ -36,9 +36,27 @@ done
 cat *gro.sim | grep -v "PeakID" | awk -vOFS="\t" '$7>0.1{print $2,$3,$4,$1,$7,$5}' | bedtools sort -i - > candidate.eRNA.withGRO.bed
 
 ### count the gro-seq signal for homer annotation, to do fisher test
-pre=hg19.homer.ann.txt
-annotatePeaks.pl $pre hg19 -fpkm -strand + -d K562.GRO-seq/ K562.GRO-cap.ctl/ K562.GRO-cap/ 1> $pre.gro 2> $pre.gro.log &
+cat coding.ann.txt cpgIsland.ann.txt exons.ann.txt intergenic.ann.txt introns.ann.txt miRNA.ann.txt ncRNA.ann.txt promoters.ann.txt protein-coding.ann.txt tts.ann.txt utr3.ann.txt utr5.ann.txt | awk -F"\t" -vOFS="\t" '{if($4-$3==0){print $1,$2,$3-1,$4,$5,$6}else{print $0}}' > hg19.homer.ann.txt
+# pre=hg19.homer.ann.txt
+# annotatePeaks.pl $pre hg19 -fpkm -strand + -d K562.GRO-seq/ K562.GRO-cap.ctl/ K562.GRO-cap/ 1> $pre.gro 2> $pre.gro.log &
+# cut -f 1-5,8,20- hg19.homer.ann.txt.gro > hg19.homer.ann.txt.gro.sim
+# awk -F"\t" '$7>0.1{print $1}'  hg19.homer.ann.txt.gro.sim
+for pre in coding.ann.txt cpgIsland.ann.txt exons.ann.txt intergenic.ann.txt introns.ann.txt miRNA.ann.txt ncRNA.ann.txt promoters.ann.txt protein-coding.ann.txt tts.ann.txt utr3.ann.txt utr5.ann.txt
+do
+	annotatePeaks.pl <(awk -F"\t" -vOFS="\t" '{if($4-$3==0){print $1,$2,$3-1,$4,$5,$6}else{print $0}}' /work/04935/shaojf/stampede2/myTools/HOMER/data/genomes/hg19/annotations/basic/$pre) hg19 -fpkm -strand + -d K562.GRO-seq/ K562.GRO-cap.ctl/ K562.GRO-cap/ 1> $pre.gro 2> $pre.gro.log &
+done
+for pre in coding.ann.txt cpgIsland.ann.txt exons.ann.txt intergenic.ann.txt introns.ann.txt miRNA.ann.txt ncRNA.ann.txt promoters.ann.txt protein-coding.ann.txt tts.ann.txt utr3.ann.txt utr5.ann.txt
+do
+	awk -F"\t" '$20>0.1{print $1}' $pre.gro > $pre.gro.sim
+done
 
+
+#### just rna
+pre=refseq
+analyzeRepeats.pl rna hg19 -fpkm -strand + -d K562.GRO-seq/ K562.GRO-cap.ctl/ K562.GRO-cap/ 1> $pre.gro 2> $pre.gro.log &
+cut -f 1-6,9- $pre.gro | awk -F"\t" '$7>0.1' > $pre.gro.sim
+grep -v "Transcript" refseq.gro.sim | awk -vOFS="\t" '{a=$3;b=$3+2000;if($5=="-"){a=$4-2000;b=$4}{print $2,a,b,$1,$7,$5}}' > refseq.utr5.bed
+grep -v "Transcript" refseq.gro.sim | awk -vOFS="\t" '{a=$3;b=$3+2000;if($5=="+"){a=$4-2000;b=$4}{print $2,a,b,$1,$7,$5}}' > refseq.utr3.bed
 # #### for reference
 # for pre in candidate.Intergenic.bed candidate.intron.bed
 # do
@@ -80,16 +98,59 @@ zcat hg19.K562.* > hg19.K562.eCLIP.normpeaks.bed
 ####
 annotatePeaks.pl hg19.K562.eCLIP.normpeaks.bed hg19 1> hg19.K562.eCLIP.normpeaks.annotation 2> hg19.K562.eCLIP.normpeaks.annotation.log
 #### should force same strand
-bedtools intersect -wao -a hg19.K562.eCLIP.normpeaks.bed -b candidate.eRNA.withGRO.bed > eCLIP.eRNA.txt
-bedtools intersect -wao -a candidate.eRNA.withGRO.bed -b hg19.K562.eCLIP.normpeaks.bed > eRNA.eCLIP.txt
+# bedtools intersect -wao -a hg19.K562.eCLIP.normpeaks.bed -b candidate.eRNA.withGRO.bed > eCLIP.eRNA.txt
+# bedtools intersect -wao -a candidate.eRNA.withGRO.bed -b hg19.K562.eCLIP.normpeaks.bed > eRNA.eCLIP.txt
 
-awk '$7!="."' eRNA.eCLIP.txt | cut -f 1-4,10 | sed 's/_K562_rep02//;s/_K562_rep01//' | sort | uniq > eRNA.eCLIP.interaction
-cut -f 4 eRNA.eCLIP.interaction | sort | uniq -c | sort -k1,1nr > eRNA.eCLIP.interaction.count 
+# awk '$7!="."' eRNA.eCLIP.txt | cut -f 1-4,10 | sed 's/_K562_rep02//;s/_K562_rep01//' | sort | uniq > eRNA.eCLIP.interaction
+# cut -f 4 eRNA.eCLIP.interaction | sort | uniq -c | sort -k1,1nr > eRNA.eCLIP.interaction.count 
+
+####### force same strand
+for f in candidate.eRNA.withGRO.bed refseq.utr?.bed
+do
+	bedtools intersect -wo -s -a $f -b hg19.K562.eCLIP.normpeaks.bed > $f.eCLIP.txt &
+done
+##### for eRNA: 200783 -> 31996. decreased a lot
+##### eRNA.eCLIP.txt doesn't consider about strand.
+for f in candidate.eRNA.withGRO.bed refseq.utr?.bed
+do
+	awk '$7!="."'  $f.eCLIP.txt | cut -f 1-4,10 | sed 's/_K562_rep02//;s/_K562_rep01//' | sort | uniq > $f.eCLIP.interaction
+	cut -f 4 $f.eCLIP.interaction | sort | uniq -c | sort -k1,1nr > $f.eCLIP.interaction.count 
+done
+for f in candidate.eRNA.withGRO.bed refseq.utr?.bed
+do
+	cut -f 5 $f.eCLIP.interaction | sort | uniq -c > eCLIP.$f.interaction.count 
+done
+paste eCLIP.candidate.eRNA.withGRO.bed.interaction.count eCLIP.refseq.utr3.bed.interaction.count eCLIP.refseq.utr5.bed.interaction.count | awk -vOFS="\t" '{print $2,$1,$3,$5}' > eCLIP.eRNA.utr3.utr5.count
+
+  #   629 candidate.eRNA.withGRO.bed.eCLIP.interaction.count
+  # 21457 refseq.utr3.bed.eCLIP.interaction.count
+  # 33862 refseq.utr5.bed.eCLIP.interaction.count
+  #     7531 candidate.eRNA.withGRO.bed
+  #    35919 refseq.utr3.bed
+  #    35919 refseq.utr5.bed
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ### chr6:16,192,628-16,341,494
 
-# for f in hg19.K562.*
-for f in hg19.K562.YWHAG-human*.bed.gz hg19.K562.Z*.bed.gz
+for f in hg19.K562.*
+# for f in hg19.K562.YWHAG-human*.bed.gz hg19.K562.Z*.bed.gz
 do
 	gunzip -c $f | annotatePeaks.pl /dev/stdin hg19 1> $f.annotation 2> $f.log &
 done

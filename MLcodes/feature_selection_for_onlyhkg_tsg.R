@@ -4,16 +4,14 @@ library(ggplot2)
 library(pheatmap)
 library(cluster)
 library(randomForest)
-# library(lars)
 library(glmnet)
 # install.packages("Rtsne")
 # library(Rtsne)
 # devtools::install_github('mlampros/FeatureSelection')
 # library(FeatureSelection)
 args <- commandArgs(TRUE)
-# args <- c("total.type.srt.all", "total.type.srt.gm.liver")
+# args <- c("onlyhkg.tsg.all")
 input <- fread(args[1], sep = "\t", header = T)
-input.subs <- fread(args[2], sep = "\t", header = T)
 ### for old data.table
 # scores <- data.matrix(input[,.SD, .SDcols = c(3:170)])
 # genes <- as.matrix(input[, .SD, .SDcols = 1])
@@ -24,8 +22,8 @@ genes <- as.matrix(input[,1])
 class <- as.matrix(input[,2])
 types <- factor(class)
 rownames(scores) <- genes
-class.subs <- as.matrix(input.subs[,3])
-types.subs <- factor(class.subs)
+types.sim <- as.vector(types)
+types.sim[types.sim!="hkg" & types.sim!="mixTSG" & types.sim!="Testis"] <- "othersingleTSG"
 
 ###################################################
 #####         look at the following           #####
@@ -33,51 +31,42 @@ types.subs <- factor(class.subs)
 ############## prepare the data
 range01 <- function(x, ...){(x - min(x, ...)) / (max(x, ...) - min(x, ...))}
 scaled.scores <- apply(scores, 2, range01)
-subsets <- scaled.scores[types!="other",]
-subsets.types <- factor(types[types!="other"], levels = unique(types[types!="other"]))
-subsets.subs <- scaled.scores[types.subs!="others",]
-subsets.types.subs <- factor(types.subs[types.subs!="others"], levels = unique(types.subs[types.subs!="others"]))
+save.image("onlyhkg.tsg.data.RData")
 ############## PCA
-myPCA.a <- prcomp(subsets, scale. = F, center = F)
-myPCA.b <- prcomp(subsets.subs, scale. = F, center = F)
-myPCA.a.t <- prcomp(t(subsets), scale. = F, center = F)
-myPCA.b.t <- prcomp(t(subsets.subs), scale. = F, center = F)
-subsets.pca.scores <- as.data.frame(myPCA.a$x)
-pdf(file = paste(args[1], "range01.subsets.pca.pdf", sep = "."), width = 15, height = 12)
-ggplot(data = subsets.pca.scores, aes(x = PC1, y = PC2)) +
-	geom_point(aes(colour = subsets.types, alpha = 1/10)) +
+load("onlyhkg.tsg.data.RData")
+library(ggplot2)
+scaled.scores[is.na(scaled.scores)] <- 0
+myPCA.a <- prcomp(scaled.scores, scale. = F, center = F)
+myPCA.a.t <- prcomp(t(scaled.scores), scale. = F, center = F)
+pca.scores <- as.data.frame(myPCA.a$x)
+pdf(file = paste(args[1], "range01.pca.pdf", sep = "."), width = 15, height = 12)
+ggplot(data = pca.scores, aes(x = PC1, y = PC2)) +
+	geom_point(aes(colour = types, alpha = 1/10)) +
 	ggtitle(args[1])
 dev.off()
-subsets.pca.scores <- as.data.frame(myPCA.b$x)
-pdf(file = paste(args[1], "range01.subsets.gmliver.pca.pdf", sep = "."), width = 15, height = 12)
-ggplot(data = subsets.pca.scores, aes(x = PC1, y = PC2)) +
-	geom_point(aes(colour = subsets.types.subs, alpha = 1/10)) +
+pdf(file = paste(args[1], "range01.pca.sim.pdf", sep = "."), width = 15, height = 12)
+ggplot(data = pca.scores, aes(x = PC1, y = PC2)) +
+	geom_point(aes(colour = types.sim, alpha = 1/10)) +
 	ggtitle(args[1])
 dev.off()
-subsets.pca.scores <- as.data.frame(myPCA.a.t$x)
-pdf(file = paste(args[1], "range01.subsets.t.pca.pdf", sep = "."), width = 15, height = 12)
-ggplot(data = subsets.pca.scores, aes(x = PC1, y = PC2, label = rownames(subsets.pca.scores))) +
+
+pca.scores <- as.data.frame(myPCA.a.t$x)
+pdf(file = paste(args[1], "range01.t.pca.pdf", sep = "."), width = 15, height = 12)
+ggplot(data = pca.scores, aes(x = PC1, y = PC2, label = rownames(pca.scores))) +
 	geom_point(aes(alpha = 1/10)) +
 	geom_text(colour = "tomato", alpha = 0.8, size = 2) +
 	ggtitle(args[1])
 dev.off()
-subsets.pca.scores <- as.data.frame(myPCA.b.t$x)
-pdf(file = paste(args[1], "range01.subsets.gmliver.t.pca.pdf", sep = "."), width = 15, height = 12)
-ggplot(data = subsets.pca.scores, aes(x = PC1, y = PC2, label = rownames(subsets.pca.scores))) +
-	geom_point(aes(alpha = 1/10)) +
-	geom_text(colour = "tomato", alpha = 0.8, size = 2) +
-	ggtitle(args[1])
-dev.off()
-save.image("all.PCA.RData")
+save.image("onlyhkg.tsg.PCA.RData")
 ## feature selection
-write.csv(subsets.pca.scores, paste(args[1], "range01.subsets.gmliver.t.pca.csv", sep = "."))
-feature.select <- order(abs(subsets.pca.scores[,1]), decreasing=T)[1:500]
-colnames(subsets)[feature.select]
-subsets.pca.scores[feature.select,1]
+write.csv(pca.scores, paste(args[1], "range01.t.pca.csv", sep = "."))
+feature.select <- order(abs(pca.scores[,1]), decreasing = T)[1:500]
+colnames(scores)[feature.select]
+pca.scores[feature.select,1]
 colors <- colorRampPalette(c("blue", "white", "red"))(10)
-datax <- rbind.data.frame(scaled.scores[types.subs=="hkg",], scaled.scores[types.subs=="GM",], scaled.scores[types.subs=="Liver",])
-data <- datax[,feature.select]
-pdf(file = paste(args[1], "range01.subsets.gmliver.top500.pheatmap.pdf", sep = "."), width = 15, height = 12)
+data <- scaled.scores[,feature.select]
+library(pheatmap)
+png(filename = paste(args[1], "range01.top500.pheatmap.png", sep = "."), width = 1500, height = 1200)
 myplot <- pheatmap(data, scale = "none", 
 	show_rownames = F, show_colnames = T, color = colors, 
 	cluster_cols = F, cluster_rows = F)
@@ -101,12 +90,12 @@ save.image("all.LASSO.RData")
 library(FeatureSelection)
 params_glmnet <- list(alpha = 1, family = 'gaussian', nfolds = 5, parallel = TRUE)
 params_xgboost <- list( params = list("objective" = "reg:linear", "bst:eta" = 0.001, "subsample" = 0.75, "max_depth" = 5, 
-                                     "colsample_bytree" = 0.75, "nthread" = 6),
+                                     "colsample_bytree" = 0.75, "nthread" = 60),
                                       nrounds = 1000, print.every.n = 250, maximize = FALSE)
 params_ranger <- list(dependent.variable.name = 'y', probability = FALSE, num.trees = 1000, verbose = TRUE, mtry = 5, 
                      min.node.size = 10, num.threads = 60, classification = FALSE, importance = 'permutation')
 params_features <- list(keep_number_feat = NULL, union = TRUE)
-feat <- wrapper_feat_select(X = subsets, y = as.numeric(subsets.types), params_glmnet = params_glmnet, params_xgboost = params_xgboost, 
+feat <- wrapper_feat_select(X = scaled.scores, y = as.numeric(types), params_glmnet = params_glmnet, params_xgboost = params_xgboost, 
                           params_ranger = params_ranger, xgb_sort = 'Gain', CV_folds = 5, stratified_regr = FALSE, 
                           scale_coefs_glmnet = FALSE, cores_glmnet = 5, params_features = params_features, verbose = TRUE)
 str(feat)
@@ -164,6 +153,19 @@ sesObject <- SES(target, dataset, max_k = 5, threshold = 0.2, test = "testIndFis
 ###################################################
 #####           look at the above             #####
 ###################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ####
 # colors <- colorRampPalette(c("blue", "white", "red"))(10)
