@@ -81,7 +81,8 @@ tsne.scale.sub <- Rtsne(tpm.sub, check_duplicates = FALSE, dims = 2, perplexity 
 t.tsne.sub <- Rtsne(t(tpm.sub), check_duplicates = FALSE, dims = 2, perplexity = 10, verbose = TRUE, max_iter = 500)
 t.tsne.scale.sub <- Rtsne(t(tpm.sub), check_duplicates = FALSE, dims = 2, perplexity = 10, verbose = TRUE, max_iter = 500, pca_center = T, pca_scale = T)
 
-save.image("median.tsne.RData")
+# save.image("median.tsne.RData")
+save.image("median.tsne.1.RData")
 # load("median.tsne.RData")
 
 ## Plotting

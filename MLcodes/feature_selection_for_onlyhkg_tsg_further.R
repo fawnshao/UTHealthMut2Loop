@@ -10,7 +10,7 @@ library(glmnet)
 # devtools::install_github('mlampros/FeatureSelection')
 # library(FeatureSelection)
 args <- commandArgs(TRUE)
-# args <- c("onlyhkg.tsg.all")
+# args <- c("onlyhkg.tsg.further.srt.all")
 input <- fread(args[1], sep = "\t", header = T)
 ### for old data.table
 # scores <- data.matrix(input[,.SD, .SDcols = c(3:170)])
@@ -23,17 +23,19 @@ class <- as.matrix(input[,2])
 types <- factor(class)
 rownames(scores) <- genes
 types.sim <- as.vector(types)
-types.sim[types.sim!="hkg" & types.sim!="mixTSG" & types.sim!="Testis"] <- "othersingleTSG"
+types.sim[c(2507:3531,4235:4263)] <- "othersingleTSG"
+# types.sim[types.sim!="hkg" & types.sim!="mixTSG" & types.sim!="Testis"] <- "othersingleTSG"
 
 ###################################################
 #####         look at the following           #####
 ###################################################
+## add hkg classification by PCA
 ############## prepare the data
 range01 <- function(x, ...){(x - min(x, ...)) / (max(x, ...) - min(x, ...))}
 scaled.scores <- apply(scores, 2, range01)
-save.image("onlyhkg.tsg.data.RData")
+save.image("onlyhkg.tsg.further.srt.data.RData")
 ############## PCA
-load("onlyhkg.tsg.data.RData")
+load("onlyhkg.tsg.further.srt.data.RData")
 library(ggplot2)
 scaled.scores[is.na(scaled.scores)] <- 0
 myPCA.a <- prcomp(scaled.scores, scale. = F, center = F)
@@ -57,7 +59,7 @@ ggplot(data = pca.scores, aes(x = PC1, y = PC2, label = rownames(pca.scores))) +
 	geom_text(colour = "tomato", alpha = 0.8, size = 2) +
 	ggtitle(args[1])
 dev.off()
-save.image("onlyhkg.tsg.PCA.RData")
+save.image("onlyhkg.tsg.further.srt.PCA.RData")
 ## feature selection
 write.csv(pca.scores, paste(args[1], "range01.t.pca.csv", sep = "."))
 feature.select <- order(abs(pca.scores[,1]), decreasing = T)[1:500]
@@ -86,7 +88,7 @@ dev.off()
 save.image("all.LASSO.RData")
 ############## FeatureSelection
 # install_github('mlampros/FeatureSelection') 
-# load("all.PCA.RData")
+# load("onlyhkg.tsg.further.srt.PCA.RData")
 library(FeatureSelection)
 params_glmnet <- list(alpha = 1, family = 'gaussian', nfolds = 5, parallel = TRUE)
 params_xgboost <- list( params = list("objective" = "reg:linear", "bst:eta" = 0.001, "subsample" = 0.75, "max_depth" = 5, 
@@ -98,25 +100,31 @@ params_features <- list(keep_number_feat = NULL, union = TRUE)
 feat <- wrapper_feat_select(X = scaled.scores, y = as.numeric(types), params_glmnet = params_glmnet, params_xgboost = params_xgboost, 
                           params_ranger = params_ranger, xgb_sort = 'Gain', CV_folds = 5, stratified_regr = FALSE, 
                           scale_coefs_glmnet = FALSE, cores_glmnet = 5, params_features = params_features, verbose = TRUE)
+save.image("onlyhkg.tsg.further.srt.step1.RData")
+write.table(feat$all_feat$"glmnet-lasso", paste(args[1], "FeatureSelection.glmnetlasso.tsv", sep = "."), row.names = F, sep = "\t")
+write.table(feat$all_feat$xgboost, paste(args[1], "FeatureSelection.xgboost.tsv", sep = "."), row.names = F, sep = "\t")
+write.table(feat$all_feat$ranger, paste(args[1], "FeatureSelection.ranger.tsv", sep = "."), row.names = F, sep = "\t")
+write.table(feat$union_feat, paste(args[1], "FeatureSelection.union_feat.tsv", sep = "."), row.names = F, sep = "\t")
+
 str(feat)
-params_barplot <- list(keep_features = 300, horiz = TRUE, cex.names = 1.0)
+params_barplot <- list(keep_features = 30, horiz = TRUE, cex.names = 0.5)
 png(filename = paste(args[1], "FeatureSelection.bar.png", sep = "."), width = 1500, height = 1200)
 barplot_feat_select(feat, params_barplot, xgb_sort = 'Cover')
 dev.off()
-dat <- data.frame(p = as.numeric(subsets.types), subsets)
+dat <- data.frame(p = as.numeric(scaled.scores), types)
 cor_feat <- func_correlation(dat, target = 'p', correlation_thresh = 0.1, use_obs = 'complete.obs', correlation_method = 'pearson')
 out_lst <- lapply(feat$all_feat, function(x) which(rownames(cor_feat) %in% x[1:100, 1]))
-cor_lasso <- func_correlation(subsets[, feat$all_feat$`glmnet-lasso`[, 1]], target = NULL, correlation_thresh = 0.9, 
+cor_lasso <- func_correlation(scaled.scores[, feat$all_feat$`glmnet-lasso`[, 1]], target = NULL, correlation_thresh = 0.9, 
                              use_obs = 'complete.obs', correlation_method = 'pearson')
-cor_xgb = func_correlation(subsets[, feat$all_feat$xgboost[, 1][1:100]], target = NULL, correlation_thresh = 0.9, 
+cor_xgb <- func_correlation(scaled.scores[, feat$all_feat$xgboost[, 1][1:100]], target = NULL, correlation_thresh = 0.9, 
                            use_obs = 'complete.obs', correlation_method = 'pearson')
-cor_rf = func_correlation(subsets[, feat$all_feat$ranger[, 1][1:100]], target = NULL, correlation_thresh = 0.9,
+cor_rf <- func_correlation(scaled.scores[, feat$all_feat$ranger[, 1][1:100]], target = NULL, correlation_thresh = 0.9,
                           use_obs = 'complete.obs', correlation_method = 'pearson')
 write.csv(cor_feat,paste(args[1], "FeatureSelection.cor_feat.csv", sep = "."))
 write.csv(cor_lasso,paste(args[1], "FeatureSelection.cor_lasso.csv", sep = "."))
 write.csv(cor_xgb,paste(args[1], "FeatureSelection.cor_xgb.csv", sep = "."))
 write.csv(cor_rf,paste(args[1], "FeatureSelection.cor_rf.csv", sep = "."))
-save.image("all.FeatureSelection.RData")
+save.image("onlyhkg.tsg.further.srt.RData")
 ############## Caret
 # load("all.PCA.RData")
 # library(mlbench)

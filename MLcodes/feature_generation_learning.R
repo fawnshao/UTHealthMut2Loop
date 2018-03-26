@@ -110,13 +110,13 @@ feat <- wrapper_feat_select(X = subsets, y = as.numeric(subsets.types), params_g
                           params_ranger = params_ranger, xgb_sort = 'Gain', CV_folds = 5, stratified_regr = FALSE, 
                           scale_coefs_glmnet = FALSE, cores_glmnet = 5, params_features = params_features, verbose = TRUE)
 str(feat)
-params_barplot < list(keep_features = 300, horiz = TRUE, cex.names = 1.0)
+params_barplot <- list(keep_features = 300, horiz = TRUE, cex.names = 1.0)
 png(filename = paste(args[1], "FeatureSelection.bar.png", sep = "."), width = 1500, height = 1200)
 barplot_feat_select(feat, params_barplot, xgb_sort = 'Cover')
 dev.off()
 dat <- data.frame(p = as.numeric(subsets.types), subsets)
 cor_feat <- func_correlation(dat, target = 'p', correlation_thresh = 0.1, use_obs = 'complete.obs', correlation_method = 'pearson')
-out_lst < lapply(feat$all_feat, function(x) which(rownames(cor_feat) %in% x[1:100, 1]))
+out_lst <- lapply(feat$all_feat, function(x) which(rownames(cor_feat) %in% x[1:100, 1]))
 cor_lasso <- func_correlation(subsets[, feat$all_feat$`glmnet-lasso`[, 1]], target = NULL, correlation_thresh = 0.9, 
                              use_obs = 'complete.obs', correlation_method = 'pearson')
 cor_xgb = func_correlation(subsets[, feat$all_feat$xgboost[, 1][1:100]], target = NULL, correlation_thresh = 0.9, 
