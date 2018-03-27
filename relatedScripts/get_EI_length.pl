@@ -24,6 +24,7 @@ foreach $g(keys %gene){
 	if(not exists $intron{$g}){
 		$intron{$g} = 0;
 	}
+	print STDERR "$g\t$intron{$g}\n";
 	$x = $gene{$g} - $intron{$g};
 	print "$g\t$x\n";
 }
