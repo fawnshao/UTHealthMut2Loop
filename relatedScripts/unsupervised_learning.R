@@ -103,8 +103,12 @@ dev.off()
 
 save.image("onlyhkg_tsg.pca.tsne.RData")
 
-
-
+#########
+load("onlyhkg.pca.RData")
+tpm.mix <- tpm[class == "mixTSG",]
+myPCA.mix <- prcomp(tpm.mix, scale. = F, center = F)
+pca.scores <- as.data.frame(myPCA.mix$x)
+mix.srt <- tpm.mix[order(pca.scores[,1], decreasing = F),]
 #########
 # args <- c("onlyhkg.tsg.further.srt.log2tpm.median.tsv")
 # args <- c("hkg.tsg.bothpcandnc.log2tpm.median.tsv")
@@ -118,7 +122,8 @@ data <- rbind.data.frame(tpm[final.class=="hkg1",],
 	tpm[final.class=="hkg2",], 
 	tpm[final.class=="hkg3",],
 	tpm[final.class=="hkg4",],
-	tpm[class!="hkg",]
+	tpm[class!="hkg" & class!="mixTSG",],
+	mix.srt
 	)
 data[data > 10] <- 10
 annos <- data.frame(class = c(final.class[final.class=="hkg1"],
@@ -139,6 +144,7 @@ myplot <- pheatmap(data, scale = "none", annotation_row = annos,
 	show_rownames = F, show_colnames = T, color = colors, 
 	cluster_cols = F, cluster_rows = F)
 dev.off()
+write.table(data.frame(rownames(data), annos[,1], data), "hkg.tsg.srtbyPCA.tsv", row.names = F, quote = F, sep = "\t")
 #########
 
 
