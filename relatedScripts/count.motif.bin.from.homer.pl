@@ -6,11 +6,11 @@ $line = <IN>;
 chomp $line;
 @t = split(/\t/, $line);
 $max = scalar(@t);
-print STERR "$max\n";
+# print STERR "$max\n";
 for($i = 5; $i < $max; $i++){
 	@tt = split(/\//, $t[$i]);
 	$motifs{$i} = $tt[0];
-	print STERR "$i\t$motifs{$i}\n";
+	# print STERR "$i\t$motifs{$i}\n";
 }
 while(<IN>){
 	chomp;
@@ -20,18 +20,18 @@ while(<IN>){
 			@tt = split(/,/, $t[$i]);
 			foreach $a(@tt){
 				@ttt = split(/\(/, $a);
-				foreach $b(@ttt){
-					if($t[4] eq '-'){
-						$dis = (2000 - $b) / 100;
-					}
-					else{
-						$dis = $b;
-					}
-					$bin = sprintf("%0d", $dis);
-					$id = $motifs{$i}.":".$bin;
-					print STERR "$id\n";
-					$count{$id}++;
+				$b = $ttt[0];
+				print STERR "$b\n";
+				if($t[4] eq '-'){
+					$dis = (2000 - $b) / 100;
 				}
+				else{
+					$dis = $b;
+				}
+				$bin = sprintf("%0d", $dis);
+				$id = $motifs{$i}.":".$bin;
+				print STERR "$id\n";
+				$count{$id}++;
 			}
 		}
 	}
