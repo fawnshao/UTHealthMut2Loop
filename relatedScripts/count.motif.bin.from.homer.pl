@@ -29,7 +29,7 @@ while(<IN>){
 					$dis = ($b - 1000) / 100;
 				}
 				$bin = sprintf("%0d", $dis);
-				$id = $motifs{$i}."@".$bin;
+				$id = $motifs{$i}."\t".$bin;
 				# print STERR "$id\n";
 				$count{$id}++;
 			}
