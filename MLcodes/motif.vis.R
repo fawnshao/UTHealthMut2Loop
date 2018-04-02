@@ -46,6 +46,10 @@ library(data.table)
 args <- c("hkg.vert.known.ETS.Sp1.YY1.bin.txt", 
 	"mixTSG.vert.known.ETS.Sp1.YY1.bin.txt", 
 	"singleTSG.vert.known.ETS.Sp1.YY1.bin.txt")
+mymotifs <- c("Elk4(ETS)", "ETS(ETS)", "Elk1(ETS)", "ELF1(ETS)", 
+	"YY1(Zf)", "Fli1(ETS)", "Sp1(Zf)", "GABPA(ETS)",
+	"ETS1(ETS)", "EWS:FLI1-fusion(ETS)", "Etv2(ETS)" 
+	)
 input1 <- fread(args[1], sep = "\t", header = F, na.strings = "/")
 input2 <- fread(args[2], sep = "\t", header = F, na.strings = "/")
 input3 <- fread(args[3], sep = "\t", header = F, na.strings = "/")
@@ -56,10 +60,12 @@ class <- c(rep("hkg",nrow(input1)), rep("mixTSG",nrow(input2)), rep("singleTSG",
 datax <- data.frame(rbind.data.frame(input1[,1:2], input2[,1:2], input3[,1:2]), class, percentage)
 colnames(datax)[1:2] <- c("motif", "bin")
 
-myplot <- ggplot(data = datax, aes(x = bin, y = percentage, fill = as.factor(class))) + 
-		geom_bar(stat = "identity", position=position_dodge()) +
-		facet_grid(motif ~ .) +
+datax <- datax[abs(datax[,2])<11 & datax[,1] %in% mymotifs,]
+myplot <- ggplot(data = datax, aes(x = bin, y = percentage, fill = class)) + 
+		geom_bar(stat = "identity", position = position_dodge()) +
+		facet_grid(motif ~ . + class) +
+		scale_x_continuous(limits = c(-10,10)) +
 		ggtitle(args[1])
-png(filename = paste(args[1], "motif.bar.png", sep = "."), width = 600, height = 1000)
+png(filename = paste(args[1], "motif.bar.png", sep = "."), width = 900, height = 800)
 print(myplot)
 dev.off()

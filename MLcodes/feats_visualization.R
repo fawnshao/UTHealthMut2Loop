@@ -179,7 +179,8 @@ RunFS <- function(x, y = as.numeric(types), pre = args[1]){
 	write.table(feat$union_feat, paste(pre, "FeatureSelection.union_feat.tsv", sep = "."), row.names = F, sep = "\t")
 	return(feat)
 }
-data.s.feat <- RunFS(x = data.s, y = as.numeric(types), pre = paste(args[1],"selects", sep = "."))
+data.s.na <- t(na.omit(t(data.s)))
+data.s.feat <- RunFS(x = data.s.na, y = as.numeric(types), pre = paste(args[1],"selects", sep = "."))
 #############################################
 
 

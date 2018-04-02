@@ -23,10 +23,10 @@ while(<IN>){
 				$b = $ttt[0];
 				# print STERR "$b\n";
 				if($t[4] eq '-'){
-					$dis = (1000 - $b) / 100;
+					$dis = (1000 - $b); #/ 100;
 				}
 				else{
-					$dis = ($b - 1000) / 100;
+					$dis = ($b - 1000); #/ 100;
 				}
 				$bin = sprintf("%0d", $dis);
 				$id = $motifs{$i}."\t".$bin;
