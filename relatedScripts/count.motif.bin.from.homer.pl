@@ -21,12 +21,12 @@ while(<IN>){
 			foreach $a(@tt){
 				@ttt = split(/\(/, $a);
 				$b = $ttt[0];
-				print STERR "$b\n";
+				# print STERR "$b\n";
 				if($t[4] eq '-'){
 					$dis = (2000 - $b) / 100;
 				}
 				else{
-					$dis = $b;
+					$dis = $b / 100;
 				}
 				$bin = sprintf("%0d", $dis);
 				$id = $motifs{$i}.":".$bin;
