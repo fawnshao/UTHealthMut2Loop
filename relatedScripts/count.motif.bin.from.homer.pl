@@ -36,7 +36,7 @@ while(<IN>){
 		}
 	}
 }
-close;
+close(IN);
 
 foreach $x (keys %count){
 	print "$x\t$count{$x}\n";
