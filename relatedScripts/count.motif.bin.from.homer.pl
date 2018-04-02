@@ -6,6 +6,7 @@ $line = <IN>;
 chomp $line;
 @t = split(/\t/, $line);
 $max = scalar(@t);
+print STERR "$max\n";
 for($i = 5; $i < $max; $i++){
 	@tt = split(/\//, $t[$i]);
 	$motifs{$i} = $tt[0];
