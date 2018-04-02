@@ -17,7 +17,7 @@ while(<IN>){
 		if($t[$i] ne ""){
 			@tt = split(/,/, $t[$i]);
 			foreach $a(@tt){
-				@ttt = split(/(/, $a);
+				@ttt = split(/\(/, $a);
 				foreach $b(@ttt){
 					if($t[4] eq '-'){
 						$dis = (2000 - $b) / 100;
