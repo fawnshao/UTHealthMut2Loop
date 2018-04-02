@@ -16,7 +16,7 @@ while(<IN>){
 	chomp;
 	@t = split(/\t/);
 	for($i = 5; $i < $max; $i++){
-		if($t[$i] ~ /,/){
+		if($t[$i] =~ /,/){
 			@tt = split(/;/, $t[$i]);
 			foreach $a(@tt){
 				@ttt = split(/\(/, $a);
