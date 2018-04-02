@@ -36,3 +36,22 @@ myplot <- ggplot(data = data, aes(x = class, y = labels)) +
 print(myplot)
 dev.off()
 
+
+
+################################
+args <- c("hkg.vert.known.ETS.Sp1.YY1.bin.txt", 
+	"mixTSG.vert.known.ETS.Sp1.YY1.bin.txt", 
+	"singleTSG.vert.known.ETS.Sp1.YY1.bin.txt")
+input1 <- fread(args[1], sep = "\t", header = F, na.strings = "/")
+input2 <- fread(args[2], sep = "\t", header = F, na.strings = "/")
+input3 <- fread(args[3], sep = "\t", header = F, na.strings = "/")
+
+motifs <- as.matrix(input[,1])
+motifs.seq <- as.matrix(input[,2])
+# qv <- data.matrix(input[,c(3,5,7,9,11,13,15)])
+# rv <- data.matrix(input[,c(4,6,8,10,12,14,16)])
+qv <- data.matrix(input[,c(3,5,7)])
+rv <- data.matrix(input[,c(4,6,8)])
+class <- gsub(".q", "", colnames(qv))
+colnames(qv) <- class
+
