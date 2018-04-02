@@ -56,10 +56,10 @@ class <- c(rep("hkg",nrow(input1)), rep("mixTSG",nrow(input2)), rep("singleTSG",
 datax <- data.frame(rbind.data.frame(input1[,1:2], input2[,1:2], input3[,1:2]), class, percentage)
 colnames(datax)[1:2] <- c("motif", "bin")
 
-myplot <- ggplot(data = datax, aes(x = bin, y = percentage)) + 
-		geom_bar(stat = "identity", fill = "steelblue") +
+myplot <- ggplot(data = datax, aes(x = bin, y = percentage, fill = as.factor(class))) + 
+		geom_bar(stat = "identity", position=position_dodge()) +
 		facet_grid(motif ~ .) +
 		ggtitle(args[1])
-png(filename = paste(args[1], "motif.bar.png", sep = "."), width = 700, height = 1500)
+png(filename = paste(args[1], "motif.bar.png", sep = "."), width = 600, height = 1000)
 print(myplot)
 dev.off()
