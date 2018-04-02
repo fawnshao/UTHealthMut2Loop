@@ -146,7 +146,7 @@ perl $myperl <(cut -f 1-2,5,7 hkg.homer.motifs/knownResults.txt) sim.known.motif
 
 ######################
 cut -f 1-5,87,89,90,91,92,93,96,100,101,102,103,104,105,106,107,108,109,128,275,276,277,313,314,311,354 gencode.vert.known.motifs.txt > gencode.vert.known.ETS.Sp1.YY1.txt
-perl ~/myTools/UTHealthMut2Loop/relatedScripts/count.motif.bin.from.homer.pl gencode.vert.known.ETS.Sp1.YY1.txt > gencode.vert.known.ETS.Sp1.YY1.bin.txt
-perl ~/myTools/UTHealthMut2Loop/relatedScripts/count.motif.bin.from.homer.pl <(perl $myperl gencode.vert.known.ETS.Sp1.YY1.txt hkg.tsg.srtbyPCA.class 0 0 | awk '$2~/hkg/ || NR==1' | cut -f 3-) > hkg.vert.known.ETS.Sp1.YY1.bin.txt
-perl ~/myTools/UTHealthMut2Loop/relatedScripts/count.motif.bin.from.homer.pl <(perl $myperl gencode.vert.known.ETS.Sp1.YY1.txt hkg.tsg.srtbyPCA.class 0 0 | awk '$2~/mixTSG/ || NR==1' | cut -f 3-) > mixTSG.vert.known.ETS.Sp1.YY1.bin.txt
-perl ~/myTools/UTHealthMut2Loop/relatedScripts/count.motif.bin.from.homer.pl <(perl $myperl gencode.vert.known.ETS.Sp1.YY1.txt hkg.tsg.srtbyPCA.class 0 0 | awk '($2!~/singleTSG/ && $2!~/mixTSG/) || NR==1' | cut -f 3-) > singleTSG.vert.known.ETS.Sp1.YY1.bin.txt
+perl ~/myTools/UTHealthMut2Loop/relatedScripts/count.motif.bin.from.homer.pl <(sed 's/),/);/g' gencode.vert.known.ETS.Sp1.YY1.txt) > gencode.vert.known.ETS.Sp1.YY1.bin.txt
+perl ~/myTools/UTHealthMut2Loop/relatedScripts/count.motif.bin.from.homer.pl <(perl $myperl gencode.vert.known.ETS.Sp1.YY1.txt hkg.tsg.srtbyPCA.class 0 0 | awk '$2~/hkg/ || NR==1' | cut -f 3- | sed 's/),/);/g') > hkg.vert.known.ETS.Sp1.YY1.bin.txt
+perl ~/myTools/UTHealthMut2Loop/relatedScripts/count.motif.bin.from.homer.pl <(perl $myperl gencode.vert.known.ETS.Sp1.YY1.txt hkg.tsg.srtbyPCA.class 0 0 | awk '$2~/mixTSG/ || NR==1' | cut -f 3- | sed 's/),/);/g') > mixTSG.vert.known.ETS.Sp1.YY1.bin.txt
+perl ~/myTools/UTHealthMut2Loop/relatedScripts/count.motif.bin.from.homer.pl <(perl $myperl gencode.vert.known.ETS.Sp1.YY1.txt hkg.tsg.srtbyPCA.class 0 0 | awk '($2!~/singleTSG/ && $2!~/mixTSG/) || NR==1' | cut -f 3- | sed 's/),/);/g') > singleTSG.vert.known.ETS.Sp1.YY1.bin.txt
