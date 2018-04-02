@@ -23,21 +23,22 @@ while(<IN>){
 				$b = $ttt[0];
 				# print STERR "$b\n";
 				if($t[4] eq '-'){
-					$dis = (1000 - $b) / 100;
+					$dis = 1000 - $b;
 				}
 				else{
-					$dis = ($b - 1000) / 100;
+					$dis = $b - 1000;
 				}
-				$bin = sprintf("%0d", $dis);
-				$id = $motifs{$i}."\t".$bin;
-				# print STERR "$id\n";
-				$count{$id}++;
+				print "$motifs{$i}\t$dis\n";
+				# $bin = sprintf("%0d", $dis);
+				# $id = $motifs{$i}."\t".$bin;
+				# # print STERR "$id\n";
+				# $count{$id}++;
 			}
 		}
 	}
 }
 close(IN);
 
-foreach $x (keys %count){
-	print "$x\t$count{$x}\n";
-}
+# foreach $x (keys %count){
+# 	print "$x\t$count{$x}\n";
+# }
