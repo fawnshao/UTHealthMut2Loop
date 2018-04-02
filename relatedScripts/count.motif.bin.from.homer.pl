@@ -9,6 +9,7 @@ $max = scalar(@t);
 for($i = 5; $i < $max; $i++){
 	@tt = split(/\//, $t[$i]);
 	$motifs{$i} = $tt[0];
+	print STERR "$i\t$motifs{$i}\n";
 }
 while(<IN>){
 	chomp;
@@ -27,6 +28,7 @@ while(<IN>){
 					}
 					$bin = sprintf("%0d", $dis);
 					$id = $motifs{$i}.":".$bin;
+					print STERR "$id\n";
 					$count{$id}++;
 				}
 			}
