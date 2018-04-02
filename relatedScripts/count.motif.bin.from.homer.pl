@@ -30,7 +30,7 @@ while(<IN>){
 				}
 				$bin = sprintf("%0d", $dis);
 				$id = $motifs{$i}.":".$bin;
-				print STERR "$id\n";
+				# print STERR "$id\n";
 				$count{$id}++;
 			}
 		}
