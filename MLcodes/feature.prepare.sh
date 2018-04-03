@@ -144,9 +144,36 @@ awk -F"\t" '$5<0.001 && $7-$9>10{print $1"\t"$2}' hkg.homer.motifs/knownResults.
 echo "motif seq hkg.q hkg.ratio singleTSG.q singleTSG.ratio mixTSG.q mixTSG.ratio" | tr " " "\t" > sim.known.motif.mat
 perl $myperl <(cut -f 1-2,5,7 hkg.homer.motifs/knownResults.txt) sim.known.motif.id 0 0 | cut -f 1-2,5- | perl $myperl <(cut -f 1-2,5,7 singleTSG.homer.motifs/knownResults.txt) /dev/stdin 0 0 | cut -f 1-4,7- | perl $myperl <(cut -f 1-2,5,7 mixTSG.homer.motifs/knownResults.txt) /dev/stdin 0 0 | cut -f 1-6,9- | sed 's/%//g' >> sim.known.motif.mat
 
+
+####
+gene=gencode.v19.gene.bed
+pre=`echo $gene | awk -F"." '{print $1}'`
+annotatePeaks.pl <(awk -vOFS="\t" '{a=$2-1000;b=$2+1000;if($6=="-"){a=$3-1000;b=$3+1000}if(a<0){a=0;}print $1,a,b,$4,"1000",$6}' $gene) hg19 -m promoter.motif -size given -p 68 > $pre.promoter.motifs.txt
+annotatePeaks.pl <(awk -vOFS="\t" '{a=$2-1000;b=$3;if($6=="-"){a=$2;b=$3+1000}if(a<0){a=0;}print $1,a,b,$4,"1000",$6}' $gene) hg19 -m promoter.motif -size given -p 68 > $pre.wg.promoter.motifs.txt
+
+cut -f 1-5,23- gencode.wg.promoter.motifs.txt > gencode.wg.promoter.motifs.sim
+perl ~/myTools/UTHealthMut2Loop/relatedScripts/motif.dis.from.homer.pl <(perl $myperl gencode.wg.promoter.motifs.sim hkg.tsg.srtbyPCA.class 0 0 | awk '$2~/hkg/ || NR==1' | cut -f 3- | sed 's/),/);/g') > hkg.promotermotif.dis.txt
+perl ~/myTools/UTHealthMut2Loop/relatedScripts/motif.dis.from.homer.pl <(perl $myperl gencode.wg.promoter.motifs.sim hkg.tsg.srtbyPCA.class 0 0 | awk '$2~/mixTSG/ || NR==1' | cut -f 3- | sed 's/),/);/g') > mixTSG.promotermotif.dis.txt
+perl ~/myTools/UTHealthMut2Loop/relatedScripts/motif.dis.from.homer.pl <(perl $myperl gencode.wg.promoter.motifs.sim hkg.tsg.srtbyPCA.class 0 0 | awk '($2!~/hkg/ && $2!~/mixTSG/) || NR==1' | cut -f 3- | sed 's/),/);/g') > singleTSG.promotermotif.dis.txt
+
+
 ######################
 cut -f 1-5,87,89,90,91,92,93,96,100,101,102,103,104,105,106,107,108,109,128,275,276,277,313,314,311,354 gencode.vert.known.motifs.txt > gencode.vert.known.ETS.Sp1.YY1.txt
 perl ~/myTools/UTHealthMut2Loop/relatedScripts/count.motif.bin.from.homer.pl <(sed 's/),/);/g' gencode.vert.known.ETS.Sp1.YY1.txt) > gencode.vert.known.ETS.Sp1.YY1.bin.txt
 perl ~/myTools/UTHealthMut2Loop/relatedScripts/count.motif.bin.from.homer.pl <(perl $myperl gencode.vert.known.ETS.Sp1.YY1.txt hkg.tsg.srtbyPCA.class 0 0 | awk '$2~/hkg/ || NR==1' | cut -f 3- | sed 's/),/);/g') > hkg.vert.known.ETS.Sp1.YY1.bin.txt
 perl ~/myTools/UTHealthMut2Loop/relatedScripts/count.motif.bin.from.homer.pl <(perl $myperl gencode.vert.known.ETS.Sp1.YY1.txt hkg.tsg.srtbyPCA.class 0 0 | awk '$2~/mixTSG/ || NR==1' | cut -f 3- | sed 's/),/);/g') > mixTSG.vert.known.ETS.Sp1.YY1.bin.txt
 perl ~/myTools/UTHealthMut2Loop/relatedScripts/count.motif.bin.from.homer.pl <(perl $myperl gencode.vert.known.ETS.Sp1.YY1.txt hkg.tsg.srtbyPCA.class 0 0 | awk '($2!~/hkg/ && $2!~/mixTSG/) || NR==1' | cut -f 3- | sed 's/),/);/g') > singleTSG.vert.known.ETS.Sp1.YY1.bin.txt
+
+perl ~/myTools/UTHealthMut2Loop/relatedScripts/motif.dis.from.homer.pl <(perl $myperl gencode.vert.known.ETS.Sp1.YY1.txt hkg.tsg.srtbyPCA.class 0 0 | awk '$2~/hkg/ || NR==1' | cut -f 3- | sed 's/),/);/g') > hkg.vert.known.ETS.Sp1.YY1.dis.txt
+perl ~/myTools/UTHealthMut2Loop/relatedScripts/motif.dis.from.homer.pl <(perl $myperl gencode.vert.known.ETS.Sp1.YY1.txt hkg.tsg.srtbyPCA.class 0 0 | awk '$2~/mixTSG/ || NR==1' | cut -f 3- | sed 's/),/);/g') > mixTSG.vert.known.ETS.Sp1.YY1.dis.txt
+perl ~/myTools/UTHealthMut2Loop/relatedScripts/motif.dis.from.homer.pl <(perl $myperl gencode.vert.known.ETS.Sp1.YY1.txt hkg.tsg.srtbyPCA.class 0 0 | awk '($2!~/hkg/ && $2!~/mixTSG/) || NR==1' | cut -f 3- | sed 's/),/);/g') > singleTSG.vert.known.ETS.Sp1.YY1.dis.txt
+
+######################
+perl $myperl gencode.cage_peak_phase1and2combined.txt hkg.tsg.srtbyPCA.class 9 0 > hkg.tsg.srtbyPCA.class.cage
+awk -F"\t" -vOFS="\t" '{a=$10;b=$4;if($14=="-"){b=$11;a=$5;}print $1,$2,b-a}' <(tail -n +2 hkg.tsg.srtbyPCA.class.cage) > hkg.tsg.srtbyPCA.class.cage.sim
+
+perl $myperl gencode.cpgIslandExt.txt hkg.tsg.srtbyPCA.class 7 0 > hkg.tsg.srtbyPCA.class.cpg
+awk -F"\t" -vOFS="\t" '{a=($4-$8)-1000;b=($5-$8)-1000;if($12=="-"){a=($9-$5)-1000;b=1000-($4-$8);}print $1,$2,a,b}' <(grep -v "/" hkg.tsg.srtbyPCA.class.cpg) > hkg.tsg.srtbyPCA.class.cpg.sim
+awk -F"\t" '{for(i=$3;i<=$4;i++){printf "%s\t%s\t%s\n",$1,$2,i}}' hkg.tsg.srtbyPCA.class.cpg.sim > hkg.tsg.srtbyPCA.class.cpg.sim.1
+
+~/.local/bin/fimo promoter.motif.meme hg19.fa

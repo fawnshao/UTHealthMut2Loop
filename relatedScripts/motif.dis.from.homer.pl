@@ -23,7 +23,8 @@ while(<IN>){
 				$b = $ttt[0];
 				# print STERR "$b\n";
 				if($t[4] eq '-'){
-					$dis = 1000 - $b;
+					# $dis = 1000 - $b;
+					$dis = $t[3] - $t[2] - 1000 - $b;
 				}
 				else{
 					$dis = $b - 1000;
