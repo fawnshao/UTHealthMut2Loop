@@ -82,14 +82,76 @@ datax <- data.frame(rbind.data.frame(input1, input2, input3), types.sim)
 colnames(datax) <- c("motif", "dis2tss", "class")
 
 myplot <- ggplot(data = datax, aes(x = dis2tss, colour = class)) + 
-		geom_freqpoly(binwidth = 10, position = "identity", data = datax[types.sim == "HKG",], aes(y = ..count.. / 2551)) +
-		geom_freqpoly(binwidth = 10, position = "identity", data = datax[types.sim == "mixTSG",], aes(y = ..count.. / 1574)) +
-		geom_freqpoly(binwidth = 10, position = "identity", data = datax[types.sim == "singleTSG",], aes(y = ..count.. / 2735)) +
+		geom_freqpoly(binwidth = 50, position = "identity", data = datax[types.sim == "HKG",], aes(y = ..count.. / 2551)) +
+		geom_freqpoly(binwidth = 50, position = "identity", data = datax[types.sim == "mixTSG",], aes(y = ..count.. / 1574)) +
+		geom_freqpoly(binwidth = 50, position = "identity", data = datax[types.sim == "singleTSG",], aes(y = ..count.. / 2735)) +
 		facet_wrap( ~ motif, nrow = 2) + 
-		scale_x_continuous(limits = c(-999,4999)) +
+		scale_x_continuous(limits = c(-1000,5000)) +
 		labs(x = "relative postion of motif to TSS", y = "percentage") +
 		ggtitle(args[1])
 png(filename = paste(args[1], "promotermotif.hist.png", sep = "."), width = 1000, height = 800)
+print(myplot)
+dev.off()
+
+########
+### ETS SP1 YY1
+library(ggplot2)
+library(data.table)
+
+args <- c("hkg.vert.known.ETS.Sp1.YY1.dis.txt", 
+	"mixTSG.vert.known.ETS.Sp1.YY1.dis.txt", 
+	"singleTSG.vert.known.ETS.Sp1.YY1.dis.txt")
+mymotifs <- c("Elk4(ETS)", "ETS(ETS)", "Elk1(ETS)", "ELF1(ETS)", 
+	"YY1(Zf)", "Fli1(ETS)", "Sp1(Zf)", "GABPA(ETS)",
+	"ETS1(ETS)", "EWS:FLI1-fusion(ETS)", "Etv2(ETS)", "PU.1(ETS)"
+	)
+input1 <- fread(args[1], sep = "\t", header = F, na.strings = "/")
+input2 <- fread(args[2], sep = "\t", header = F, na.strings = "/")
+input3 <- fread(args[3], sep = "\t", header = F, na.strings = "/")
+
+types.sim <- c(rep("HKG",nrow(input1)), rep("mixTSG",nrow(input2)), rep("singleTSG",nrow(input3)))
+datax <- data.frame(rbind.data.frame(input1, input2, input3), types.sim)
+colnames(datax) <- c("motif", "dis2tss", "class")
+datax <- datax[datax[,1] %in% mymotifs,]
+
+myplot <- ggplot(data = datax, aes(x = dis2tss, colour = class)) + 
+		geom_freqpoly(binwidth = 10, position = "identity", data = datax[datax[,3] == "HKG",], aes(y = ..count.. / 2551)) +
+		geom_freqpoly(binwidth = 10, position = "identity", data = datax[datax[,3] == "mixTSG",], aes(y = ..count.. / 1574)) +
+		geom_freqpoly(binwidth = 10, position = "identity", data = datax[datax[,3] == "singleTSG",], aes(y = ..count.. / 2735)) +
+		facet_wrap( ~ motif, ncol = 4) + 
+		scale_x_continuous(limits = c(-1000,1000)) +
+		labs(x = "relative postion of motif to TSS", y = "percentage") +
+		ggtitle(args[1])
+png(filename = paste(args[1], "promoterETSmotif.hist.png", sep = "."), width = 800, height = 800)
+print(myplot)
+dev.off()
+
+########
+### neighboring TSS
+library(ggplot2)
+library(data.table)
+
+args <- c("hkg.tsg.srtbyPCA.class.tss.neighbors.sim")
+input <- fread(args[1], sep = "\t", header = T, na.strings = "/")
+types.sim <- as.matrix(input[,2])[,1]
+types.sim[grep("hkg",types.sim)] <- "HKG"
+types.sim[types.sim!="HKG" & types.sim!="mixTSG"] <- "singleTSG"
+strand.lab <- as.matrix(input[,3])[,1]
+strand.lab[input[,3]==input[,5]] <- "same"
+strand.lab[input[,3]!=input[,5]] <- "diff"
+
+datax <- data.frame(input[,6], strand.lab, types.sim)
+colnames(datax) <- c("tss.dis", "strand", "class")
+
+myplot <- ggplot(data = datax, aes(x = tss.dis, colour = class)) + 
+		geom_freqpoly(binwidth = 30, position = "identity", data = datax[types.sim == "HKG",], aes(y = ..count.. / 2551)) +
+		geom_freqpoly(binwidth = 30, position = "identity", data = datax[types.sim == "mixTSG",], aes(y = ..count.. / 1574)) +
+		geom_freqpoly(binwidth = 30, position = "identity", data = datax[types.sim == "singleTSG",], aes(y = ..count.. / 2735)) +
+		scale_x_continuous(limits = c(-3000,3000)) +
+		facet_wrap( ~ strand, nrow = 1) + 
+		labs(x = "nearest neighboring TSS distance", y = "percentage") +
+		ggtitle(args[1])
+png(filename = paste(args[1], "neighboringTSS.hist.png", sep = "."), width = 1000, height = 500)
 print(myplot)
 dev.off()
 
