@@ -14,5 +14,5 @@ while(<IN>){
 close(IN);
 
 foreach $id (keys %info){
-	print "info{$x}\n";
+	print "$info{$id}\n";
 }

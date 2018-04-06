@@ -57,6 +57,8 @@ do
 	bedtools closest -D a -a a -b b >> gencode.appris_principal.leve12.tss.neighbors.txt
 done < gencode.v19.all.transcript.appris_principal.leve12.tss.bed
 
+perl ~/stampede2/myTools/UTHealthMut2Loop/relatedScripts/get.nearest.pairs.pl <(awk -F"\t" '$3!="/"' hkg.tsg.srtbyPCA.class.appris.tss.neighbors.sim.annotation) > uniq.tss.pairs
+
 perl $myperl <(cut -f 4,6,10,12,13 gencode.appris_principal.leve12.tss.neighbors.txt) hkg.tsg.srtbyPCA.class 0 0 | cut -f 1-2,4- | perl $myperl genecode.gene.all.annotation.txt /dev/stdin 0 0 | cut -f 1-6,8 | perl $myperl genecode.gene.all.annotation.txt /dev/stdin 0 3 | cut -f 1-7,9 | perl $myperl hkg.tsg.srtbyPCA.class /dev/stdin 0 0 | cut -f 1-8,10 > hkg.tsg.srtbyPCA.class.appris.tss.neighbors.sim.annotation
 
 head -1 v1.4.log2tpm.median.tsv | cut -f 2- > appris.close.targets.div.left.tsv
