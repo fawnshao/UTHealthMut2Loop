@@ -155,3 +155,69 @@ png(filename = paste(args[1], "neighboringTSS.hist.png", sep = "."), width = 100
 print(myplot)
 dev.off()
 
+########
+### neighboring TSS annotation
+library(ggplot2)
+library(data.table)
+
+args <- c("hkg.tsg.srtbyPCA.class.tss.neighbors.sim.annotation")
+input <- fread(args[1], sep = "\t", header = T, na.strings = "/")
+types.sim <- as.matrix(input[,2])[,1]
+types.sim[grep("hkg",types.sim)] <- "HKG"
+types.sim[types.sim!="HKG" & types.sim!="mixTSG"] <- "singleTSG"
+
+anno.class <- as.matrix(input)[,7]
+anno.class[anno.class!="protein_coding"] <- "others"
+anno.class.1 <- anno.class
+anno.class <- as.matrix(input)[,8]
+anno.class[anno.class!="protein_coding"] <- "others"
+# anno.class[anno.class!="protein_coding" & anno.class!="lincRNA" & anno.class!="antisense" & anno.class!="processed_transcript" & anno.class!="pseudogene" & anno.class!="snoRNA" & anno.class!="snRNA" & anno.class!="sense_overlapping" & anno.class!="sense_intronic"] <- "others"
+anno.class.2 <- anno.class
+annotation.type <- paste(anno.class.1, anno.class.2, sep = ": ")
+# annotation.type <- paste(as.matrix(input)[,7], as.matrix(input)[,8], sep = ":")
+x <- melt(sort(table(annotation.type[types.sim=="HKG" & abs(input[,6]) < 1000]), decreasing = F) / 2551)
+y <- melt(sort(table(annotation.type[types.sim=="singleTSG" & abs(input[,6]) < 1000]), decreasing = F) / 2735)
+z <- melt(sort(table(annotation.type[types.sim=="mixTSG" & abs(input[,6]) < 1000]), decreasing = F) / 1574)
+datax <- data.frame(rbind.data.frame(x,y,z),c(rep("HKG", nrow(x)),rep("singleTSG", nrow(y)),rep("mixTSG", nrow(z))))
+colnames(datax) <- c("type", "value", "class")
+# sums <- c(2551, 1574, 2735)
+# names(sums) <- c("HKG", "mixTSG", "singleTSG")
+
+
+myplot <- ggplot(data = datax, aes(x = class, y = value, fill = type)) + 
+	# geom_bar(position = position_dodge(1), stat = "identity") + 
+	geom_bar(stat = "identity", width = 0.5) + 
+	# geom_text(aes(y = label_ypos, label = value), vjust=1.6, color = "white", size = 3.5)+
+	ggtitle(args[1])# + coord_flip()
+	# theme(axis.text.x = element_text(angle = 60, hjust = 1))
+# png(filename = paste(args[1], "annotype.barplot.png", sep = "."), width = 1200, height = 600)
+png(filename = paste(args[1], "annotype.1k.barplot.png", sep = "."), width = 500, height = 800)
+print(myplot)
+dev.off()
+
+anno.class <- as.matrix(input)[,7]
+anno.class[anno.class!="protein_coding" & anno.class!="lincRNA" & anno.class!="antisense"] <- "others"
+anno.class.1 <- anno.class
+anno.class <- as.matrix(input)[,8]
+anno.class[anno.class!="protein_coding" & anno.class!="lincRNA" & anno.class!="antisense"] <- "others"
+anno.class.2 <- anno.class
+annotation.type <- paste(anno.class.1, anno.class.2, sep = ": ")
+x <- melt(sort(table(annotation.type[types.sim=="HKG" & abs(input[,6]) < 1000]), decreasing = T) / 2551)
+y <- melt(sort(table(annotation.type[types.sim=="singleTSG" & abs(input[,6]) < 1000]), decreasing = T) / 2735)
+z <- melt(sort(table(annotation.type[types.sim=="mixTSG" & abs(input[,6]) < 1000]), decreasing = T) / 1574)
+datax <- data.frame(rbind.data.frame(x,y,z),c(rep("HKG", nrow(x)),rep("singleTSG", nrow(y)),rep("mixTSG", nrow(z))))
+colnames(datax) <- c("type", "value", "class")
+myplot <- ggplot(data = datax, aes(x = type, y = value, fill = class)) + 
+	geom_bar(stat = "identity", width = 0.5) + 
+	ggtitle(args[1]) + coord_flip()
+png(filename = paste(args[1], "annotype.1k.t.barplot.png", sep = "."), width = 800, height = 600)
+print(myplot)
+dev.off()
+
+myplot <- ggplot(data = datax, aes(x = class, y = type)) + 
+		geom_point(aes(colour = value, size = value)) +
+		ggtitle(args[1])
+png(filename = paste(args[1], "annotype.1k.t.dotplot.png", sep = "."), width = 400, height = 600)
+print(myplot)
+dev.off()
+

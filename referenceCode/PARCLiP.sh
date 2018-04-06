@@ -38,10 +38,10 @@ do
 	samtools sort -@ 68 ${pre}.Aligned.out.srt.bam ${pre}.Aligned.out.bam
 	samtools index -@ 68 ${pre}.Aligned.out.srt.bam
 	make_bigwig_files.py --bam ${pre}.Aligned.out.srt.bam --genome $genomesize --bw_pos ${pre}.norm.pos.bw --bw_neg ${pre}.norm.neg.bw
-	bedSort ${pre}.norm.pos.bg ${pre}.norm.pos.srt.bg &
-	bedSort ${pre}.norm.neg.t.bg ${pre}.norm.neg.t.srt.bg &
+	bedSort ${pre}.Aligned.out.srt.norm.pos.bg ${pre}.Aligned.out.srt.norm.pos.srt.bg &
+	bedSort ${pre}.Aligned.out.srt.norm.neg.t.bg ${pre}.Aligned.out.srt.norm.neg.t.srt.bg &
 	wait
-	bedGraphToBigWig ${pre}.norm.pos.srt.bg $genomesize bedGraphToBigWig.${pre}..norm.pos.bw &
-	bedGraphToBigWig ${pre}.norm.neg.t.srt.bg $genomesize bedGraphToBigWig.${pre}.norm.neg.bw &
+	bedGraphToBigWig ${pre}.Aligned.out.srt.norm.pos.srt.bg $genomesize bedGraphToBigWig.${pre}.norm.pos.bw &
+	bedGraphToBigWig ${pre}.Aligned.out.srt.norm.neg.t.srt.bg $genomesize bedGraphToBigWig.${pre}.norm.neg.bw &
 done < sim.info.txt
 wait

@@ -124,6 +124,9 @@ g <- colnames(scores.x)[grep("GTRD.GABP",colnames(scores.x))]
 h <- colnames(scores.x)[grep("GTRD.Spi",colnames(scores.x))]
 i <- colnames(scores.x)[grep("GTRD.PU.1",colnames(scores.x))]
 ets.col <- c(ets.col, a, b, c, d, e, f, g, h, i)
+aa <- colnames(scores.x)[grep("GTRD.TAF-1",colnames(scores.x))]
+ab <- colnames(scores.x)[grep("GTRD.TBP",colnames(scores.x))]
+others.col <- c(aa, ab)
 yy1.col <- colnames(scores.x)[grep("YY1",colnames(scores.x))]
 sp1.col <- colnames(scores.x)[grep("Sp1",colnames(scores.x))]
 loop.col <- colnames(scores.x)[grep("HiC",colnames(scores.x))]
@@ -132,32 +135,39 @@ data.s <- scores[,colnames(scores) %in% selects]
 data.s <- apply(data.s, 2, myscale)
 data.s <- apply(data.s, 2, range01)
 
-png(filename = paste(args[1], "selects.pheatmap.png", sep = "."), width = 2500, height = 1500)
+annos <- data.frame(class = types, class.sim = types.sim)
+rownames(annos) <- rownames(data.s)
+colors <- colorRampPalette(c("white", "blue"))(100)
+
+# png(filename = paste(args[1], "selects.pheatmap.png", sep = "."), width = 2500, height = 1500)
+png(filename = paste(args[1], "selects.2.pheatmap.png", sep = "."), width = 2500, height = 1500)
 myplot <- pheatmap(data.s, scale = "none", annotation_row = annos,
 	show_rownames = F, show_colnames = T, color = colors, # gaps_row = c(2552, 5287),
 	cluster_cols = F, cluster_rows = F)
 dev.off()
-png(filename = paste(args[1], "selects.hkg.pheatmap.png", sep = "."), width = 2500, height = 3000)
+# png(filename = paste(args[1], "selects.hkg.pheatmap.png", sep = "."), width = 2500, height = 3000)
+png(filename = paste(args[1], "selects.2.hkg.pheatmap.png", sep = "."), width = 2500, height = 3000)
 myplot <- pheatmap(t(na.omit(t(data.s[types.sim=="HKG",]))), scale = "none", annotation_row = annos[types.sim=="HKG",],
 	show_rownames = T, show_colnames = T, color = colors, fontsize_row = 3, # gaps_row = c(2552, 5287),
 	cluster_cols = T, cluster_rows = T)
 dev.off()
 used <- t(na.omit(t(data.s[types.sim=="HKG",])))
 used.ordered <- used[myplot$tree_row$order, myplot$tree_col$order]
-used.tsne <- RuntSNE(x = used.ordered, pre = paste(args[1],"selects.hkg.1.hkg", sep = "."))
-used.tsne.plot <- PlottSNE(x = used.tsne, y = types[types.sim=="HKG"], z = types.sim[types.sim=="HKG"], pre = paste(args[1],"selects.hkg.1.hkg", sep = "."))
+# used.tsne <- RuntSNE(x = used.ordered, pre = paste(args[1],"selects.hkg.1.hkg", sep = "."))
+used.tsne <- RuntSNE(x = used.ordered, pre = paste(args[1],"selects.hkg.2.hkg", sep = "."))
+# used.tsne.plot <- PlottSNE(x = used.tsne, y = types[types.sim=="HKG"], z = types.sim[types.sim=="HKG"], pre = paste(args[1],"selects.hkg.1.hkg", sep = "."))
+used.tsne.plot <- PlottSNE(x = used.tsne, y = types[types.sim=="HKG"], z = types.sim[types.sim=="HKG"], pre = paste(args[1],"selects.hkg.2.hkg", sep = "."))
 out <- data.frame(rownames(used.ordered), used.ordered, used.tsne$Y)
-write.table(out, paste(args[1], "selects.hkg.featureswithtSNE.tsv", sep = "."), sep = "\t", row.names = F)
+write.table(out, paste(args[1], "selects.2.hkg.featureswithtSNE.tsv", sep = "."), sep = "\t", row.names = F)
 
 tsne.scale <- apply(used.tsne$Y, 2, range01)
-data.v <- data.frame(used.ordered,tsne.scale)
+data.v <- data.frame(used.ordered, tsne.scale)
 colnames(data.v)[206:207] <- c("tSNE.1", "tSNE.2")
-png(filename = paste(args[1], "selects.hkg.tSNE.pheatmap.png", sep = "."), width = 2500, height = 1500)
+png(filename = paste(args[1], "selects.2.hkg.tSNE.pheatmap.png", sep = "."), width = 2500, height = 1500)
 pheatmap(data.v, scale = "none", annotation_row = annos[types.sim=="HKG",],
 	show_rownames = F, show_colnames = T, color = colors, # gaps_row = c(2552, 5287),
 	cluster_cols = F, cluster_rows = F)
 dev.off()
-
 
 
 #############################################
@@ -188,9 +198,10 @@ data.s.feat <- RunFS(x = data.s.na, y = as.numeric(types), pre = paste(args[1],"
 # data.s[is.na(data.s)] <- 0
 data.sx <- data.s
 data.s <- t(na.omit(t(data.s)))
-data.s.tsne <- RuntSNE(x = data.s, pre = paste(args[1],"data.s", sep = "."))
-data.s.plot <- PlottSNE(x = data.s.tsne, y = types, z = types.sim, pre = paste(args[1],"data.s", sep = "."))
-data.s.hkg.tsne <- RuntSNE(x = data.s[types.sim=="HKG",], pre = paste(args[1],"data.s.hkg", sep = "."))
-data.s.hkg.plot <- PlottSNE(x = data.s.hkg.tsne, y = types[types.sim=="HKG"], z = types.sim[types.sim=="HKG"], pre = paste(args[1],"data.s.hkg", sep = "."))
+data.s.tsne <- RuntSNE(x = data.s, pre = paste(args[1],"data.s.2", sep = "."))
+data.s.plot <- PlottSNE(x = data.s.tsne, y = types, z = types.sim, pre = paste(args[1],"data.s.2", sep = "."))
+data.s.hkg.tsne <- RuntSNE(x = data.s[types.sim=="HKG",], pre = paste(args[1],"data.s.hkg.2", sep = "."))
+data.s.hkg.plot <- PlottSNE(x = data.s.hkg.tsne, y = types[types.sim=="HKG"], z = types.sim[types.sim=="HKG"], pre = paste(args[1],"data.s.hkg.2", sep = "."))
 
-save.image(paste(args[1], "mytest.RData", sep = "."))
+# save.image(paste(args[1], "mytest.RData", sep = "."))
+save.image(paste(args[1], "ETS.SP1.YY1.TAF1.TBP.RData", sep = "."))
