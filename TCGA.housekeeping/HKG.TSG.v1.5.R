@@ -1,7 +1,8 @@
 library(data.table)
 library(pheatmap)
-
-args <- c("tcga_RSEM_gene_tpm", "tcga_RSEM_gene_tpm.samples.sim", "v1.5", "0.25", "0.5", "0.1", "3")
+args <- c("EB++AdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.xena", 
+	"EB++AdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.xena.phenotype", "v1.5", "0.25", "0.5", "0.1", "3")
+# args <- c("tcga_RSEM_gene_tpm", "tcga_RSEM_gene_tpm.samples.sim", "v1.5", "0.25", "0.5", "0.1", "3")
 # expression tissuename outputpre tissueTau sampleTau expressioncutoff[log2(tpm+1)]
 
 ### some functions ###
@@ -88,7 +89,7 @@ tpm <- as.matrix(raw.table[,-1])
 rownames(tpm) <- as.matrix(raw.table[,1])
 info <- as.matrix(read.table(args[2], sep = "\t", header = T))
 samplecount <- table(info[,2])
-tissues <- names(samplecount[samplecount > 10])
+tissues <- names(samplecount[samplecount > 20])
 # tissues <- unique(info[,2])
 # tissues <- tissues[-c(7,24,25,53)]
 
@@ -152,15 +153,16 @@ write.table(data.frame(rownames(tpm), log2tpm.Tau), file = paste(outputpre, "log
 write.table(all.stats, file = paste(outputpre, "allstats.tsv", sep = "."), 
 	sep = "\t", row.names = FALSE, quote = FALSE)
 
-#load("v1.3.Tau.RData")
+#load("v1.5.RData")
 #library(pheatmap)
 print("Looking for housekeeping genes")
-housekeepinggene <- all.stats[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau, ]
-housekeepinggene.median <- log2tpm.median[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau, ]
-housekeepinggene.Tau <- log2tpm.Tau[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau, ]
+housekeepinggene <- all.stats[nullcount.sum < 10 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau, ]
+housekeepinggene.median <- log2tpm.median[nullcount.sum < 10 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau, ]
+housekeepinggene.Tau <- log2tpm.Tau[nullcount.sum < 10 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau, ]
 rownames(housekeepinggene.median) <- housekeepinggene[,1]
 rownames(housekeepinggene.Tau) <- housekeepinggene[,1]
-# housekeepinggene[grep("GAPDH", as.matrix(housekeepinggene[,1])), 1]
+# GAPDH
+# housekeepinggene[grep("ENSG00000111640.14", as.matrix(housekeepinggene[,1])), 1]
 
 ## check ENSG00000204983.8|PRSS1 Pancreas
 # tissuespecificgene[grep("PRSS1",as.matrix(tissuespecificgene[,1])),1]
@@ -173,12 +175,13 @@ tissuespecificgene <- data.frame()
 tissueflags <- c()
 rindex <- c()
 for(i in 1:nrow(all.stats)){
-	if(!is.na(log2tpm.median.Tau[i]) && log2tpm.median.Tau[i] > 1 - tissueTau && !is.na(log2tpm.Tau.min[i]) && log2tpm.Tau.min[i] < sampleTau && min(nullcount[i,], na.rm = T) == 0){
+	if(!is.na(log2tpm.median.Tau[i]) && log2tpm.median.Tau[i] > 1 - tissueTau && !is.na(log2tpm.Tau.min[i]) && log2tpm.Tau.min[i] < sampleTau && min(nullcount[i,], na.rm = T) < 10){
 		flag <- 0
 		tflags <- c()
 		for(j in 1:length(tissues)){
-			temp <- log2tpm.median[i,j]/fmax(log2tpm.median[i,])
-			if(nullcount[i,j] == 0 && !is.na(log2tpm.Tau[i,j]) && log2tpm.Tau[i,j] < sampleTau &&  !is.na(temp) && temp > 1 - tissueTau){
+			# temp <- log2tpm.median[i,j]/fmax(log2tpm.median[i,])
+			# if(nullcount[i,j] < 10 && !is.na(log2tpm.Tau[i,j]) && log2tpm.Tau[i,j] < sampleTau &&  !is.na(temp) && temp > 1 - tissueTau){
+			if(nullcount[i,j] < 10 && !is.na(log2tpm.Tau[i,j]) && log2tpm.Tau[i,j] < sampleTau){
 				flag <- 1
 				tflags <- c(tflags, tissues[j])
 			}
