@@ -22,7 +22,7 @@ fmax <- function(x)
 
 print("Reading Data")
 # outputpre tissuename tissueTau sampleTau
-args <- c("v1.5", "tcga_RSEM_gene_tpm.samples.sim", "v1.5", "0.25", "0.5", "0.1", "3")
+args <- c("v1.5", "tcga_RSEM_gene_tpm.samples.sim", "0.25", "0.5", "3")
 # args <- c("v1.6", "GTEx_sample.tissue.txt", "0.25", "0.5", "10")
 all.stats.file <- paste(args[1], "allstats.tsv", sep = ".")
 all.stats <- fread(all.stats.file, sep = "\t", header = T)
@@ -34,7 +34,7 @@ nullcount <- as.matrix(fread(nullcount.file, sep = "\t", header = T)[,-1])
 # 	log2tpm.mean, log2tpm.median, log2tpm.Tau)
 info <- as.matrix(read.table(args[2], sep = "\t", header = T))
 samplecount <- table(info[,2])
-tissues <- names(samplecount[samplecount > 10])
+tissues <- names(samplecount[samplecount > 20])
 
 outputpre <- args[1]
 tissueTau <- as.numeric(args[3])
@@ -51,9 +51,9 @@ log2tpm.median.Tau <- as.matrix(all.stats[,5])
 nullcount.sum <- as.matrix(all.stats[,6])
 log2tpm.Tau.max <- as.matrix(all.stats[,7])
 log2tpm.Tau.min <- as.matrix(all.stats[,8])
-log2tpm.mean <- as.matrix(all.stats[,9:57])
-log2tpm.median <- as.matrix(all.stats[,58:106])
-log2tpm.Tau <- as.matrix(all.stats[,107:155])
+log2tpm.mean <- as.matrix(all.stats[,9:(length(tissues) + 8)])
+log2tpm.median <- as.matrix(all.stats[,(length(tissues) + 9):(length(tissues)*2 + 8)])
+log2tpm.Tau <- as.matrix(all.stats[,(length(tissues)*2 + 9):(length(tissues)*3 + 8)])
 rownames(log2tpm.mean) <- genes
 colnames(log2tpm.mean) <- tissues
 rownames(log2tpm.median) <- genes
@@ -149,9 +149,12 @@ for(i in 1:length(tissues)){
 
 print("Looking for housekeeping genes")
 log2tpm.median.min <- apply(log2tpm.median, 1, function(x){min(x, na.rm = T)})
-housekeepinggene <- all.stats[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau & log2tpm.median.min > medianthreshold, ]
-housekeepinggene.median <- log2tpm.median[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau & log2tpm.median.min > medianthreshold, ]
-housekeepinggene.Tau <- log2tpm.Tau[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau & log2tpm.median.min > medianthreshold, ]
+# housekeepinggene <- all.stats[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau & log2tpm.median.min > medianthreshold, ]
+# housekeepinggene.median <- log2tpm.median[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau & log2tpm.median.min > medianthreshold, ]
+# housekeepinggene.Tau <- log2tpm.Tau[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau & log2tpm.median.min > medianthreshold, ]
+housekeepinggene <- all.stats[nullcount.sum < 10 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau & log2tpm.median.min > medianthreshold, ]
+housekeepinggene.median <- log2tpm.median[nullcount.sum < 10 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau & log2tpm.median.min > medianthreshold, ]
+housekeepinggene.Tau <- log2tpm.Tau[nullcount.sum < 10 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau & log2tpm.median.min > medianthreshold, ]
 rownames(housekeepinggene.median) <- as.matrix(housekeepinggene[,1])
 rownames(housekeepinggene.Tau) <- as.matrix(housekeepinggene[,1])
 # housekeepinggene[grep("GAPDH", as.matrix(housekeepinggene[,1])), 1]
@@ -164,12 +167,14 @@ tissuespecificgene <- data.frame()
 tissueflags <- c()
 rindex <- c()
 for(i in 1:nrow(all.stats)){
-	if(!is.na(log2tpm.median.Tau[i]) && log2tpm.median.Tau[i] > 1 - tissueTau && !is.na(log2tpm.Tau.min[i]) && log2tpm.Tau.min[i] < sampleTau && min(nullcount[i,], na.rm = T) == 0){
+	# if(!is.na(log2tpm.median.Tau[i]) && log2tpm.median.Tau[i] > 1 - tissueTau && !is.na(log2tpm.Tau.min[i]) && log2tpm.Tau.min[i] < sampleTau && min(nullcount[i,], na.rm = T) == 0){
+	if(!is.na(log2tpm.median.Tau[i]) && log2tpm.median.Tau[i] > 1 - tissueTau && !is.na(log2tpm.Tau.min[i]) && log2tpm.Tau.min[i] < sampleTau && min(nullcount[i,], na.rm = T) < 10){
 		flag <- 0
 		tflags <- c()
 		for(j in 1:length(tissues)){
 			temp <- log2tpm.median[i,j] / fmax(log2tpm.median[i,])
-			if(nullcount[i,j] == 0 && !is.na(log2tpm.Tau[i,j]) && log2tpm.Tau[i,j] < sampleTau &&  !is.na(temp) && temp > 1 - tissueTau && log2tpm.median[i,j] > medianthreshold){
+			# if(nullcount[i,j] == 0 && !is.na(log2tpm.Tau[i,j]) && log2tpm.Tau[i,j] < sampleTau &&  !is.na(temp) && temp > 1 - tissueTau && log2tpm.median[i,j] > medianthreshold){
+			if(nullcount[i,j] < 10 && !is.na(log2tpm.Tau[i,j]) && log2tpm.Tau[i,j] < sampleTau &&  !is.na(temp) && temp > 1 - tissueTau && log2tpm.median[i,j] > medianthreshold){
 				flag <- 1
 				tflags <- c(tflags, tissues[j])
 			}
