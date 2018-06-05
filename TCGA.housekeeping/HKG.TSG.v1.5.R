@@ -181,8 +181,8 @@ tissuespecificgene <- data.frame()
 tissueflags <- c()
 rindex <- c()
 for(i in 1:nrow(all.stats)){
-	# if(!is.na(log2tpm.median.Tau[i]) && log2tpm.median.Tau[i] > 1 - tissueTau && !is.na(log2tpm.Tau.min[i]) && log2tpm.Tau.min[i] < sampleTau) && min(nullcount[i,], na.rm = T) == 0){
-	if(!is.na(log2tpm.median.Tau[i]) && log2tpm.median.Tau[i] > 1 - tissueTau && !is.na(log2tpm.Tau.min[i]) && log2tpm.Tau.min[i] < sampleTau) && min(nullcount[i,], na.rm = T) < 10){
+	# if(!is.na(log2tpm.median.Tau[i]) && log2tpm.median.Tau[i] > 1 - tissueTau && !is.na(log2tpm.Tau.min[i]) && log2tpm.Tau.min[i] < sampleTau && min(nullcount[i,], na.rm = T) == 0){
+	if(!is.na(log2tpm.median.Tau[i]) && log2tpm.median.Tau[i] > 1 - tissueTau && !is.na(log2tpm.Tau.min[i]) && log2tpm.Tau.min[i] < sampleTau && min(nullcount[i,], na.rm = T) < 10){
 		flag <- 0
 		tflags <- c()
 		for(j in 1:length(tissues)){
