@@ -131,3 +131,11 @@ awk -F"\t" '$2~/hkg/ && $3=="/"' hkg.tsg.cat.srt | cut -f1 | grep -wf /dev/stdin
 # paste <(cut -f 1 -d"." gencode.v23.gene.anntotation.txt) <(cut -f 2-3 gencode.v23.gene.anntotation.txt) > sim.gencode.v23.gene.anntotation.txt 
 perl $myperl sim.gencode.v19.gene.anntotation.txt <(cut -f 1,92-93 hkg.tsg.cat.srt.GTEx.pancancer.diff.hkg.tsv) 0 0 | cut -f 1-3,5-6 | perl $myperl sim.gencode.v23.gene.anntotation.txt /dev/stdin 0 0 | cut -f 1-5,7-8 > hkg.tsg.cat.srt.GTEx.pancancer.diff.hkg.anntotation
 
+# paste <(gunzip -c gencode.v23.annotation.gene.probeMap.gz | cut -f 1 -d".") <(gunzip -c gencode.v23.annotation.gene.probeMap.gz | cut -f 2) | tail -n +2 > sim.gencode.v23.annotation.gene.probeMap
+
+head -1 sim.v1.5.log2tpm.median.tsv > srt.sim.v1.5.log2tpm.median.tsv
+perl $myperl sim.v1.5.log2tpm.median.tsv <(gunzip -c gencode.v23.annotation.gene.probeMap.gz | cut -f 1 -d"." | tail -n +2) 0 0 | cut -f 1,3- >> srt.sim.v1.5.log2tpm.median.tsv
+head -1 hkg.tsg.cat > srt.sim.hkg.tsg.annotation
+perl $myperl hkg.tsg.cat <(gunzip -c gencode.v23.annotation.gene.probeMap.gz | cut -f 1 -d"." | tail -n +2) 0 0 | cut -f 1,3- >> srt.sim.hkg.tsg.annotation
+
+
