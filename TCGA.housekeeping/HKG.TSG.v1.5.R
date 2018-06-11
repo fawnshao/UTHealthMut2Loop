@@ -136,8 +136,8 @@ log2tpm.Tau.min <- apply(log2tpm.Tau, 1, function(x) {min(x[is.finite(x)], na.rm
 
 ### it takes ~30min until this step
 
-print("Saving RData")
-save.image("v1.5.RData")
+# print("Saving RData")
+# save.image("v1.5.RData")
 # ### it takes ~50min until this step
 
 print("Writing raw output files")
