@@ -2,7 +2,8 @@ library(data.table)
 library(pheatmap)
 # args <- c("EB++AdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.xena", 
 # 	"EB++AdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.xena.phenotype", "v1.5", "0.25", "0.5", "0.1", "3")
-args <- c("tcga_RSEM_gene_tpm", "tcga_RSEM_gene_tpm.samples.sim", "v1.5", "0.25", "0.5", "0.1", "3")
+args <- c("tcga_RSEM_gene_tpm", "tcga_RSEM_gene_tpm.samples.sim", "v1.5.T", "0.25", "0.5", "0.1", "3")
+# args <- c("tcga_RSEM_gene_tpm", "tcga_RSEM_gene_tpm.samples.sim", "v1.5.N", "0.25", "0.5", "0.1", "3")
 # expression tissuename outputpre tissueTau sampleTau expressioncutoff[log2(tpm+1)]
 
 ### some functions ###
@@ -90,6 +91,9 @@ rownames(tpm) <- as.matrix(raw.table[,1])
 info <- as.matrix(read.table(args[2], sep = "\t", header = T))
 samplecount <- table(info[,2])
 tissues <- names(samplecount[samplecount > 20])
+tissues <- tissues[-grep("Normal", tissues)]
+# tissues <- tissues[grep("Normal", tissues)]
+# tissues <- names(samplecount[samplecount > 20][-grep("Normal", names(samplecount))])
 # tissues <- unique(info[,2])
 # tissues <- tissues[-c(7,24,25,53)]
 
