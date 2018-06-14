@@ -550,38 +550,38 @@ head -1 hkg.tsg.srtbyPCA.transcript.NRF1.mat | awk '{print $0"\tNRF1(NRF)\tNRF(N
 perl $myperl hkg.tsg.srtbyPCA.transcript.NRF1.mat <(cut -f1 hkg.gm.liver.promoter.vert.motifs.mat | tail -n +2) 0 0 | cut -f 1,3- | sed 's?/?0?g' > a
 paste a <(cut -f 208 hkg.gm.liver.promoter.vert.motifs.mat | tail -n +2) <(cut -f 210 hkg.gm.liver.promoter.vert.motifs.mat | tail -n +2) <(cut -f 334 hkg.gm.liver.promoter.vert.motifs.mat | tail -n +2) <(cut -f 83 hkg.gm.liver.promoter.vert.motifs.mat | tail -n +2) >> hkg.gm.liver.NRF1.mat
 ################################################################################################
-library(pheatmap)
-library(data.table)
-args <- c("hkg.gm.liver.NRF1.mat")
-input <- fread(args[1], sep = "\t", header = T, na.strings = "/")
-datax <- data.matrix(input[,-1])
-rownames(datax) <- as.matrix(input[,1])[,1]
-datax[datax > 1] <- 1
+# library(pheatmap)
+# library(data.table)
+# args <- c("hkg.gm.liver.NRF1.mat")
+# input <- fread(args[1], sep = "\t", header = T, na.strings = "/")
+# datax <- data.matrix(input[,-1])
+# rownames(datax) <- as.matrix(input[,1])[,1]
+# datax[datax > 1] <- 1
 
-annos <- data.frame(class = c(rep("hkg+",302), rep("hkg+-",2821), rep("hkg-",1058), 
-	rep("gm+",117), rep("gm-", 96), rep("liver+",53), rep("liver-", 265)))
-rownames(annos) <- rownames(datax)
-colors <- colorRampPalette(c("white", "blue"))(10)
+# annos <- data.frame(class = c(rep("hkg+",302), rep("hkg+-",2821), rep("hkg-",1058), 
+# 	rep("gm+",117), rep("gm-", 96), rep("liver+",53), rep("liver-", 265)))
+# rownames(annos) <- rownames(datax)
+# colors <- colorRampPalette(c("white", "blue"))(10)
 
-pdf(file = paste(args[1], "pheatmap.pdf", sep = "."), width = 10, height = 8)
-myplot <- pheatmap(datax, scale = "none", annotation_row = annos,
-	show_rownames = F, show_colnames = T, color = colors, fontsize_col = 6,
-	cluster_cols = T, cluster_rows = F)
-dev.off()
-nullcount <- apply(datax, 2, function(x){length(x[x==0])})
-pdf(file = paste(args[1], "selected.pheatmap.pdf", sep = "."), width = 10, height = 8)
-myplot <- pheatmap(datax[, nullcount < 4000], scale = "none", annotation_row = annos,
-	show_rownames = F, show_colnames = T, color = colors, fontsize_col = 6,
-	cluster_cols = F, cluster_rows = F)
-dev.off()
-datay <- datax[1:4181,16:19]
-annos.sim <- data.frame(class = c(rep("hkg+",302), rep("hkg+-",2821), rep("hkg-",1058)))
-rownames(annos.sim) <- rownames(datay)
-pdf(file = paste(args[1], "selected.motifs.pheatmap.pdf", sep = "."), width = 4, height = 6)
-myplot <- pheatmap(datay, scale = "none", annotation_row = annos.sim,
-	show_rownames = F, show_colnames = T, color = colors, fontsize_col = 6,
-	cluster_cols = T, cluster_rows = T)
-dev.off()
+# pdf(file = paste(args[1], "pheatmap.pdf", sep = "."), width = 10, height = 8)
+# myplot <- pheatmap(datax, scale = "none", annotation_row = annos,
+# 	show_rownames = F, show_colnames = T, color = colors, fontsize_col = 6,
+# 	cluster_cols = T, cluster_rows = F)
+# dev.off()
+# nullcount <- apply(datax, 2, function(x){length(x[x==0])})
+# pdf(file = paste(args[1], "selected.pheatmap.pdf", sep = "."), width = 10, height = 8)
+# myplot <- pheatmap(datax[, nullcount < 4000], scale = "none", annotation_row = annos,
+# 	show_rownames = F, show_colnames = T, color = colors, fontsize_col = 6,
+# 	cluster_cols = F, cluster_rows = F)
+# dev.off()
+# datay <- datax[1:4181,16:19]
+# annos.sim <- data.frame(class = c(rep("hkg+",302), rep("hkg+-",2821), rep("hkg-",1058)))
+# rownames(annos.sim) <- rownames(datay)
+# pdf(file = paste(args[1], "selected.motifs.pheatmap.pdf", sep = "."), width = 4, height = 6)
+# myplot <- pheatmap(datay, scale = "none", annotation_row = annos.sim,
+# 	show_rownames = F, show_colnames = T, color = colors, fontsize_col = 6,
+# 	cluster_cols = T, cluster_rows = T)
+# dev.off()
 ################################################################################################
 head -1 hkg.tsg.srtbyPCA.transcript.NRF1.mat > hkg.tsg.srtbyPCA.transcript.NRF1.peaks.mat
 perl $myperl hkg.tsg.srtbyPCA.transcript.NRF1.mat <(cut -f6 hkg.tsg.srtbyPCA.transcript.bed) 0 0 | cut -f 1,3- | sed 's?/?0?g' >> hkg.tsg.srtbyPCA.transcript.NRF1.peaks.mat

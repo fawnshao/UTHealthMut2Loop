@@ -163,9 +163,9 @@ print("Looking for housekeeping genes")
 # housekeepinggene <- all.stats[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau, ]
 # housekeepinggene.median <- log2tpm.median[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau, ]
 # housekeepinggene.Tau <- log2tpm.Tau[nullcount.sum == 0 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau, ]
-housekeepinggene <- all.stats[nullcount.sum < 10 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau, ]
-housekeepinggene.median <- log2tpm.median[nullcount.sum < 10 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau, ]
-housekeepinggene.Tau <- log2tpm.Tau[nullcount.sum < 10 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau, ]
+housekeepinggene <- all.stats[nullcount.sum < 10 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau & log2tpm.median.min > medianthreshold, ]
+housekeepinggene.median <- log2tpm.median[nullcount.sum < 10 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau & log2tpm.median.min > medianthreshold, ]
+housekeepinggene.Tau <- log2tpm.Tau[nullcount.sum < 10 & !is.na(log2tpm.Tau.max) & log2tpm.Tau.max < sampleTau & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tissueTau & log2tpm.median.min > medianthreshold, ]
 rownames(housekeepinggene.median) <- housekeepinggene[,1]
 rownames(housekeepinggene.Tau) <- housekeepinggene[,1]
 # GAPDH
@@ -192,7 +192,7 @@ for(i in 1:nrow(all.stats)){
 		for(j in 1:length(tissues)){
 			temp <- log2tpm.median[i,j]/fmax(log2tpm.median[i,])
 			# if(nullcount[i,j] == 0 && !is.na(log2tpm.Tau[i,j]) && log2tpm.Tau[i,j] < sampleTau &&  !is.na(temp) && temp > 1 - tissueTau){
-			if(nullcount[i,j] < 10 && !is.na(log2tpm.Tau[i,j]) && log2tpm.Tau[i,j] < sampleTau &&  !is.na(temp) && temp > 1 - tissueTau){
+			if(nullcount[i,j] < 10 && !is.na(log2tpm.Tau[i,j]) && log2tpm.Tau[i,j] < sampleTau &&  !is.na(temp) && temp > 1 - tissueTau && log2tpm.median[i,j] > medianthreshold){
 			# if(!is.na(log2tpm.Tau[i,j]) && log2tpm.Tau[i,j] < sampleTau){
 				flag <- 1
 				tflags <- c(tflags, tissues[j])
