@@ -5,7 +5,7 @@ while (<IN>) {
 	chomp;
 	@t = split(/\t/);
 	$gene = "na";
-	if($t[7] != "."){
+	if($t[7] ne "."){
 		@tt = split(/\|/, $t[7]);
 		$gene = $tt[0];
 	}
