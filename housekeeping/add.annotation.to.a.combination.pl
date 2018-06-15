@@ -20,7 +20,7 @@ while (<IN>) {
 			if(not exists $hash{$x}){
 				$hash{$x} = "null";
 			}
-			$a = $hash{$x}.",";
+			$a .= $hash{$x}.",";
 		}
 		$a =~ s/,$//;
 	}
@@ -30,7 +30,7 @@ while (<IN>) {
 			if(not exists $hash{$x}){
 				$hash{$x} = "null";
 			}
-			$b = $hash{$x}.",";
+			$b .= $hash{$x}.",";
 		}
 		$b =~ s/,$//;
 	}

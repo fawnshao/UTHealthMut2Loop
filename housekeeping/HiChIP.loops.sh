@@ -27,5 +27,5 @@ echo "ID cell.count GeneAnnotation1 GeneAnnotation2" | tr " " "\t" > HiChIP.loop
 tail -n +2 HiChIP.loops.mat.annotation | awk -vOFS="\t" '{sum=0;for(i=2;i<=6;i++){sum+=$i}print $1,sum,$7,$8}' >> HiChIP.loops.mat.annotation.sim
 
 head -1 HiChIP.loops.mat.annotation.sim > HiChIP.loops.mat.annotation.sim.hkg.tsg
-perl $annoperl <(tail -n +2 hkg.tsg.srtbyPCA.class | sed 's/|/\t/' | cut -f 1,3) <(tail -n +2 HiChIP.loops.mat.annotation.sim) >> HiChIP.loops.mat.annotation.sim.hkg.tsg
+perl $annoperl <(tail -n +2 hkg.tsg.srtbyPCA.class | sed 's/|/\t/' | awk -vOFS="\t" '{print $1,$2"|"$3}') <(tail -n +2 HiChIP.loops.mat.annotation.sim) >> HiChIP.loops.mat.annotation.sim.hkg.tsg
 
