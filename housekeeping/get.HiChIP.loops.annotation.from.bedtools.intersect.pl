@@ -19,6 +19,6 @@ close(IN);
 foreach $id (sort keys %hash){
 	@vars = @{$hash{$id}};
 	@uvars = keys %{{ map{$_ => 1} @vars}};
-	$v = join(", ", sort @uvars);
+	$v = join(",", sort @uvars);
 	print "$id\t$v\n";
 }
