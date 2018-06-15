@@ -4,6 +4,7 @@
 myperl=/home1/04935/shaojf/myTools/BioinformaticsDaily/textProcess/add_any_2files_together.pl
 matperl=/home1/04935/shaojf/myTools/BioinformaticsDaily/textProcess/make_matrixwith3col_from_single_file.pl 
 bedperl=/home1/04935/shaojf/myTools/UTHealthMut2Loop/housekeeping/get.HiChIP.loops.annotation.from.bedtools.intersect.pl
+annoperl=/home1/04935/shaojf/myTools/UTHealthMut2Loop/housekeeping/add.annotation.to.a.combination.pl
 for f in *_H3K27ac_Loops.txt
 do
 	pre=`echo $f | cut -f 1 -d"_"`
@@ -24,4 +25,7 @@ perl $myperl HiChIP.loops.transcript.sim <(sed 's/%/\t/' HiChIP.loops.mat | tail
 
 echo "ID cell.count GeneAnnotation1 GeneAnnotation2" | tr " " "\t" > HiChIP.loops.mat.annotation.sim
 tail -n +2 HiChIP.loops.mat.annotation | awk -vOFS="\t" '{sum=0;for(i=2;i<=6;i++){sum+=$i}print $1,sum,$7,$8}' >> HiChIP.loops.mat.annotation.sim
+
+head -1 HiChIP.loops.mat.annotation.sim > HiChIP.loops.mat.annotation.sim.hkg.tsg
+perl $annoperl <(tail -n +2 hkg.tsg.srtbyPCA.class | sed 's/|/\t/' | cut -f 1,3) <(tail -n +2 HiChIP.loops.mat.annotation.sim) >> HiChIP.loops.mat.annotation.sim.hkg.tsg
 

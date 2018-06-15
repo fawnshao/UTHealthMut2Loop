@@ -17,6 +17,9 @@ while (<IN>) {
 	if($t[2] ne "na"){
 		@tt = split(/,/, $t[2]);
 		foreach $x(@tt){
+			if(not exists $hash{$x}){
+				$hash{$x} = "null";
+			}
 			$a = $hash{$x}.",";
 		}
 		$a =~ s/,$//;
@@ -24,6 +27,9 @@ while (<IN>) {
 	if($t[3] ne "na"){
 		@tt = split(/,/, $t[3]);
 		foreach $x(@tt){
+			if(not exists $hash{$x}){
+				$hash{$x} = "null";
+			}
 			$b = $hash{$x}.",";
 		}
 		$b =~ s/,$//;
