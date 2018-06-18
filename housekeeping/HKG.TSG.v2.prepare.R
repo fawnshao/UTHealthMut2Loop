@@ -22,7 +22,7 @@ library(pheatmap)
 # https://www.ncbi.nlm.nih.gov/pubmed/15388519
 # genes with midrange profiles having 0.15<tau<0.85 were found to constitute >50% of all expression patterns
 ######################################################
-args <- c("GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_tpm.gct", "GTEx_sample.tissue.txt", "v2")
+args <- c("GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_tpm.gct", "GTEx_sample.tissue.txt", "v2", "0")
 # expression tissuename outputpre tissueTau sampleTau expressioncutoff[log2(tpm+1)]
 
 ### some functions ###
@@ -145,7 +145,7 @@ tissues <- unique(info[,2])
 tissues <- tissues[-c(7,24,25,53)]
 
 outputpre <- args[3]
-
+nullexpression <- as.numeric(args[4])
 ## calculate
 print("Calculating nullcount, median/mean and Tau for each tissue")
 nullcount <- matrix(ncol = length(tissues), nrow = nrow(tpm))
@@ -177,9 +177,9 @@ print("Calculating nullcount, mean and Tau across tissues")
 log2tpm.median.mean <- apply(log2tpm.median, 1, fmean)
 log2tpm.median.Tau <- apply(log2tpm.median, 1, fTau)
 
-nullcount.sum <- apply(nullcount, 1, sum)
-log2tpm.Tau.max <- apply(log2tpm.Tau, 1, function(x) {max(x[is.finite(x)], na.rm = T)})
-log2tpm.Tau.min <- apply(log2tpm.Tau, 1, function(x) {min(x[is.finite(x)], na.rm = T)})
+# nullcount.sum <- apply(nullcount, 1, sum)
+# log2tpm.Tau.max <- apply(log2tpm.Tau, 1, function(x) {max(x[is.finite(x)], na.rm = T)})
+# log2tpm.Tau.min <- apply(log2tpm.Tau, 1, function(x) {min(x[is.finite(x)], na.rm = T)})
 
 ### it takes ~30min until this step
 
