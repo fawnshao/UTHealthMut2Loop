@@ -2,20 +2,6 @@ library(data.table)
 library(pheatmap)
 library(ggplot2)
 library(reshape2)
-###+++###
-#Function require a vector with expression of one gene in different tissues/samples.
-#Max is calculated taking in account tissues with 0 expression. 2+0+4=2
-fmax <- function(x)
-	{
-		if(!all(is.na(x)))
-	 	{
-	 		res <- max(x, na.rm = TRUE)
-	 	} else {
-	 		res <- NA
-	 	}
-	 	return(res)
-	}
-###***###***###	
 
 print("Reading Data")
 # outputpre tissuename tissueTau sampleTau
@@ -40,7 +26,8 @@ log2tpm.outlier <- as.matrix(fread(log2tpm.outlier.file, sep = "\t", header = T)
 
 info <- as.matrix(read.table(args[2], sep = "\t"))
 tissues <- unique(info[,2])
-tissues <- tissues[-c(7,24,25,53)]
+# tissues <- tissues[-c(7,24,25,53)]
+tissues <- tissues[-c(7,24,25,31,53)]
 
 genes <- as.matrix(all.stats[,1])
 log2tpm.median.mean <- as.matrix(all.stats[,2])
@@ -60,9 +47,20 @@ colnames(log2tpm.iqr) <- tissues
 rownames(log2tpm.outlier) <- genes
 colnames(log2tpm.outlier) <- tissues
 
+sd.percentage <- log2tpm.sd / log2tpm.mean
 # all.stats[grep("ISL1", genes),]
 
 print("Plotting distribution for mean and Tau")
+
+a <- melt(log2tpm.median)
+
+data <- melt(sd.percentage)
+colnames(data) <- c("gene", "tissue", "sd.percentage")
+pdf(file = paste(args[1], "sd.percentage.pdf", sep = "."), width = 20, height = 10)
+ggplot(data, aes(x = tissue, y = sd.percentage, fill = tissue)) + 
+	geom_violin() + 
+	theme(legend.position = "none", axis.text.x = element_text(angle = 60, hjust = 1))
+dev.off()
 
 data <- melt(log2tpm.Tau)
 colnames(data) <- c("gene", "tissue", "Tau")
@@ -71,11 +69,31 @@ ggplot(data, aes(x = tissue, y = Tau, fill = tissue)) +
 	geom_violin() + 
 	theme(legend.position = "none", axis.text.x = element_text(angle = 60, hjust = 1))
 dev.off()
+pdf(file = paste(args[1], "notnull.Tau.pdf", sep = "."), width = 20, height = 10)
+ggplot(data[a[,3]>0,], aes(x = tissue, y = Tau, fill = tissue)) + 
+	geom_violin() + 
+	theme(legend.position = "none", axis.text.x = element_text(angle = 60, hjust = 1))
+dev.off()
+pdf(file = paste(args[1], "medgt3.Tau.pdf", sep = "."), width = 20, height = 10)
+ggplot(data[a[,3]>3,], aes(x = tissue, y = Tau, fill = tissue)) + 
+	geom_violin() + 
+	theme(legend.position = "none", axis.text.x = element_text(angle = 60, hjust = 1))
+dev.off()
 
 data <- melt(log2tpm.outlier)
 colnames(data) <- c("gene", "tissue", "outlier")
 pdf(file = paste(args[1], "outliercounts.pdf", sep = "."), width = 20, height = 10)
-ggplot(data, aes(x = outlier, y = Tau, fill = tissue)) + 
+ggplot(data, aes(x = tissue, y = outlier, fill = tissue)) + 
+	geom_violin() + 
+	theme(legend.position = "none", axis.text.x = element_text(angle = 60, hjust = 1))
+dev.off()
+pdf(file = paste(args[1], "notnull.outliercounts.pdf", sep = "."), width = 20, height = 10)
+ggplot(data[a[,3]>0,], aes(x = tissue, y = outlier, fill = tissue)) + 
+	geom_violin() + 
+	theme(legend.position = "none", axis.text.x = element_text(angle = 60, hjust = 1))
+dev.off()
+pdf(file = paste(args[1], "medgt3.outliercounts.pdf", sep = "."), width = 20, height = 10)
+ggplot(data[a[,3]>3,], aes(x = tissue, y = outlier, fill = tissue)) + 
 	geom_violin() + 
 	theme(legend.position = "none", axis.text.x = element_text(angle = 60, hjust = 1))
 dev.off()
@@ -83,7 +101,17 @@ dev.off()
 data <- melt(log2tpm.sd)
 colnames(data) <- c("gene", "tissue", "sd")
 pdf(file = paste(args[1], "sd.pdf", sep = "."), width = 20, height = 10)
-ggplot(data, aes(x = sd, y = Tau, fill = tissue)) + 
+ggplot(data, aes(x = tissue, y = sd, fill = tissue)) + 
+	geom_violin() + 
+	theme(legend.position = "none", axis.text.x = element_text(angle = 60, hjust = 1))
+dev.off()
+pdf(file = paste(args[1], "notnull.sd.pdf", sep = "."), width = 20, height = 10)
+ggplot(data[a[,3]>0,], aes(x = tissue, y = sd, fill = tissue)) + 
+	geom_violin() + 
+	theme(legend.position = "none", axis.text.x = element_text(angle = 60, hjust = 1))
+dev.off()
+pdf(file = paste(args[1], "medgt3.sd.pdf", sep = "."), width = 20, height = 10)
+ggplot(data[a[,3]>3,], aes(x = tissue, y = sd, fill = tissue)) + 
 	geom_violin() + 
 	theme(legend.position = "none", axis.text.x = element_text(angle = 60, hjust = 1))
 dev.off()
@@ -91,7 +119,7 @@ dev.off()
 data <- melt(log2tpm.iqr)
 colnames(data) <- c("gene", "tissue", "iqr")
 pdf(file = paste(args[1], "iqr.pdf", sep = "."), width = 20, height = 10)
-ggplot(data, aes(x = iqr, y = Tau, fill = tissue)) + 
+ggplot(data, aes(x = tissue, y = iqr, fill = tissue)) + 
 	geom_violin() + 
 	theme(legend.position = "none", axis.text.x = element_text(angle = 60, hjust = 1))
 dev.off()
@@ -104,12 +132,23 @@ ggplot(data, aes(x = value)) +
 dev.off()
 
 data <- melt(log2tpm.median)
-colnames(data) <- c("gene", "tissue", "mean")
+colnames(data) <- c("gene", "tissue", "median")
 pdf(file = paste(args[1], "median.pdf", sep = "."), width = 20, height = 10)
-ggplot(data, aes(x = tissue, y = mean, fill = tissue)) + 
+ggplot(data, aes(x = tissue, y = median, fill = tissue)) + 
 	geom_violin() + # scale_y_continuous(limits = c(0,6)) +
 	theme(legend.position = "none", axis.text.x = element_text(angle = 60, hjust = 1))
 dev.off()
+pdf(file = paste(args[1], "notnull.median.pdf", sep = "."), width = 20, height = 10)
+ggplot(data[a[,3]>0,], aes(x = tissue, y = median, fill = tissue)) + 
+	geom_violin() + 
+	theme(legend.position = "none", axis.text.x = element_text(angle = 60, hjust = 1))
+dev.off()
+pdf(file = paste(args[1], "medgt3.median.pdf", sep = "."), width = 20, height = 10)
+ggplot(data[a[,3]>3,], aes(x = tissue, y = median, fill = tissue)) + 
+	geom_violin() + 
+	theme(legend.position = "none", axis.text.x = element_text(angle = 60, hjust = 1))
+dev.off()
+
 
 data <- melt(log2tpm.median.mean)
 pdf(file = paste(args[1], "tissuemean.pdf", sep = "."), width = 20, height = 10)
@@ -176,6 +215,15 @@ for(i in 1:length(tissues)){
 	colnames(data) <- c("median", "nullcount")
 	p <- ggplot(data, aes(x = nullcount, y = median)) + geom_point() + ggtitle(tissues[i])
 	pdf(file = paste(args[1], i, "medianVSnullcount.pdf", sep = "."), width = 10, height = 10)
+	print(p)
+	dev.off()
+}
+
+for(i in 1:length(tissues)){
+	data <- data.frame(log2tpm.median[,i], sd.percentage[,i])
+	colnames(data) <- c("median", "sd.percentage")
+	p <- ggplot(data, aes(x = sd.percentage, y = median)) + geom_point() + ggtitle(tissues[i])
+	pdf(file = paste(args[1], i, "medianVSsd.percentage.pdf", sep = "."), width = 10, height = 10)
 	print(p)
 	dev.off()
 }

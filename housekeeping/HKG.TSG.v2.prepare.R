@@ -22,7 +22,7 @@ library(pheatmap)
 # https://www.ncbi.nlm.nih.gov/pubmed/15388519
 # genes with midrange profiles having 0.15<tau<0.85 were found to constitute >50% of all expression patterns
 ######################################################
-args <- c("GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_tpm.gct", "GTEx_sample.tissue.txt", "v2", "0")
+args <- c("GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_tpm.gct", "GTEx_sample.tissue.txt", "v2", "0.1")
 # expression tissuename outputpre tissueTau sampleTau expressioncutoff[log2(tpm+1)]
 
 ### some functions ###
@@ -142,7 +142,8 @@ tpm <- as.matrix(raw.table[,-1])
 rownames(tpm) <- as.matrix(raw.table[,1])
 info <- as.matrix(read.table(args[2], sep = "\t"))
 tissues <- unique(info[,2])
-tissues <- tissues[-c(7,24,25,53)]
+# tissues <- tissues[-c(7,24,25,53)]
+tissues <- tissues[-c(7,24,25,31,53)]
 
 outputpre <- args[3]
 nullexpression <- as.numeric(args[4])
@@ -156,9 +157,9 @@ log2tpm.iqr <- matrix(ncol = length(tissues), nrow = nrow(tpm))
 log2tpm.outlier <- matrix(ncol = length(tissues), nrow = nrow(tpm))
 log2tpm.Tau <- matrix(ncol = length(tissues), nrow = nrow(tpm))
 for(i in 1:length(tissues)){
-	print(tissues[i]])
+	print(tissues[i])
 	z <- log2(tpm[, info[,2] == tissues[i]] + 1)
-	nullcount[,i] <- apply(z, 1, function(x) {length(x[x < nullexpression])})
+	nullcount[,i] <- apply(z, 1, function(x) {length(x[x <= nullexpression])})
 	log2tpm.median[,i] <- apply(z, 1, fmedian)
 	log2tpm.mean[,i] <- apply(z, 1, fmean)
 	log2tpm.sd[,i] <- apply(z, 1, fsd)
