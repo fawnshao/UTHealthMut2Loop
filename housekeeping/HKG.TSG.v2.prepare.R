@@ -156,6 +156,7 @@ log2tpm.iqr <- matrix(ncol = length(tissues), nrow = nrow(tpm))
 log2tpm.outlier <- matrix(ncol = length(tissues), nrow = nrow(tpm))
 log2tpm.Tau <- matrix(ncol = length(tissues), nrow = nrow(tpm))
 for(i in 1:length(tissues)){
+	print(tissues[i]])
 	z <- log2(tpm[, info[,2] == tissues[i]] + 1)
 	nullcount[,i] <- apply(z, 1, function(x) {length(x[x < nullexpression])})
 	log2tpm.median[,i] <- apply(z, 1, fmedian)
