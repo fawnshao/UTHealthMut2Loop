@@ -1,5 +1,5 @@
 library(data.table)
-library(pheatmap)
+# library(pheatmap)
 ################## some mathematics ##################
 # IQR = Q3 - Q1
 # outlier < Q1 - 1.5*IQR or outlier > Q3 + 1.5*IQR
@@ -21,8 +21,17 @@ library(pheatmap)
 # Tau = sum(1 - xi/max(x)) / (n - 1)
 # https://www.ncbi.nlm.nih.gov/pubmed/15388519
 # genes with midrange profiles having 0.15<tau<0.85 were found to constitute >50% of all expression patterns
+
+# https://www.qiagen.com/us/resources/faq?id=06a192c2-e72d-42e8-9b40-3171e1eb4cb8&lang=en
+# How much RNA does a typical mammalian cell contain?
+# FAQ ID -2946
+# The RNA content and RNA make up of a cell depend very much on its developmental stage and the type of cell. To estimate the approximate yield of RNA that can be expected from your starting material, we usually calculate that a typical mammalian cell contains 10–30 pg total RNA.
+
+# The majority of RNA molecules are tRNAs and rRNAs. mRNA accounts for only 1–5% of the total cellular RNA although the actual amount depends on the cell type and physiological state. Approximately 360,000 mRNA molecules are present in a single mammalian cell, made up of approximately 12,000 different transcripts with a typical length of around 2 kb. Some mRNAs comprise 3% of the mRNA pool whereas others account for less than 0.1%. These rare or low-abundance mRNAs may have a copy number of only 5–15 molecules per cell.
+
 ######################################################
 args <- c("GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_tpm.gct", "GTEx_sample.tissue.txt", "v2", "0.1")
+# args <- c("GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_tpm.gct", "GTEx_sample.tissue.txt", "v2", "3")
 # expression tissuename outputpre tissueTau sampleTau expressioncutoff[log2(tpm+1)]
 
 ### some functions ###
@@ -190,6 +199,7 @@ log2tpm.median.Tau <- apply(log2tpm.median, 1, fTau)
 # ### it takes ~50min until this step
 
 print("Writing raw output files")
+# write.table(data.frame(rownames(tpm), nullcount), file = paste(outputpre, args[4], "nullcount.tsv", sep = "."), sep = "\t", row.names = FALSE, quote = FALSE)
 write.table(data.frame(rownames(tpm), nullcount), file = paste(outputpre, "nullcount.tsv", sep = "."), 
 	sep = "\t", row.names = FALSE, quote = FALSE)
 write.table(data.frame(rownames(tpm), log2tpm.mean), file = paste(outputpre, "log2tpm.mean.tsv", sep = "."), 

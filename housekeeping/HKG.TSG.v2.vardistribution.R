@@ -127,7 +127,24 @@ dev.off()
 data <- melt(log2tpm.median.Tau)
 pdf(file = paste(args[1], "tissueTau.pdf", sep = "."), width = 20, height = 10)
 ggplot(data, aes(x = value)) + 
-	geom_histogram(bins = 50) + 
+	geom_histogram(bins = 100) + 
+	theme(legend.position = "none", axis.text.x = element_text(angle = 60, hjust = 1))
+dev.off()
+pdf(file = paste(args[1], "notnull.tissueTau.pdf", sep = "."), width = 20, height = 10)
+ggplot(data[a[,3]>0,], aes(x = value)) + 
+	geom_histogram(bins = 100) + 
+	theme(legend.position = "none", axis.text.x = element_text(angle = 60, hjust = 1))
+dev.off()
+
+data <- melt(log2tpm.median.mean)
+pdf(file = paste(args[1], "tissuemean.pdf", sep = "."), width = 20, height = 10)
+ggplot(data, aes(x = value)) + 
+	geom_histogram(bins = 100) + 
+	theme(legend.position = "none", axis.text.x = element_text(angle = 60, hjust = 1))
+dev.off()
+pdf(file = paste(args[1], "notnull.tissuemean.pdf", sep = "."), width = 20, height = 10)
+ggplot(data[a[,3]>0,], aes(x = value)) + 
+	geom_histogram(bins = 100) + 
 	theme(legend.position = "none", axis.text.x = element_text(angle = 60, hjust = 1))
 dev.off()
 
@@ -149,14 +166,6 @@ ggplot(data[a[,3]>3,], aes(x = tissue, y = median, fill = tissue)) +
 	theme(legend.position = "none", axis.text.x = element_text(angle = 60, hjust = 1))
 dev.off()
 
-
-data <- melt(log2tpm.median.mean)
-pdf(file = paste(args[1], "tissuemean.pdf", sep = "."), width = 20, height = 10)
-ggplot(data, aes(x = value)) + 
-	geom_histogram(bins = 1000) + # scale_x_continuous(limits = c(0,6)) +
-	theme(legend.position = "none", axis.text.x = element_text(angle = 60, hjust = 1))
-dev.off()
-
 data <- data.frame(log2tpm.median.mean, log2tpm.median.Tau)
 colnames(data) <- c("mean", "Tau")
 pdf(file = paste(args[1], "tissuemeanVStissueTau.pdf", sep = "."), width = 10, height = 10)
@@ -164,6 +173,22 @@ ggplot(data, aes(x = Tau, y = mean)) +
 	geom_point()+ 
 	theme(legend.position = "none") 
 dev.off()
+
+for(i in 1:length(tissues)){
+	data <- melt(log2tpm.median[,i])
+	p <- ggplot(data, aes(x = value)) + geom_histogram(bins = 100) + ggtitle(tissues[i])
+	pdf(file = paste(args[1], i, "median.hist.pdf", sep = "."), width = 20, height = 10)
+	print(p)
+	dev.off()
+}
+
+for(i in 1:length(tissues)){
+	data <- melt(log2tpm.median[log2tpm.median[,i] > 0,i])
+	p <- ggplot(data, aes(x = value)) + geom_histogram(bins = 100) + ggtitle(tissues[i])
+	pdf(file = paste(args[1], i, "notnull.median.hist.pdf", sep = "."), width = 20, height = 10)
+	print(p)
+	dev.off()
+}
 
 for(i in 1:length(tissues)){
 	data <- data.frame(log2tpm.median[,i], log2tpm.Tau[,i])
