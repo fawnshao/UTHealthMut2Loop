@@ -1,24 +1,57 @@
 #!/bin/sh
-# rclone sync /home1/04935/shaojf/stampede2/housekeeping_genes/v2/ mygoogle:hkg_tsg/v2/
-# cut -f 1,100 v2.TSG.tsv | awk '$2=="Liver"{print $1}' | cut -f 2 -d "|" > v2.TSG.Liver.singleTSG.gene.txt
-# cut -f 1,100 v2.TSG.tsv | awk -F"\t" '$2=="Cells - EBV-transformed lymphocytes"{print $1}' | cut -f 2 -d "|" > v2.TSG.GM.singleTSG.gene.txt
-# cut -f 1,100 v2.TSG.tsv | awk -F"\t" '$2=="Testis"{print $1}' | cut -f 2 -d "|" > v2.TSG.Testis.singleTSG.gene.txt
-# cut -f 1,100 v2.TSG.tsv | grep "Brain" | awk -F"\t" '{print $1}' | cut -f 2 -d "|" > v2.TSG.Brain.singleTSG.gene.txt
-
-# cat <(cut -f 1 v2.HKG.tsv | tail -n +2) <(cut -f 1 v2.HKG.2.tsv | tail -n +2) | perl ~/myTools/BioinformaticsDaily/textProcess/add_any_2files_together.pl hkg.tsg.srtbyPCA.class /dev/stdin 0 0 > v2.HKG.cmp
-# cat <(cut -f 1 v2.HKG.tsv | tail -n +2) <(cut -f 1 v2.HKG.2.tsv | tail -n +2) | perl ~/myTools/BioinformaticsDaily/textProcess/add_any_2files_together.pl /dev/stdin hkg.tsg.srtbyPCA.class 0 0 > v2.HKG.cmp.2
-
-# more v2.HKG.cmp.2 | grep hkg | grep / | cut -f 1 | grep -wf /dev/stdin v2.allstats.tsv > lost.in.v2.HKG
-# more v2.HKG.cmp | grep / | cut -f 1 | grep -wf /dev/stdin v2.allstats.tsv > gained.in.v2.HKG 
+# rclone sync /home1/04935/shaojf/stampede2/housekeeping_genes/v2.feature/ mygoogle:hkg_tsg/v2.feature/
+# args <- c("v2", "GTEx_sample.tissue.txt", "0.15", "1.5", "2", "0.25")
+# outputpre <- args[1]
+# tau.threshold <- as.numeric(args[3])
+# sd.threshold <- as.numeric(args[4])
+# median.threshold <- as.numeric(args[5])
+# tau.threshold2 <- as.numeric(args[6])
 
 myperl=/home1/04935/shaojf/myTools/BioinformaticsDaily/textProcess/add_any_2files_together.pl
 
-# cd /home1/04935/shaojf/stampede2/housekeeping_genes/v2/test.top.hkg.tsg
-echo "Gene Type" | sed 's/ /\t/' > v2.top.hkg.tsg.txt
-cut -f 1 v2.HKG.tsv | tail -n +2 | awk '{print $0"\tHKG"}' >> v2.top.hkg.tsg.txt
-cut -f 1,100 v2.TSG.tsv | tail -n +2 >> v2.top.hkg.tsg.txt
+# cd /home1/04935/shaojf/stampede2/housekeeping_genes/v2.feature
+echo "Gene Type" | sed 's/ /\t/' > v2.hkg.tsg.txt
+cut -f 1-2 v2.HKG.tsv | tail -n +2 | sort -k2,2nr | cut -f 1 | awk '{print $0"\tHKG.1"}' >> v2.hkg.tsg.txt
+cut -f 1-2 v2.HKG.2.tsv | tail -n +2 | sort -k2,2nr | cut -f 1 | awk '{print $0"\tHKG.2"}' >> v2.hkg.tsg.txt
+cut -f 1,100 v2.TSG.tsv | tail -n +2 | grep -v "," | sort -k2 >> v2.hkg.tsg.txt
+cut -f 1,100 v2.TSG.tsv | tail -n +2 | grep "," | sort -k2 >> v2.hkg.tsg.txt
 
-perl $myperl <(sed 's/\t/|/' gencode.v19.gene.anntotation.txt) v2.top.hkg.tsg.txt 0 0 | cut -f 1-2,4 > v2.top.hkg.tsg.anntotation.txt
+perl $myperl <(sed 's/\t/|/' gencode.v19.gene.anntotation.txt) v2.hkg.tsg.txt 0 0 | cut -f 1-2,4 > v2.hkg.tsg.anntotation.txt
+perl $myperl sim.gencode.vert.known.motifs.mat v2.hkg.tsg.anntotation.txt 0 0 | cut -f 1-3,5- > v2.hkg.tsg.vert.known.motifs.mat
+
+
+
+
+# awk '$4/($2+1) < 0.67 && $2 > 3' YY1del.salmon.tximport.abundance.tsv | cut -f 1,2,4 > batch1.tpm
+# perl $myperl <(sed 's/|/\t/' v2.hkg.tsg.anntotation.txt) batch1.tpm 0 0 > YY1del.salmon.hkg.tsg
+# perl $myperl <(cut -f 1,2,4 YY1del.salmon.tximport.abundance.tsv) <(sed 's/|/\t/' v2.hkg.tsg.anntotation.txt) 0 0 > hkg.tsg.YY1del.salmon.tsv
+# cut -f 1-4,6-7 hkg.tsg.YY1del.salmon.tsv | sed 's/\t/|/' > hkg.tsg.YY1del.forheatmap.tsv
+# awk '$15 < 0.01' YY1del.RUV.tsv | cut -f 1,11 > YY1del.RUV.deg
+# perl $myperl <(sed 's/|/\t/' v2.hkg.tsg.anntotation.txt) YY1del.RUV.deg 0 0 > YY1del.RUV.deg.hkg.tsg
+# perl $myperl <(cut -f 1,6-9 YY1del.RUV.tsv) <(sed 's/|/\t/' v2.hkg.tsg.anntotation.txt) 0 0 > hkg.tsg.YY1del.RUV.tsv
+# cut -f 1-2,6- hkg.tsg.YY1del.RUV.tsv | sed 's/\t/|/' > hkg.tsg.YY1del.RUV.normcounts
+# cut -f 1,6-9 YY1del.RUV.tsv > YY1del.RUV.normcounts
+####################################################
+# args <- c("hkg.tsg.YY1del.RUV.normcounts")
+# args <- c("YY1del.RUV.normcounts")
+# args <- c("hkg.tsg.YY1del.forheatmap.tsv")
+# library(pheatmap)
+# library(data.table)
+# input <- fread(args[1], sep = "\t", header = T, na.strings = "/")
+# scores <- log2(data.matrix(input[,4:5])+1)
+# colors <- colorRampPalette(c("blue", "white", "red"))(10)
+# rownames(scores) <- as.matrix(input[,1])[,1]
+# annos_row <- as.data.frame(input[,2:3])
+# rownames(annos_row) <- rownames(scores)
+# scores[scores > 10] <- 10
+
+# png(filename = paste(args[1], "pheatmap.png", sep = "."), width = 800, height = 1000)
+# myplot <- pheatmap(scores, scale = "none", annotation_row = annos_row, 
+# 	show_rownames = F, show_colnames = T, color = colors,
+# 	cluster_cols = F, cluster_rows = F)
+# dev.off()
+####################################################
+
 # cut -f 2 v2.top.hkg.tsg.txt | sort | uniq -c | sort -k1,1n
    #  160 Brain - Cerebellar Hemisphere,Brain - Cerebellum
    #  170 Cells - EBV-transformed lymphocytes
