@@ -18,6 +18,56 @@ cut -f 1,100 v2.TSG.tsv | tail -n +2 | grep "," | sort -k2 >> v2.hkg.tsg.txt
 
 perl $myperl <(sed 's/\t/|/' gencode.v19.gene.anntotation.txt) v2.hkg.tsg.txt 0 0 | cut -f 1-2,4 > v2.hkg.tsg.anntotation.txt
 perl $myperl sim.gencode.vert.known.motifs.mat v2.hkg.tsg.anntotation.txt 0 0 | cut -f 1-3,5- > v2.hkg.tsg.vert.known.motifs.mat
+# Rscript ~/myTools/UTHealthMut2Loop/housekeeping/heatmap.for.feature.selection.R v2.hkg.tsg.vert.known.motifs.mat
+cd test.top.hkg.tsg/
+echo "GeneType Motif MotifCount GeneCount GeneWithMotif" | tr " " "\t" > homer.vert.motif.percentage.txt
+for pre in HKG v2.hkg.2 Testis Spleen Liver Brain EBV protein_coding promoter.withcpg gencode.v19
+do
+	all=`tail -n +2 $pre.promoter.vert.motifs.txt | wc -l`
+	for i in `seq 22 384`
+	do
+		motif=`head_line $pre.promoter.vert.motifs.txt | awk -vvar=$i '$1==var{print $2}' | awk -F"/" '{print $1"/"$2}'`
+		mcount=`cut -f 1,$i $pre.promoter.vert.motifs.txt | tail -n +2 | awk -F"\t" '$2~/,/' | wc -l`
+		perc=`echo $mcount/$all | bc -l`
+		echo $pre $motif $mcount $all $perc | tr " " "\t" >> homer.vert.motif.percentage.txt
+	done
+done
+perl ~/myTools/BioinformaticsDaily/textProcess/make_matrixwith3col_from_single_file.pl <(awk -F"\t" -vOFS="\t" '{print $2,$1,$5}' homer.vert.motif.percentage.txt | tail -n +2) > homer.vert.motif.percentage.mat
+####################################################
+# args <- c("homer.vert.motif.percentage.mat")
+# library(pheatmap)
+# library(data.table)
+# input <- fread(args[1], sep = "\t", header = T, na.strings = "/")
+# scores <- data.matrix(input[,-1])
+# colors <- colorRampPalette(c("white", "red"))(10)
+# rownames(scores) <- as.matrix(input[,1])[,1]
+
+# pdf(file = paste(args[1], "pheatmap.pdf", sep = "."), width = 10, height = 16)
+# myplot <- pheatmap(scores, scale = "none", fontsize_row = 4, 
+# 	show_rownames = T, show_colnames = T, color = colors,
+# 	cluster_cols = T, cluster_rows = T)
+# dev.off()
+# diff.scores <- scores[(scores[,3] > 0.2 | scores[,7] > 0.2) & (scores[,3]/(scores[,7]+1e-10) > 1.5 | scores[,3]/(scores[,7]+1e-10) < 0.67), ]
+# pdf(file = paste(args[1], "diff.pheatmap.pdf", sep = "."), width = 10, height = 8)
+# myplot <- pheatmap(diff.scores, scale = "none", fontsize_row = 8, 
+# 	show_rownames = T, show_colnames = T, color = colors,
+# 	cluster_cols = T, cluster_rows = T)
+# dev.off()
+# score.min <- apply(scores, 1, min)
+# score.max <- apply(scores, 1, max)
+# diff.scores.1 <- scores[score.max / (score.min + 1e-10) > 2 & score.max > 0.2, ]
+# pdf(file = paste(args[1], "diff.1.pheatmap.pdf", sep = "."), width = 10, height = 8)
+# myplot <- pheatmap(diff.scores.1, scale = "none", fontsize_row = 8, 
+# 	show_rownames = T, show_colnames = T, color = colors,
+# 	cluster_cols = T, cluster_rows = T)
+# dev.off()
+####################################################
+
+awk -vOFS="\t" '{print $1,$2,$3"\n"$4,$5,$6}' FitHiChIP.GM12878_cell_line.SRR5831489.Interactions_FULL_ALLFeatures.bed | sort | uniq > FitHiChIP.GM12878_cell_line.anchors.bed
+for pre in HKG Testis Spleen Liver
+do
+	bedtools intersect -wo -a <(awk -vOFS="\t" '{a=$2-5000;b=$2+5000;if($6=="-"){a=$3-5000;b=$3+5000}if(a<0){a=0;}print $1,a,b,$4,"1000",$6}' $pre.gene.bed) -b FitHiChIP.GM12878_cell_line.SRR5831489.Interactions_FULL_ALLFeatures.bed > $pre.FitHiChIP.GM12878.txt &
+done
 
 
 
@@ -209,3 +259,82 @@ done
 # protein_coding 7729 20345 .37989678053575817154
 # gencode.v19 16509 57820 .28552404012452438602
 # v2.hkg.2 1311 2933 .44698261166041595635
+
+
+
+########## roadmap histone
+f=H3K4me3.Brain.Liver.Spleen
+computeMatrix scale-regions \
+	-R HKG.gene.bed v2.hkg.2.gene.bed Brain.gene.bed Liver.gene.bed Spleen.gene.bed \
+	-S bigwigs/*Brain*H3K4me3*.bigwig bigwigs/*Liver*H3K4me3*.bigwig bigwigs/*Spleen*H3K4me3*.bigwig \
+	-p 48 \
+	-b 3000 -a 3000 \
+	--regionBodyLength 5000 \
+	--skipZeros -o ${f}_scaled.gz \
+	--outFileNameMatrix ${f}_scaled.tab \
+	--outFileSortedRegions ${f}_genes.bed
+labs1=`ls bigwigs/*Brain*H3K4me3*.bigwig| awk -F"/" '{print $NF}' | sed 's/.bigwig//' | tr "\n" " "`
+labs2=`ls bigwigs/*Liver*H3K4me3*.bigwig | awk -F"/" '{print $NF}' | sed 's/.bigwig//' | tr "\n" " "`
+labs3=`ls bigwigs/*Spleen*H3K4me3*.bigwig | awk -F"/" '{print $NF}' | sed 's/.bigwig//' | tr "\n" " "`
+plotHeatmap -m ${f}_scaled.gz \
+	-o ${f}_scaled.plotHeatmap.pdf \
+	--colorMap Greens --whatToShow 'heatmap and colorbar' \
+	--plotFileFormat pdf --samplesLabel $labs1 $labs2 $labs3 \
+	--heatmapWidth 10 \
+	--perGroup &		
+
+plotHeatmap -m ${f}_scaled.gz \
+	-o ${f}_scaled.plotHeatmap.1.pdf \
+	--colorMap Greens --whatToShow 'heatmap and colorbar' \
+	--plotFileFormat pdf --samplesLabel $labs1 $labs2 $labs3 \
+	--heatmapWidth 10 --heatmapHeight 20 \
+	--perGroup &
+
+plotHeatmap -m ${f}_scaled.gz \
+    -o ${f}_scaled.plotHeatmap.2.pdf \
+    --colorMap Greens --whatToShow 'heatmap and colorbar' \
+    --plotFileFormat pdf --samplesLabel $labs1 $labs2 $labs3 \
+    --heatmapWidth 10 --heatmapHeight 20 \
+	--regionsLabel HKG.tier1 HKG.tier2 Brain Liver Spleen &
+wait
+
+for f in Fetal_Brain BI.Brain UCSF-UBC.Brain Liver Spleen
+do
+	computeMatrix scale-regions \
+		-R HKG.gene.bed v2.hkg.2.gene.bed Brain.gene.bed Liver.gene.bed Spleen.gene.bed \
+		-S bigwigs/*${f}*H3K4me3*.bigwig \
+		-p 48 \
+		-b 3000 -a 3000 \
+		--regionBodyLength 5000 \
+		--skipZeros -o H3K4me3_${f}_scaled.gz \
+		--outFileNameMatrix H3K4me3_${f}_scaled.tab \
+		--outFileSortedRegions H3K4me3_${f}_genes.bed
+	labs=`ls bigwigs/*${f}*H3K4me3*.bigwig| awk -F"/" '{print $NF}' | sed 's/.bigwig//' | tr "\n" " "`
+	plotHeatmap -m H3K4me3_${f}_scaled.gz \
+		-o H3K4me3_${f}_scaled.plotHeatmap.pdf \
+		--colorMap Greens --whatToShow 'heatmap and colorbar' \
+		--plotFileFormat pdf --samplesLabel $labs \
+		--heatmapWidth 10 \
+		--perGroup &		
+
+	plotHeatmap -m H3K4me3_${f}_scaled.gz \
+		-o H3K4me3_${f}_scaled.plotHeatmap.1.pdf \
+		--colorMap Greens --whatToShow 'heatmap and colorbar' \
+		--plotFileFormat pdf --samplesLabel $labs \
+		--heatmapWidth 10 --heatmapHeight 20 \
+		--perGroup &
+
+	plotHeatmap -m H3K4me3_${f}_scaled.gz \
+	    -o H3K4me3_${f}_scaled.plotHeatmap.2.pdf \
+	    --colorMap Greens --whatToShow 'heatmap and colorbar' \
+	    --plotFileFormat pdf --samplesLabel $labs \
+	    --heatmapWidth 10 --heatmapHeight 20 \
+		--regionsLabel HKG.tier1 HKG.tier2 Brain Liver Spleen &
+done
+wait
+
+
+awk -F"\t" '$2=="bigWig" && $3=="fold change over control" && $38=="hg19"' metadata.tsv | cut -f 1,7,13,25 > hg19.bigwig.tsv
+awk -F"\t" '$2=="bigWig" && $3=="fold change over control" && $38=="hg19" && $13=="EP300-human"' ../metadata.tsv | cut -f 37 | xargs -n 1 curl -O -L
+awk -F"\t" '$2=="bigWig" && $3=="fold change over control" && $38=="hg19" && $13=="YY1-human"' ../metadata.tsv | cut -f 37 | xargs -n 1 curl -O -L
+awk -F"\t" '$2=="bigWig" && $3=="fold change over control" && $38=="hg19" && $13=="SP1-human"' ../metadata.tsv | cut -f 37 | xargs -n 1 curl -O -L
