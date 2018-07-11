@@ -24,7 +24,7 @@ fmin <- function(x){
 
 print("Reading Data")
 # outputpre tissuename tissueTau sampleTau
-args <- c("v2", "GTEx_sample.tissue.txt", "0.15", "1.5", "2", "0.25") #, "1")
+args <- c("v2.T", "tcga_RSEM_gene_tpm.samples.sim", "0.15", "1.5", "2", "0.25") #, "1")
 outputpre <- args[1]
 tau.threshold <- as.numeric(args[3])
 sd.threshold <- as.numeric(args[4])
@@ -50,6 +50,12 @@ tissues.count <- table(info[,2])
 # tissues <- tissues[-c(7,24,25,53)]
 tissues <- tissues[-c(7,24,25,31,53)]
 tissues.count <- tissues.count[-c(7,24,25,31,53)]
+
+info <- as.matrix(read.table(args[2], sep = "\t", header = T))
+samplecount <- table(info[,2])
+tissues <- names(samplecount[samplecount > 20])
+tissues <- tissues[-grep("Normal", tissues)]
+# tissues <- tissues[grep("Normal", tissues)]
 
 genes <- as.matrix(all.stats[,1])
 log2tpm.median.mean <- as.matrix(all.stats[,2])

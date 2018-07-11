@@ -152,7 +152,8 @@ rownames(tpm) <- as.matrix(raw.table[,1])
 info <- as.matrix(read.table(args[2], sep = "\t", header = T))
 samplecount <- table(info[,2])
 tissues <- names(samplecount[samplecount > 20])
-# tissues <- tissues[-grep("Normal", tissues)]
+tissues <- tissues[-grep("Normal", tissues)]
+# tissues <- tissues[grep("Normal", tissues)]
 
 outputpre <- args[3]
 nullexpression <- as.numeric(args[4])
