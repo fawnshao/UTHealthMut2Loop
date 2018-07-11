@@ -25,6 +25,7 @@ fmin <- function(x){
 print("Reading Data")
 # outputpre tissuename tissueTau sampleTau
 args <- c("v2.T", "tcga_RSEM_gene_tpm.samples.sim", "0.15", "1.5", "2", "0.25") #, "1")
+# args <- c("v2.N", "tcga_RSEM_gene_tpm.samples.sim", "0.15", "1.5", "2", "0.25")
 outputpre <- args[1]
 tau.threshold <- as.numeric(args[3])
 sd.threshold <- as.numeric(args[4])
@@ -44,18 +45,12 @@ log2tpm.median <- as.matrix(fread(log2tpm.median.file, sep = "\t", header = T)[,
 log2tpm.sd <- as.matrix(fread(log2tpm.sd.file, sep = "\t", header = T)[,-1])
 log2tpm.outlier <- as.matrix(fread(log2tpm.outlier.file, sep = "\t", header = T)[,-1])
 
-info <- as.matrix(read.table(args[2], sep = "\t"))
-tissues <- unique(info[,2])
-tissues.count <- table(info[,2])
-# tissues <- tissues[-c(7,24,25,53)]
-tissues <- tissues[-c(7,24,25,31,53)]
-tissues.count <- tissues.count[-c(7,24,25,31,53)]
-
 info <- as.matrix(read.table(args[2], sep = "\t", header = T))
 samplecount <- table(info[,2])
 tissues <- names(samplecount[samplecount > 20])
 tissues <- tissues[-grep("Normal", tissues)]
 # tissues <- tissues[grep("Normal", tissues)]
+tissues.count <- table(tissues)
 
 genes <- as.matrix(all.stats[,1])
 log2tpm.median.mean <- as.matrix(all.stats[,2])
