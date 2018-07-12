@@ -1,3 +1,6 @@
+####################
+# input data is log2(RSEM + 1)
+####################
 library(data.table)
 # library(pheatmap)
 ################## some mathematics ##################
@@ -168,7 +171,8 @@ log2tpm.outlier <- matrix(ncol = length(tissues), nrow = nrow(tpm))
 log2tpm.Tau <- matrix(ncol = length(tissues), nrow = nrow(tpm))
 for(i in 1:length(tissues)){
 	print(tissues[i])
-	z <- log2(tpm[, info[,2] == tissues[i]] + 1)
+	# z <- log2(tpm[, info[,2] == tissues[i]] + 1)
+	z <- tpm[, info[,2] == tissues[i]]
 	nullcount[,i] <- apply(z, 1, function(x) {length(x[x <= nullexpression])})
 	log2tpm.median[,i] <- apply(z, 1, fmedian)
 	log2tpm.mean[,i] <- apply(z, 1, fmean)
@@ -217,5 +221,5 @@ write.table(data.frame(rownames(tpm), log2tpm.outlier), file = paste(outputpre, 
 	sep = "\t", row.names = FALSE, quote = FALSE)
 
 all.stats <- data.frame(rownames(tpm), log2tpm.median.mean, log2tpm.median.Tau)
-write.table(data.frame(rownames(tpm), all.stats), file = paste(outputpre, "allstats.tsv", sep = "."), 
+write.table(all.stats, file = paste(outputpre, "allstats.tsv", sep = "."), 
 	sep = "\t", row.names = FALSE, quote = FALSE)

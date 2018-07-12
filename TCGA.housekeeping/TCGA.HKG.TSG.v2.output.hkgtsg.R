@@ -1,3 +1,6 @@
+####################
+# nullcount.sum < 10
+####################
 library(data.table)
 ###+++###
 #Function require a vector with expression of one gene in different tissues/samples.
@@ -50,7 +53,8 @@ samplecount <- table(info[,2])
 tissues <- names(samplecount[samplecount > 20])
 tissues <- tissues[-grep("Normal", tissues)]
 # tissues <- tissues[grep("Normal", tissues)]
-tissues.count <- table(tissues)
+# tissues.count <- table(tissues)
+tissues.count <- samplecount[names(samplecount) %in% tissues]
 
 genes <- as.matrix(all.stats[,1])
 log2tpm.median.mean <- as.matrix(all.stats[,2])
@@ -75,15 +79,15 @@ nullcount.sum <- apply(nullcount, 1, sum)
 # housekeepinggene <- all.stats[nullcount.sum == 0 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.outlier.max) & log2tpm.outlier.max < outlier.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tau.threshold, ]
 # housekeepinggene.median <- log2tpm.median[nullcount.sum == 0 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.outlier.max) & log2tpm.outlier.max < outlier.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tau.threshold, ]
 # housekeepinggene.sd <- log2tpm.sd[nullcount.sum == 0 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.outlier.max) & log2tpm.outlier.max < outlier.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tau.threshold, ]
-housekeepinggene <- all.stats[nullcount.sum == 0 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tau.threshold, ]
-housekeepinggene.median <- log2tpm.median[nullcount.sum == 0 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tau.threshold, ]
-housekeepinggene.sd <- log2tpm.sd[nullcount.sum == 0 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tau.threshold, ]
+housekeepinggene <- all.stats[nullcount.sum < 10 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tau.threshold, ]
+housekeepinggene.median <- log2tpm.median[nullcount.sum < 10 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tau.threshold, ]
+housekeepinggene.sd <- log2tpm.sd[nullcount.sum < 10 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tau.threshold, ]
 rownames(housekeepinggene.median) <- as.matrix(housekeepinggene[,1])
 rownames(housekeepinggene.sd) <- as.matrix(housekeepinggene[,1])
 
-housekeepinggene2 <- all.stats[nullcount.sum == 0 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau >= tau.threshold & log2tpm.median.Tau < tau.threshold2, ]
-housekeepinggene2.median <- log2tpm.median[nullcount.sum == 0 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau >= tau.threshold & log2tpm.median.Tau < tau.threshold2, ]
-housekeepinggene2.sd <- log2tpm.sd[nullcount.sum == 0 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau >= tau.threshold & log2tpm.median.Tau < tau.threshold2, ]
+housekeepinggene2 <- all.stats[nullcount.sum < 10 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau >= tau.threshold & log2tpm.median.Tau < tau.threshold2, ]
+housekeepinggene2.median <- log2tpm.median[nullcount.sum < 10 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau >= tau.threshold & log2tpm.median.Tau < tau.threshold2, ]
+housekeepinggene2.sd <- log2tpm.sd[nullcount.sum < 10 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau >= tau.threshold & log2tpm.median.Tau < tau.threshold2, ]
 rownames(housekeepinggene2.median) <- as.matrix(housekeepinggene2[,1])
 rownames(housekeepinggene2.sd) <- as.matrix(housekeepinggene2[,1])
 
@@ -99,14 +103,14 @@ tissueflags <- c()
 rindex <- c()
 for(i in 1:nrow(all.stats)){
 	# if(!is.na(nullcount.min[i]) && nullcount.min[i] == 0 && !is.na(log2tpm.sd.max[i]) && log2tpm.sd.min[i] < sd.threshold && !is.na(log2tpm.outlier.min[i]) && log2tpm.outlier.min[i] < outlier.threshold && !is.na(log2tpm.median.Tau[i]) && log2tpm.median.Tau[i] > 1 - tau.threshold && !is.na(log2tpm.median.max[i]) && log2tpm.median.max[i] > median.threshold){
-	if(!is.na(nullcount.min[i]) && nullcount.min[i] == 0 && !is.na(log2tpm.sd.max[i]) && log2tpm.sd.min[i] < sd.threshold && !is.na(log2tpm.median.Tau[i]) && log2tpm.median.Tau[i] > 1 - tau.threshold && !is.na(log2tpm.median.max[i]) && log2tpm.median.max[i] > median.threshold){
+	if(!is.na(nullcount.min[i]) && nullcount.min[i] < 10 && !is.na(log2tpm.sd.max[i]) && log2tpm.sd.min[i] < sd.threshold && !is.na(log2tpm.median.Tau[i]) && log2tpm.median.Tau[i] > 1 - tau.threshold && !is.na(log2tpm.median.max[i]) && log2tpm.median.max[i] > median.threshold){
 		# rindex <- c(rindex, i)
 		flag <- 0
 		tflags <- c()
 		for(j in 1:length(tissues)){
 			temp <- log2tpm.median[i,j] / fmax(log2tpm.median[i,])
 			# if(nullcount[i,j] == 0 && !is.na(log2tpm.sd[i,j]) && log2tpm.sd[i,j] < sd.threshold && !is.na(outlier.percentage[i,j]) && outlier.percentage[i,j] < outlier.threshold && !is.na(temp) && temp > 1 - tau.threshold && !is.na(log2tpm.median[i,j]) && log2tpm.median[i,j] > median.threshold){
-			if(nullcount[i,j] == 0 && !is.na(log2tpm.sd[i,j]) && log2tpm.sd[i,j] < sd.threshold && !is.na(temp) && temp > 1 - tau.threshold && !is.na(log2tpm.median[i,j]) && log2tpm.median[i,j] > median.threshold){
+			if(nullcount[i,j] < 10 && !is.na(log2tpm.sd[i,j]) && log2tpm.sd[i,j] < sd.threshold && !is.na(temp) && temp > 1 - tau.threshold && !is.na(log2tpm.median[i,j]) && log2tpm.median[i,j] > median.threshold){
 				flag <- 1
 				tflags <- c(tflags, tissues[j])
 			}
@@ -127,13 +131,13 @@ tissuespecificgene2 <- data.frame()
 tissueflags2 <- c()
 rindex2 <- c()
 for(i in 1:nrow(all.stats)){
-	if(!is.na(nullcount.min[i]) && nullcount.min[i] == 0 && !is.na(log2tpm.sd.max[i]) && log2tpm.sd.min[i] < sd.threshold && !is.na(log2tpm.median.Tau[i]) && log2tpm.median.Tau[i] <= 1 - tau.threshold && log2tpm.median.Tau[i] > 1 - tau.threshold2 && !is.na(log2tpm.median.max[i]) && log2tpm.median.max[i] > median.threshold){
+	if(!is.na(nullcount.min[i]) && nullcount.min[i] < 10 && !is.na(log2tpm.sd.max[i]) && log2tpm.sd.min[i] < sd.threshold && !is.na(log2tpm.median.Tau[i]) && log2tpm.median.Tau[i] <= 1 - tau.threshold && log2tpm.median.Tau[i] > 1 - tau.threshold2 && !is.na(log2tpm.median.max[i]) && log2tpm.median.max[i] > median.threshold){
 		# rindex <- c(rindex, i)
 		flag <- 0
 		tflags <- c()
 		for(j in 1:length(tissues)){
 			temp <- log2tpm.median[i,j] / fmax(log2tpm.median[i,])
-			if(nullcount[i,j] == 0 && !is.na(log2tpm.sd[i,j]) && log2tpm.sd[i,j] < sd.threshold && !is.na(temp) && temp <= 1 - tau.threshold && temp > 1 - tau.threshold2 && !is.na(log2tpm.median[i,j]) && log2tpm.median[i,j] > median.threshold){
+			if(nullcount[i,j] < 10 && !is.na(log2tpm.sd[i,j]) && log2tpm.sd[i,j] < sd.threshold && !is.na(temp) && temp <= 1 - tau.threshold && temp > 1 - tau.threshold2 && !is.na(log2tpm.median[i,j]) && log2tpm.median[i,j] > median.threshold){
 				flag <- 1
 				tflags <- c(tflags, tissues[j])
 			}
