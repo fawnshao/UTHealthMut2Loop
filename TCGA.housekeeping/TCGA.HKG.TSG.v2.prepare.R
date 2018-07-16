@@ -120,11 +120,38 @@ fmax <- function(x){
 #Function require a vector with expression of one gene in different tissues/samples.
 #If expression for one tissue is not known, gene specificity for this gene is NA
 #Minimum 2 tissues/samples
-fTau <- function(x){
+####### GETx
+# fTau <- function(x){
+# 	if(all(!is.na(x)))
+#  	{
+#  		if(min(x, na.rm = TRUE) >= 0)
+# 		{
+#  			mx <- fmax(x)
+#  			if(mx != 0 && !is.na(mx))
+#  			{
+#  				x <- (1-(x/mx))
+#  				res <- sum(x, na.rm = TRUE)
+#  				res <- res/(length(x)-1)
+#  			} else {
+#  				res <- 0
+#  			}
+#  		} else {
+#  		res <- NA
+#  		#print("Expression values have to be positive!")
+#  		} 
+#  	} else {
+#  		res <- NA
+#  		#print("No data for this gene avalable.")
+#  	} 
+#  	return(res)
+# }
+####### TCGA
+fTau <- function(x)
+{
 	if(all(!is.na(x)))
  	{
- 		if(min(x, na.rm = TRUE) >= 0)
-		{
+ 		# if(min(x, na.rm = TRUE) >= 0)
+		# {
  			mx <- fmax(x)
  			if(mx != 0 && !is.na(mx))
  			{
@@ -134,10 +161,10 @@ fTau <- function(x){
  			} else {
  				res <- 0
  			}
- 		} else {
- 		res <- NA
- 		#print("Expression values have to be positive!")
- 		} 
+ 		# } else {
+ 		# res <- NA
+ 		# #print("Expression values have to be positive!")
+ 		# } 
  	} else {
  		res <- NA
  		#print("No data for this gene avalable.")

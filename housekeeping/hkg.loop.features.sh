@@ -8,7 +8,7 @@
 # tau.threshold2 <- as.numeric(args[6])
 myperl=/home1/04935/shaojf/myTools/BioinformaticsDaily/textProcess/add_any_2files_together.pl
 
-for input in SRR5831489:GM12878_cell_line SRR5831492:K562_cell_line SRR5831496:Naive_T_primary_cell SRR5831505:Treg_primary_cell
+for input in SRR5831489:GM12878_cell_line SRR5831492:K562_cell_line SRR5831493:K562_cell_line SRR5831496:Naive_T_primary_cell SRR5831505:Treg_primary_cell SRR5831507:Treg_primary_cell SRR5831509:Naive_primary_cell SRR5831511:HCASMC_cell_line
 do
 	echo $input
 	acc=`echo $input | awk -F":" '{print $1}'`
