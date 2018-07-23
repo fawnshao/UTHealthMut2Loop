@@ -8,6 +8,7 @@
 # tau.threshold2 <- as.numeric(args[6])
 
 myperl=/home1/04935/shaojf/myTools/BioinformaticsDaily/textProcess/add_any_2files_together.pl
+mymerge=/home1/04935/shaojf/myTools/BioinformaticsDaily/textProcess/merge.rows.by.specificID.for.single.file.pl
 
 # cd /home1/04935/shaojf/stampede2/housekeeping_genes/v2.feature
 echo "Gene Type" | sed 's/ /\t/' > v2.hkg.tsg.txt
@@ -19,6 +20,50 @@ cut -f 1,100 v2.TSG.tsv | tail -n +2 | grep "," | sort -k2 >> v2.hkg.tsg.txt
 perl $myperl <(sed 's/\t/|/' gencode.v19.gene.anntotation.txt) v2.hkg.tsg.txt 0 0 | cut -f 1-2,4 > v2.hkg.tsg.anntotation.txt
 perl $myperl sim.gencode.vert.known.motifs.mat v2.hkg.tsg.anntotation.txt 0 0 | cut -f 1-3,5- > v2.hkg.tsg.vert.known.motifs.mat
 # Rscript ~/myTools/UTHealthMut2Loop/housekeeping/heatmap.for.feature.selection.R v2.hkg.tsg.vert.known.motifs.mat
+############################## chromHMM
+# # split -l 500000 hg19.roadmap.25_imputed12marks.bed
+# # DAXX TSS is not accurate
+# for pre in HKG v2.hkg.2 Testis Spleen Liver Brain EBV protein_coding gencode.v19
+# do
+# 	for i in x??
+# 	do
+# 		bedtools intersect -wo -a <(awk -vOFS="\t" '{a=$2-1000;b=$2+1000;if($6=="-"){a=$3-1000;b=$3+1000}if(a<0){a=0;}print $1,a,b,$4,"1000",$6}' $pre.gene.bed) -b $i >> roadmap.chromHMM.$pre.txt
+# 	done
+# done
+# pre=promoter.withcpg
+# for i in x??
+# do
+# 	bedtools intersect -wo -a $pre.gene.bed -b $i >> roadmap.chromHMM.$pre.txt
+# done
+
+# for f in roadmap.chromHMM.*.txt
+# do
+# 	grep -v -i -e "cell" -e "blood" -e "cultured" $f > tissue.$f &
+# done
+
+# grep -v -i -e "cell" -e "blood" -e "cultured" EIDlegend.txt | wc -l
+# 50
+
+for pre in HKG v2.hkg.2 Testis Spleen Liver Brain EBV protein_coding gencode.v19
+do
+	bedtools intersect -wo -a <(awk -vOFS="\t" '{a=$2-1000;b=$2+1000;if($6=="-"){a=$3-1000;b=$3+1000}if(a<0){a=0;}print $1,a,b,$4,"1000",$6}' $pre.gene.bed) -b hg19.tissue.roadmap.activeenhancer.bed > roadmap.chromHMM.activeenhancer.$pre.txt
+done
+pre=promoter.withcpg
+bedtools intersect -wo -a $pre.gene.bed -b hg19.tissue.roadmap.activeenhancer.bed > roadmap.chromHMM.activeenhancer.$pre.txt
+for pre in HKG v2.hkg.2 Testis Spleen Liver Brain EBV protein_coding gencode.v19 promoter.withcpg
+do
+	perl $mymerge <(cut -f 4,11 roadmap.chromHMM.activeenhancer.$pre.txt) > roadmap.chromHMM.activeenhancer.$pre.sim.txt
+done
+
+for pre in HKG v2.hkg.2 Testis Spleen Liver Brain EBV protein_coding gencode.v19 promoter.withcpg
+do
+	echo -n $pre": "
+	awk -F":" '{print $1}' roadmap.chromHMM.activeenhancer.$pre.sim.txt | awk '$2>20' | wc -l
+done
+# HKG promoters do not tend to be enhancers
+
+
+
 cd test.top.hkg.tsg/
 echo "GeneType Motif MotifCount GeneCount GeneWithMotif" | tr " " "\t" > homer.vert.motif.percentage.txt
 for pre in HKG v2.hkg.2 Testis Spleen Liver Brain EBV protein_coding promoter.withcpg gencode.v19
