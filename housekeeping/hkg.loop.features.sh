@@ -22,6 +22,8 @@
 myperl=/home1/04935/shaojf/myTools/BioinformaticsDaily/textProcess/add_any_2files_together.pl
 mymatrix=/home1/04935/shaojf/myTools/BioinformaticsDaily/textProcess/make_matrixwith3col_from_single_file.pl
 mymerge=/home1/04935/shaojf/myTools/BioinformaticsDaily/textProcess/merge.rows.by.specificID.for.single.file.pl
+analyzenetwork=/home1/04935/shaojf/myTools/UTHealthMut2Loop/housekeeping/analyze.looping.network.pl
+
 # only these two are CTCF HiChIP:
 # SRR5831509	SAMN07357487	GSM2705061	OTHER	152	SRX3008815	Illumina HiSeq 4000	45,947	18,503	Homo sapiens	male	--	Sorted primary Naive T cells	Naïve T primary cell
 # SRR5831508	SAMN07357442	GSM2705060	OTHER	152	SRX3008814	Illumina HiSeq 4000	52,887	21,407	Homo sapiens	male	--	Sorted primary Naive T cells	Naïve T primary cell

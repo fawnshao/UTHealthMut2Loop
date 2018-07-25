@@ -43,7 +43,7 @@ close(OUT);
 open(OUT, ">$ARGV[0].subnetworks.txt");
 foreach $s(keys %nodes){
 	@t = split(/\t/, $nodes{$s});
-	$size = scalar(@t)''
+	$size = scalar(@t);
 	print OUT "subnet.$s\t$size\t$nodes{$s}\n";
 }
 close(OUT);
