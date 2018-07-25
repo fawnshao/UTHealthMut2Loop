@@ -110,6 +110,8 @@ rm candidate.enhancer.mapping.txt.tmp candidate.enhancer.mapping.txt.tmp.1
 
 grep -v chr gencode.looping.txt > gencode.looping.merged.txt
 perl $myperl candidate.enhancer.mapping.txt <(grep chr gencode.looping.txt) 0 1 | awk -vOFS="\t" '{print $1,$6,$3,$4}' >> gencode.looping.merged.txt
+
+
 perl $mymatrix <(awk -vOFS="\t" '{print $1"%"$2,$4,$3}' gencode.looping.merged.txt | tail -n +2) > gencode.looping.merged.mat
 # grep chr gencode.looping.merged.mat | 
 head -1 gencode.looping.merged.mat | cut -f 2- | awk '{print "ID1%ID2\t"$0"\tExperimentCount\tID1.anntotation\tID2.anntotation"}' > gencode.looping.merged.mat.anntotation
