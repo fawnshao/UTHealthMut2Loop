@@ -15,17 +15,17 @@ while(<IN>){
 	# }
 	$degrees{$t[0]}++;
 	$degrees{$t[1]}++;
-	if(not exists $subnetworks{$t[0]} && not exists $subnetworks{$t[1]}){
+	if(! exists $subnetworks{$t[0]} && ! exists $subnetworks{$t[1]}){
 		$i++;
 		$subnetworks{$t[0]} = $i;
 		$subnetworks{$t[1]} = $i;
 		$nodes{$i} = $t[0]."\t".$t[1];
 	}
-	elsif(not exists $subnetworks{$t[0]} && exists $subnetworks{$t[1]}){
+	elsif(! exists $subnetworks{$t[0]} && exists $subnetworks{$t[1]}){
 		$subnetworks{$t[0]} = $subnetworks{$t[1]};
 		$nodes{$subnetworks{$t[1]}} .= "\t".$t[0];
 	}
-	elsif(exists $subnetworks{$t[0]} && not exists $subnetworks{$t[1]}){
+	elsif(exists $subnetworks{$t[0]} && ! exists $subnetworks{$t[1]}){
 		$subnetworks{$t[1]} = $subnetworks{$t[0]};
 		$nodes{$subnetworks{$t[0]}} .= "\t".$t[1];
 	}
