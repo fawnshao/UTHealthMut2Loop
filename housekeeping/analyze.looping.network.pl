@@ -9,6 +9,10 @@ open(IN, $ARGV[0]) or die "can not open $ARGV[0]\n";
 while(<IN>){
 	chomp;
 	@t = split(/\t/);
+	if($t[1] =~ /:/){
+		@tt = split(/:/, $t[1]);
+		$t[1] = $tt[1];
+	}
 	$degrees{$t[0]}++;
 	$degrees{$t[1]}++;
 	if(not exists $subnetworks{$t[0]} && not exists $subnetworks{$t[1]}){
