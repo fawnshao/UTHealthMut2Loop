@@ -19,11 +19,11 @@ while(<IN>){
 	}
 	elsif(not exists $subnetworks{$t[0]} && exists $subnetworks{$t[1]}){
 		$subnetworks{$t[0]} = $subnetworks{$t[1]};
-		$nodes{$i} .= "\t".$t[0];
+		$nodes{$subnetworks{$t[1]}} .= "\t".$t[0];
 	}
 	elsif(exists $subnetworks{$t[0]} && not exists $subnetworks{$t[1]}){
 		$subnetworks{$t[1]} = $subnetworks{$t[0]};
-		$nodes{$i} .= "\t".$t[1];
+		$nodes{$subnetworks{$t[0]}} .= "\t".$t[1];
 	}
 }
 close(IN);
