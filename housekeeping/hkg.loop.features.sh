@@ -102,7 +102,7 @@ bedtools intersect -wo -a candidate.enhancer.merged.bed -b <(awk -vOFS="\t" '{a=
 perl $mymerge <(cat candidate.enhancer.merged.gencodeTSS candidate.enhancer.merged.refseqTSS | cut -f 4,8) > candidate.enhancer.merged.map2tss
 # bedtools intersect -wa -v -a candidate.enhancer.merged.bed -b <(cat gencode.v19.gene.bed hg19.RefSeq.gene.bed | awk -vOFS="\t" '{a=$2-5000;b=$2+5000;if($6=="-"){a=$3-5000;b=$3+5000}if(a<0){a=0;}print $1,a,b,$4,"5000",$6}') > candidate.enhancer.merged.notTSS.bed
 bedtools intersect -wao -a candidate.enhancer.bed -b candidate.enhancer.merged.bed | cut -f 4,8 > candidate.enhancer.mapping.txt.tmp
-perl $myperl candidate.enhancer.merged.map2tss candidate.enhancer.mapping.txt.tmp 0 1 > candidate.enhancer.mapping.txt.tmp.1
+paste <(cut -f 1 candidate.enhancer.merged.map2tss) <(cut -f 2 candidate.enhancer.merged.map2tss | cut -d":" -f 2)| perl $myperl /dev/stdin candidate.enhancer.mapping.txt.tmp 0 1 > candidate.enhancer.mapping.txt.tmp.1
 awk -vOFS="\t" '{if($4!="/"){print $1,$4}else{print $1,$2}}' candidate.enhancer.mapping.txt.tmp.1 > candidate.enhancer.mapping.txt
 rm candidate.enhancer.mapping.txt.tmp candidate.enhancer.mapping.txt.tmp.1
 # bedtools intersect -wo -a candidate.enhancer.bed -b candidate.enhancer.merged.notTSS.bed | cut -f 4,8 > candidate.enhancer.mapping.txt
