@@ -4,7 +4,7 @@
 %degrees = ();
 %subnetworks = ();
 %nodes = ();
-$i = 1;
+$i = 0;
 open(IN, $ARGV[0]) or die "can not open $ARGV[0]\n";
 while(<IN>){
 	chomp;
@@ -24,10 +24,10 @@ while(<IN>){
 		$nodes{$subnetworks{$t[0]}} .= "\t".$t[1];
 	}
 	if(not exists $subnetworks{$t[0]} && not exists $subnetworks{$t[1]}){
+		$i++;
 		$subnetworks{$t[0]} = $i;
 		$subnetworks{$t[1]} = $i;
 		$nodes{$i} = join("\t", $t[0], $t[1]);
-		$i++;
 	}
 }
 close(IN);
