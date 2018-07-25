@@ -26,7 +26,7 @@ mymerge=/home1/04935/shaojf/myTools/BioinformaticsDaily/textProcess/merge.rows.b
 # SRR5831509	SAMN07357487	GSM2705061	OTHER	152	SRX3008815	Illumina HiSeq 4000	45,947	18,503	Homo sapiens	male	--	Sorted primary Naive T cells	Naïve T primary cell
 # SRR5831508	SAMN07357442	GSM2705060	OTHER	152	SRX3008814	Illumina HiSeq 4000	52,887	21,407	Homo sapiens	male	--	Sorted primary Naive T cells	Naïve T primary cell
 
-for input in SRR5831489:GM12878_cell_line SRR5831490:GM12878_cell_line SRR5831492:K562_cell_line SRR5831493:K562_cell_line SRR5831495:My-La_cell_line SRR5831496:Naive_T_primary_cell SRR5831501:Th17_primary_cell SRR5831504:Th17_primary_cell SRR5831505:Treg_primary_cell SRR5831505:Treg_primary_cell SRR5831507:Treg_primary_cell SRR5831509:Naive_primary_cell SRR5831511:HCASMC_cell_line SRR5831512:HCASMC_cell_line
+for input in SRR5831489:GM12878_cell_line SRR5831490:GM12878_cell_line SRR5831492:K562_cell_line SRR5831493:K562_cell_line SRR5831494:My-La_cell_line SRR5831495:My-La_cell_line SRR5831496:Naive_T_primary_cell SRR5831498:Naive_primary_cell SRR5831501:Th17_primary_cell SRR5831503:Th17_primary_cell SRR5831504:Th17_primary_cell SRR5831505:Treg_primary_cell SRR5831505:Treg_primary_cell SRR5831507:Treg_primary_cell SRR5831509:Naive_primary_cell SRR5831511:HCASMC_cell_line SRR5831512:HCASMC_cell_line
 do
 	echo $input
 	acc=`echo $input | awk -F":" '{print $1}'`
@@ -113,7 +113,7 @@ perl $mymatrix <(awk -vOFS="\t" '{print $1"%"$2,$4,$3}' gencode.looping.merged.t
 head -1 gencode.looping.merged.mat | cut -f 2- | awk '{print "ID1%ID2\t"$0"\tExperimentCount\tID1.anntotation\tID2.anntotation"}' > gencode.looping.merged.mat.anntotation
 #################### needs to set the column number
 # awk '{sum=0;for(i=2;i<=NF;i++){if($i>0){sum+=1}}print $0"\t"sum}' <(tail -n +2 gencode.looping.merged.mat) | sed 's/%/\t/' | perl $myperl v2.hkg.tsg.anntotation.txt /dev/stdin 0 0 | cut -f 1-12,14 | perl $myperl v2.hkg.tsg.anntotation.txt /dev/stdin 0 1 | cut -f 1-13,15 | sed 's/\t/%/' >> gencode.looping.merged.mat.anntotation
-awk '{sum=0;for(i=2;i<=NF;i++){if($i>9){sum+=1}}print $0"\t"sum}' <(tail -n +2 gencode.looping.merged.mat) | sed 's/%/\t/' | perl $myperl v2.hkg.tsg.anntotation.txt /dev/stdin 0 0 | cut -f 1-16,18 | perl $myperl v2.hkg.tsg.anntotation.txt /dev/stdin 0 1 | cut -f 1-17,19 | sed 's/\t/%/' >> gencode.looping.merged.mat.anntotation
+awk '{sum=0;for(i=2;i<=NF;i++){if($i>9){sum+=1}}print $0"\t"sum}' <(tail -n +2 gencode.looping.merged.mat) | sed 's/%/\t/' | perl $myperl v2.hkg.tsg.anntotation.txt /dev/stdin 0 0 | cut -f 1-19,21 | perl $myperl v2.hkg.tsg.anntotation.txt /dev/stdin 0 1 | cut -f 1-20,22 | sed 's/\t/%/' >> gencode.looping.merged.mat.anntotation
 ####################
 
 # head -1 gencode.looping.merged.mat.anntotation > gencode.looping.merged.mat.hkg.tsg.anntotation
@@ -141,13 +141,17 @@ cut -f 1 common.hkg2promoter.txt | sed 's/%/\t/' | awk '$1~/ENSG/ && $2~/ENSG/ &
 cut -f 1 common.tsg2promoter.txt | sed 's/%/\t/' | awk '$1~/ENSG/ && $2~/ENSG/ && $1!=$2 && $2!~/;/' > common.tsg2promoter.sim.pairs
 perl $myperl GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_tpm.gct <(cut -f 1 common.hkg2promoter.sim.pairs) 0 0 | cut -f 2- > tmp.1
 perl $myperl GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_tpm.gct <(cut -f 2 common.hkg2promoter.sim.pairs) 0 0 | cut -f 2- > tmp.2
-cat <(sed -n '17p' tmp.1) <(sed -n '17p' tmp.2) 
+Rscript ~/myTools/UTHealthMut2Loop/housekeeping/calc_cor_gene_expr_for_GTEx.R tmp.1 tmp.2 common.hkg2promoter.sim.pairs.cor.tsv
+perl $myperl GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_tpm.gct <(cut -f 1 common.tsg2promoter.sim.pairs) 0 0 | cut -f 2- > tmp.1
+perl $myperl GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_tpm.gct <(cut -f 2 common.tsg2promoter.sim.pairs) 0 0 | cut -f 2- > tmp.2
+Rscript ~/myTools/UTHealthMut2Loop/housekeeping/calc_cor_gene_expr_for_GTEx.R tmp.1 tmp.2 common.tsg2promoter.sim.pairs.cor.tsv
+rm tmp.1 tmp.2
 
 #################### annotate all the loopping partner of HKGs
 awk -F"\t" '($NF!="/" && $NF!~/HKG/) || ($(NF-1)!="/" && $(NF-1)!~/HKG/)' gencode.looping.merged.mat.hkg.tsg.anntotation > all.tsg.partner.txt
 head -1 all.tsg.partner.txt > all.hkg.partner.txt
 grep HKG gencode.looping.merged.mat.hkg.tsg.anntotation >> all.hkg.partner.txt
 
-awk -F"\t" '$(NF-2) >= 8{print $1"\t"$(NF-2)}' all.hkg.partner.txt | sed 's/%/\t/' > all.hkg.gt8.interaction.txt
-awk -F"\t" '$(NF-2) >= 8{print $1"\t"$(NF-1)"\t"$NF}' all.hkg.partner.txt | sed 's/%/\t/' | awk -F"\t" -vOFS="\t" '{print $1,$3"\n"$2,$4}' | tail -n +2 | sort | uniq | awk 'BEGIN{print "ID\tannotation"}{print $0}'> all.hkg.gt8.node.txt
+awk -F"\t" '$(NF-2) >= 12{print $1"\t"$(NF-2)}' all.hkg.partner.txt | sed 's/%/\t/' > all.hkg.gt12.interaction.txt
+awk -F"\t" '$(NF-2) >= 12{print $1"\t"$(NF-1)"\t"$NF}' all.hkg.partner.txt | sed 's/%/\t/' | awk -F"\t" -vOFS="\t" '{print $1,$3"\n"$2,$4}' | tail -n +2 | sort | uniq | awk 'BEGIN{print "ID\tannotation"}{print $0}'> all.hkg.gt12.node.txt
 
