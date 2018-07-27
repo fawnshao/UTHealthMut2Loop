@@ -6,6 +6,7 @@
 %nodes = ();
 $i = 0;
 open(IN, $ARGV[0]) or die "can not open $ARGV[0]\n";
+<IN>;
 while(<IN>){
 	chomp;
 	@t = split(/\t/);

@@ -28,7 +28,7 @@ analyzenetwork=/home1/04935/shaojf/myTools/UTHealthMut2Loop/housekeeping/analyze
 # SRR5831509	SAMN07357487	GSM2705061	OTHER	152	SRX3008815	Illumina HiSeq 4000	45,947	18,503	Homo sapiens	male	--	Sorted primary Naive T cells	Naïve T primary cell
 # SRR5831508	SAMN07357442	GSM2705060	OTHER	152	SRX3008814	Illumina HiSeq 4000	52,887	21,407	Homo sapiens	male	--	Sorted primary Naive T cells	Naïve T primary cell
 
-for input in SRR5831489:GM12878_cell_line SRR5831490:GM12878_cell_line SRR5831492:K562_cell_line SRR5831493:K562_cell_line SRR5831494:My-La_cell_line SRR5831495:My-La_cell_line SRR5831496:Naive_T_primary_cell SRR5831498:Naive_primary_cell SRR5831501:Th17_primary_cell SRR5831503:Th17_primary_cell SRR5831504:Th17_primary_cell SRR5831505:Treg_primary_cell SRR5831505:Treg_primary_cell SRR5831507:Treg_primary_cell SRR5831509:Naive_primary_cell SRR5831511:HCASMC_cell_line SRR5831512:HCASMC_cell_line
+for input in SRR5831489:GM12878_cell_line SRR5831490:GM12878_cell_line SRR5831492:K562_cell_line SRR5831493:K562_cell_line SRR5831494:My-La_cell_line SRR5831495:My-La_cell_line SRR5831496:Naive_T_primary_cell SRR5831497:Naive_primary_cell SRR5831498:Naive_primary_cell SRR5831499:Naive_primary_cell SRR5831501:Th17_primary_cell SRR5831503:Th17_primary_cell SRR5831504:Th17_primary_cell SRR5831505:Treg_primary_cell SRR5831505:Treg_primary_cell SRR5831507:Treg_primary_cell SRR5831509:Naive_primary_cell SRR5831511:HCASMC_cell_line SRR5831512:HCASMC_cell_line
 do
 	echo $input
 	acc=`echo $input | awk -F":" '{print $1}'`
@@ -111,13 +111,18 @@ rm candidate.enhancer.mapping.txt.tmp candidate.enhancer.mapping.txt.tmp.1
 grep -v chr gencode.looping.txt > gencode.looping.merged.txt
 perl $myperl candidate.enhancer.mapping.txt <(grep chr gencode.looping.txt) 0 1 | awk -vOFS="\t" '{print $1,$6,$3,$4}' >> gencode.looping.merged.txt
 
+for exp in `cut -f 4 gencode.looping.merged.txt | tail -n +2 | uniq | sort | uniq`
+do
+    awk -v var=$exp '$3>=10 && $4==var && $1!=$2{print $1"\t"$2}' gencode.looping.merged.txt | sort | uniq > interaction.$exp
+    perl $analyzenetwork interaction.$exp
+done
 
 perl $mymatrix <(awk -vOFS="\t" '{print $1"%"$2,$4,$3}' gencode.looping.merged.txt | tail -n +2) > gencode.looping.merged.mat
 # grep chr gencode.looping.merged.mat | 
 head -1 gencode.looping.merged.mat | cut -f 2- | awk '{print "ID1%ID2\t"$0"\tExperimentCount\tID1.anntotation\tID2.anntotation"}' > gencode.looping.merged.mat.anntotation
 #################### needs to set the column number
 # awk '{sum=0;for(i=2;i<=NF;i++){if($i>0){sum+=1}}print $0"\t"sum}' <(tail -n +2 gencode.looping.merged.mat) | sed 's/%/\t/' | perl $myperl v2.hkg.tsg.anntotation.txt /dev/stdin 0 0 | cut -f 1-12,14 | perl $myperl v2.hkg.tsg.anntotation.txt /dev/stdin 0 1 | cut -f 1-13,15 | sed 's/\t/%/' >> gencode.looping.merged.mat.anntotation
-awk '{sum=0;for(i=2;i<=NF;i++){if($i>9){sum+=1}}print $0"\t"sum}' <(tail -n +2 gencode.looping.merged.mat) | sed 's/%/\t/' | perl $myperl v2.hkg.tsg.anntotation.txt /dev/stdin 0 0 | cut -f 1-19,21 | perl $myperl v2.hkg.tsg.anntotation.txt /dev/stdin 0 1 | cut -f 1-20,22 | sed 's/\t/%/' >> gencode.looping.merged.mat.anntotation
+awk '{sum=0;for(i=2;i<=NF;i++){if($i>9){sum+=1}}print $0"\t"sum}' <(tail -n +2 gencode.looping.merged.mat) | sed 's/%/\t/' | perl $myperl v2.hkg.tsg.anntotation.txt /dev/stdin 0 0 | cut -f 1-21,23 | perl $myperl v2.hkg.tsg.anntotation.txt /dev/stdin 0 1 | cut -f 1-22,24 | sed 's/\t/%/' >> gencode.looping.merged.mat.anntotation
 ####################
 
 # head -1 gencode.looping.merged.mat.anntotation > gencode.looping.merged.mat.hkg.tsg.anntotation
@@ -135,10 +140,10 @@ perl $mymerge <(cut -f 4,9 hkg.tsg.commonenhancer.chromHMM.txt) > hkg.tsg.common
 # cut -f 1,11- gencode.looping.merged.mat.hkg.tsg.anntotation | awk '$2 > 3 && $3~/HKG/ && $4~/HKG/{print $1}' | sort | uniq | wc -l
 # cut -f 1,11- gencode.looping.merged.mat.hkg.tsg.anntotation | awk '$2 > 3 && $3~/HKG/ && $1~/chr/{print $1}' | sort | uniq | wc -l
 #################### do not need to set the column number
-awk -F"\t" '$(NF-2) >= 8 && $0~/HKG/ && $1!~/chr/' gencode.looping.merged.mat.hkg.tsg.anntotation > common.hkg2promoter.txt
-awk -F"\t" '$(NF-2) >= 8 && $0~/HKG/ && $1~/chr/' gencode.looping.merged.mat.hkg.tsg.anntotation > common.hkg2enhancer.txt
-awk -F"\t" '$(NF-2) >= 8 && (($NF!="/" && $NF!~/HKG/) || ($(NF-1)!="/" && $(NF-1)!~/HKG/)) && $1!~/chr/' gencode.looping.merged.mat.hkg.tsg.anntotation > common.tsg2promoter.txt
-awk -F"\t" '$(NF-2) >= 8 && (($NF!="/" && $NF!~/HKG/) || ($(NF-1)!="/" && $(NF-1)!~/HKG/)) && $1~/chr/' gencode.looping.merged.mat.hkg.tsg.anntotation > common.tsg2enhancer.txt
+awk -F"\t" '$(NF-2) >= 10 && $0~/HKG/ && $1!~/chr/' gencode.looping.merged.mat.hkg.tsg.anntotation > common.hkg2promoter.txt
+awk -F"\t" '$(NF-2) >= 10 && $0~/HKG/ && $1~/chr/' gencode.looping.merged.mat.hkg.tsg.anntotation > common.hkg2enhancer.txt
+awk -F"\t" '$(NF-2) >= 10 && (($NF!="/" && $NF!~/HKG/) || ($(NF-1)!="/" && $(NF-1)!~/HKG/)) && $1!~/chr/' gencode.looping.merged.mat.hkg.tsg.anntotation > common.tsg2promoter.txt
+awk -F"\t" '$(NF-2) >= 10 && (($NF!="/" && $NF!~/HKG/) || ($(NF-1)!="/" && $(NF-1)!~/HKG/)) && $1~/chr/' gencode.looping.merged.mat.hkg.tsg.anntotation > common.tsg2enhancer.txt
 ####################
 # ENSG00000011052.17|NME2 does not have expression in GTEx data
 cut -f 1 common.hkg2promoter.txt | sed 's/%/\t/' | awk '$1~/ENSG/ && $2~/ENSG/ && $1!=$2 && $2!~/;/' > common.hkg2promoter.sim.pairs
