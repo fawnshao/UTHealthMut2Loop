@@ -75,7 +75,7 @@ while(<IN>){
 	chomp;
 	@t = split(/\t/);
 	$intnodes = $t[0]."\t".$t[1];
-	$interaction{$intnodes} = "subnet".$subnetworks{$t[0]};
+	$interaction{$intnodes} = "subnet.".$subnetworks{$t[0]};
 	print OUT "$intnodes\t$t[2]\t$interaction{$intnodes}\n";
 }
 close(IN);
