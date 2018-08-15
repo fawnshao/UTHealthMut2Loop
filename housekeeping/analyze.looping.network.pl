@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# input a <node1 node2 interation> file
+# input a <node1 node2 interaction> file
 # output degree, subnetwork size
 %degrees = ();
 %subnetworks = ();
@@ -40,10 +40,10 @@ while(<IN>){
 	elsif(exists $subnetworks{$t[0]} && exists $subnetworks{$t[1]} && $subnetworks{$t[0]} != $subnetworks{$t[1]}){
 		$nodes{$subnetworks{$t[0]}} .= "\t".$nodes{$subnetworks{$t[1]}};
 		@x = split(/\t/,$nodes{$subnetworks{$t[1]}});
+		delete $nodes{$subnetworks{$t[1]}};
 		foreach $xx(@x){
 			$subnetworks{$xx} = $subnetworks{$t[0]};
 		}
-		delete $nodes{$subnetworks{$t[1]}};
 	}
 }
 close(IN);
