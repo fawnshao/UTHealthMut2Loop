@@ -24,7 +24,7 @@ fmin <- function(x){
 
 print("Reading Data")
 # outputpre tissuename tissueTau sampleTau
-args <- c("v2.1", "GTEx_sample.tissue.txt", "0.15", "1.5", "2", "0.25") #, "1")
+args <- c("v2.1", "GTEx_sample.tissue.age.txt", "0.15", "1.5", "2", "0.25") #, "1")
 # args <- commandArgs(TRUE)
 # outputpre <- args[1]
 tau.threshold <- as.numeric(args[3])
@@ -33,7 +33,7 @@ median.threshold <- as.numeric(args[5])
 tau.threshold2 <- as.numeric(args[6])
 # outlier.threshold <- as.numeric(args[6])
 
-info <- as.matrix(read.table(args[2], sep = "\t"))
+info <- as.matrix(read.table(args[2], sep = "\t", header = T))
 tissues <- unique(info[,2])
 tissues.count <- table(info[,2])
 # tissues <- tissues[-c(7,24,25,53)]
