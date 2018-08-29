@@ -164,6 +164,7 @@ ages <- unique(info[,7])
 
 nullexpression <- as.numeric(args[4])
 for(k in 1:length(ages)){
+	print(ages[k])
 	outputpre <- paste(args[3], ages[k], sep = ".")
 	nullcount <- matrix(ncol = length(tissues), nrow = nrow(tpm))
 	log2tpm.median <- matrix(ncol = length(tissues), nrow = nrow(tpm))
@@ -174,7 +175,7 @@ for(k in 1:length(ages)){
 	log2tpm.Tau <- matrix(ncol = length(tissues), nrow = nrow(tpm))
 	for(i in 1:length(tissues)){
 		## calculate
-		print("Calculating nullcount, median/mean and Tau for each tissue")
+		# print("Calculating nullcount, median/mean and Tau for each tissue")
 		print(tissues[i])
 		z <- log2(tpm[, info[,2] == tissues[i] & info[,7] == ages[k]] + 1)
 		nullcount[,i] <- apply(z, 1, function(x) {length(x[x <= nullexpression])})
