@@ -51,7 +51,7 @@ ages <- unique(info[,7])
 
 for(k in 1:length(ages)){
 	print(ages[k])
-	outputpre <- paste(args[3], ages[k], sep = ".")
+	outputpre <- paste(args[1], ages[k], sep = ".")
 	all.stats.file <- paste(outputpre, "allstats.tsv", sep = ".")
 	all.stats <- fread(all.stats.file, sep = "\t", header = T)
 	nullcount.file <- paste(outputpre, "nullcount.tsv", sep = ".")
