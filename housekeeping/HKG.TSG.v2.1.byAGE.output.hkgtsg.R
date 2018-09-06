@@ -39,7 +39,6 @@ tissues.count <- table(info[,2])
 # tissues <- tissues[-c(7,24,25,53)]
 tissues <- tissues[-c(7,24,25,31,53)]
 tissues.count <- tissues.count[-c(7,24,25,31,53)]
-tissues <- tissues[-c(7,24,25,31,53)]
 AgeGroup <- info[,5]
 AgeGroup[info[,5] == "20-29"] <- "20-39"
 AgeGroup[info[,5] == "30-39"] <- "20-39"
@@ -65,8 +64,9 @@ for(k in 1:length(ages)){
 	log2tpm.outlier <- as.matrix(fread(log2tpm.outlier.file, sep = "\t", header = T)[,-1])
 
 	genes <- as.matrix(all.stats[,1])
-	log2tpm.median.mean <- as.matrix(all.stats[,2])
-	log2tpm.median.Tau <- as.matrix(all.stats[,3])
+	##### index shift 1
+	log2tpm.median.mean <- as.matrix(all.stats[,3])
+	log2tpm.median.Tau <- as.matrix(all.stats[,4])
 	rownames(log2tpm.median) <- genes
 	colnames(log2tpm.median) <- tissues
 	rownames(nullcount) <- genes
@@ -88,16 +88,20 @@ for(k in 1:length(ages)){
 	# housekeepinggene.median <- log2tpm.median[nullcount.sum == 0 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.outlier.max) & log2tpm.outlier.max < outlier.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tau.threshold, ]
 	# housekeepinggene.sd <- log2tpm.sd[nullcount.sum == 0 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.outlier.max) & log2tpm.outlier.max < outlier.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tau.threshold, ]
 	housekeepinggene <- all.stats[nullcount.sum == 0 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tau.threshold, ]
-	housekeepinggene.median <- log2tpm.median[nullcount.sum == 0 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tau.threshold, ]
-	housekeepinggene.sd <- log2tpm.sd[nullcount.sum == 0 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tau.threshold, ]
-	rownames(housekeepinggene.median) <- as.matrix(housekeepinggene[,1])
-	rownames(housekeepinggene.sd) <- as.matrix(housekeepinggene[,1])
+	# housekeepinggene.median <- log2tpm.median[nullcount.sum == 0 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tau.threshold, ]
+	# housekeepinggene.sd <- log2tpm.sd[nullcount.sum == 0 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau < tau.threshold, ]
+	# rownames(housekeepinggene.median) <- as.matrix(housekeepinggene[,1])
+	# rownames(housekeepinggene.sd) <- as.matrix(housekeepinggene[,1])
+	housekeepinggene.median <- log2tpm.median[rownames(log2tpm.median) %in% as.matrix(housekeepinggene[,1]),]
+	housekeepinggene.sd <- log2tpm.sd[rownames(log2tpm.sd) %in% as.matrix(housekeepinggene[,1]),]
 
 	housekeepinggene2 <- all.stats[nullcount.sum == 0 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau >= tau.threshold & log2tpm.median.Tau < tau.threshold2, ]
-	housekeepinggene2.median <- log2tpm.median[nullcount.sum == 0 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau >= tau.threshold & log2tpm.median.Tau < tau.threshold2, ]
-	housekeepinggene2.sd <- log2tpm.sd[nullcount.sum == 0 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau >= tau.threshold & log2tpm.median.Tau < tau.threshold2, ]
-	rownames(housekeepinggene2.median) <- as.matrix(housekeepinggene2[,1])
-	rownames(housekeepinggene2.sd) <- as.matrix(housekeepinggene2[,1])
+	# housekeepinggene2.median <- log2tpm.median[nullcount.sum == 0 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau >= tau.threshold & log2tpm.median.Tau < tau.threshold2, ]
+	# housekeepinggene2.sd <- log2tpm.sd[nullcount.sum == 0 & !is.na(log2tpm.sd.max) & log2tpm.sd.max < sd.threshold & !is.na(log2tpm.median.min) & log2tpm.median.min > median.threshold & !is.na(log2tpm.median.Tau) & log2tpm.median.Tau >= tau.threshold & log2tpm.median.Tau < tau.threshold2, ]
+	# rownames(housekeepinggene2.median) <- as.matrix(housekeepinggene2[,1])
+	# rownames(housekeepinggene2.sd) <- as.matrix(housekeepinggene2[,1])
+	housekeepinggene2.median <- log2tpm.median[rownames(log2tpm.median) %in% as.matrix(housekeepinggene2[,1]),]
+	housekeepinggene2.sd <- log2tpm.sd[rownames(log2tpm.sd) %in% as.matrix(housekeepinggene2[,1]),]
 
 	print("Searching TSG")
 	# all.stats[grep("ENSG00000168757.8|TSPY2 ", genes),]
@@ -132,8 +136,8 @@ for(k in 1:length(ages)){
 	}
 	tissuespecificgene.median <- log2tpm.median[rindex, ]
 	tissuespecificgene.sd <- log2tpm.sd[rindex, ]
-	rownames(tissuespecificgene.median) <- as.matrix(tissuespecificgene[,1])
-	rownames(tissuespecificgene.sd) <- as.matrix(tissuespecificgene[,1])
+	# rownames(tissuespecificgene.median) <- as.matrix(tissuespecificgene[,1])
+	# rownames(tissuespecificgene.sd) <- as.matrix(tissuespecificgene[,1])
 
 	tissuespecificgene2 <- data.frame()
 	tissueflags2 <- c()
@@ -159,8 +163,8 @@ for(k in 1:length(ages)){
 	}
 	tissuespecificgene2.median <- log2tpm.median[rindex2, ]
 	tissuespecificgene2.sd <- log2tpm.sd[rindex2, ]
-	rownames(tissuespecificgene2.median) <- as.matrix(tissuespecificgene2[,1])
-	rownames(tissuespecificgene2.sd) <- as.matrix(tissuespecificgene2[,1])
+	# rownames(tissuespecificgene2.median) <- as.matrix(tissuespecificgene2[,1])
+	# rownames(tissuespecificgene2.sd) <- as.matrix(tissuespecificgene2[,1])
 
 
 	print("Writing output files")
